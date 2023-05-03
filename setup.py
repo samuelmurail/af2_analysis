@@ -8,6 +8,7 @@ with open('README.rst', encoding='utf-8') as readme_file:
 requirements = [
     'pandas>=2.0',
     'tqdm>=4.0',
+    'seaborn>=0.11',
 ]
 
 setup(
