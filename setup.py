@@ -1,0 +1,55 @@
+from setuptools import setup, find_packages
+
+version = "0.0.1"
+
+with open('README.rst', encoding='utf-8') as readme_file:
+    readme = readme_file.read()
+
+requirements = [
+    'pandas>=2.0',
+    'tqdm>=4.0',
+]
+
+setup(
+    name='af2_analysis',
+    version=version,
+    description=(
+        '`AF2 analysis` is a python library allowing analysis of Alphafold results.'
+    ),
+    long_description=readme,
+    long_description_content_type='text/markdown',
+    author='Samuel Murail',
+    author_email="samuel.murail@u-paris.fr",
+    url='https://github.com/samuelmurail/af2_analysis',
+    packages=['af2_analysis'],
+    package_dir={'af2_analysis': 'src/af2_analysis'},
+    entry_points={'console_scripts': ['af2_analysis = af2_analysis.__main__:main']},
+    include_package_data=True,
+    python_requires='>=3.7',
+    install_requires=requirements,
+    license='GNUv2.0',
+    zip_safe=False,
+    classifiers=[
+        "Development Status :: 5 - Devloppment/Beta",
+        "Environment :: Console",
+        "Intended Audience :: Developers",
+        "Natural Language :: English",
+        "License :: OSI Approved :: BSD License",
+        "Programming Language :: Python :: 3 :: Only",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: Implementation :: CPython",
+        "Programming Language :: Python :: Implementation :: PyPy",
+        "Programming Language :: Python",
+        "Topic :: Software Development",
+    ],
+    keywords=[
+        "af2_analysis",
+        "Python",
+        "AlphaFold2",
+        "ColabFold",
+    ],
+)
