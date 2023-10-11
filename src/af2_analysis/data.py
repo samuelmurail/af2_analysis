@@ -2,10 +2,15 @@
 # coding: utf-8
 
 import os
+import numpy as np
 import pandas as pd
-import seaborn as sns
+import json
 
-from .format import colabfold_1_5
+import seaborn as sns
+import matplotlib.pyplot as plt
+from cmcrameri import cm
+
+from .format import colabfold_1_5, default
 
 class Data:
     """ Data class
@@ -27,7 +32,7 @@ class Data:
         if directory is not None:
             self.read_directory(directory)
     
-    def read_directory(self, directory):
+    def read_directory(self, directory, keep_recycles=False):
         """ Read a directory.
 
         If the directory contains a `log.txt` file, the format is set to `colabfold_1.5`.
@@ -45,9 +50,14 @@ class Data:
 
         if os.path.isfile(os.path.join(directory, 'log.txt')):
             self.format = 'colabfold_1.5'
-            self.df = colabfold_1_5.read_log(directory)
+            self.df = colabfold_1_5.read_log(directory, keep_recycles)
+            self.add_pdb()
+            self.add_json()
         else:
-            raise NotImplementedError(f"Format not implemented for {directory}")
+            self.format = 'default'
+            self.df = default.read_dir(directory)
+            self.add_json()
+            self.extract_json()
 
     def add_json(self):
         """ Add json files to the dataframe.
@@ -63,6 +73,44 @@ class Data:
 
         if self.format == 'colabfold_1.5':
             colabfold_1_5.add_json(self.df, self.dir)
+        if self.format == 'default':
+            default.add_json(self.df, self.dir)
+    
+    def extract_json(self):
+        """ Extract json files to the dataframe.
+        
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
+
+        index_list = []
+        json_list = []
+
+        for i, row in self.df.iterrows():
+            if row.json is not None:
+                index_list.append(i)
+                
+                with open(row.json, 'r') as f:
+                    data = json.load(f)
+                
+                json_list.append(data)
+        
+        new_column = {}
+        for keys in json_list[0].keys():
+            new_column[keys] = []
+        for data in json_list:
+            for keys in data.keys():
+                new_column[keys].append(data[keys])
+        
+        for keys in new_column.keys():
+            self.df[keys] = np.nan
+            new_col = pd.Series(new_column[keys], index=index_list)
+            self.df[keys].iloc[index_list] = new_col
 
     def add_pdb(self):
         """ Add pdb files to the dataframe.
@@ -139,3 +187,21 @@ class Data:
         ax = sns.lineplot(max_pd, x=col, y=score, hue=hue)
 
         return(ax)
+    
+    def plot_pae(self, index, cmap=cm.vik):
+
+        row = self.df.iloc[index]
+
+        if row['json'] is None:
+            return(None, None)
+
+        with open(row['json']) as f:
+            local_json = json.load(f)
+        
+        pae_array = np.array(local_json['pae'])
+
+        fig = plt.figure()
+        ax = plt.imshow(pae_array, cmap=cmap, vmin=0., vmax=30.)
+        plt.colorbar(ax)
+
+        return(fig, ax)

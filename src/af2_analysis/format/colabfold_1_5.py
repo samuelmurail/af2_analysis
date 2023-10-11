@@ -18,7 +18,7 @@ weigths = [
     'alphafold2_multimer_v3'
 ]
 
-def read_log(directory):
+def read_log(directory, keep_recycles=False):
     """ Read colabfold `log.txt` file. 
     Extract information about the model and the query.
 
@@ -28,6 +28,8 @@ def read_log(directory):
     ----------
     directory : str
         Path to the directory containing the `log.txt` file.
+    keep_recycles : bool
+        If True, keep all the recycles. If False, keep only the last recycle.
     
     Returns
     -------
@@ -59,10 +61,14 @@ def read_log(directory):
             model = int(name_token[-3])
             seed = int(name_token[-1])
             recycle = int(token[3].split("=")[1])
-            pLDDT= float(token[4].split("=")[1])
-            pTM= float(token[5].split("=")[1])
-            ipTM= float(token[6].split("=")[1])
-            
+            pLDDT = float(token[4].split("=")[1])
+            pTM = float(token[5].split("=")[1])
+            if len(token) > 7:
+                #print(token)
+                ipTM= float(token[6].split("=")[1])
+            else:
+                ipTM = 0
+                    
             log_dict_list.append({
                 'query': query,
                 'seed': seed,
@@ -74,8 +80,22 @@ def read_log(directory):
                 'ipTM': ipTM,
             })
     
+
+    if not keep_recycles:
+        to_keep_index = []
+        for i in range(1, len(log_dict_list)):
+            # print(log_dict_list[i]['recycle'], log_dict_list[i-1]['recycle']+1)
+            if log_dict_list[i]['recycle'] != log_dict_list[i-1]['recycle'] + 1:
+                to_keep_index.append(i-1)
+        to_keep_index.append(len(log_dict_list)-1)
+        log_dict_list = [log_dict_list[i] for i in to_keep_index]
+
+
     log_pd = pd.DataFrame(log_dict_list)
-    log_pd['ranking'] = 0.8 * log_pd['ipTM'] + 0.2 * log_pd['pTM'] 
+    if sum(log_pd['ipTM']) == 0:
+        log_pd['ranking_confidence'] = log_pd['pLDDT']
+    else:
+        log_pd['ranking_confidence'] = 0.8 * log_pd['ipTM'] + 0.2 * log_pd['pTM'] 
     return log_pd
 
 
@@ -106,7 +126,8 @@ def add_pdb(log_pd, directory):
 
     for _, row in tqdm(log_pd.iterrows(), total=log_pd.shape[0]):
                 
-        reg = fr"{row['query']}_.*_{row['weight']}_model_{row['model']}_seed_{row['seed']:03d}\.r{row['recycle']}\.pdb"
+        #reg = fr"{row['query']}_.*_{row['weight']}_model_{row['model']}_seed_{row['seed']:03d}\.r{row['recycle']}\.pdb"
+        reg = fr"{row['query']}.*_{row['weight']}_model_{row['model']}_seed_{row['seed']:03d}\.pdb"
         r = re.compile(reg)
         res = list(filter(r.match, file_list))
 
@@ -159,7 +180,8 @@ def add_json(log_pd, directory):
             json_list.append(None)
             continue
         
-        reg = fr"{row['query']}_scores_.*_{row['weight']}_model_{row['model']}_seed_{row['seed']:03d}\.json"
+        #reg = fr"{row['query']}_scores_.*_{row['weight']}_model_{row['model']}_seed_{row['seed']:03d}\.json"
+        reg = fr"{row['query']}_scores.*_{row['weight']}_model_{row['model']}_seed_{row['seed']:03d}\.json"
         r = re.compile(reg)
         
         res = list(filter(r.match, file_list))
