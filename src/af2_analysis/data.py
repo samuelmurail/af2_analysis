@@ -5,7 +5,7 @@ import os
 import numpy as np
 import pandas as pd
 import json
-
+import pdb_numpy
 import seaborn as sns
 import matplotlib.pyplot as plt
 from cmcrameri import cm
@@ -58,6 +58,12 @@ class Data:
             self.df = default.read_dir(directory)
             self.add_json()
             self.extract_json()
+
+        # Read the first pdb to extract chain lengths:
+        first_model = pdb_numpy.Coor(self.df.loc[0, 'pdb'])
+        self.chains = list(np.unique(first_model.models[0].chain))
+        self.chain_length = [len(np.unique(first_model.models[0].uniq_resid[first_model.models[0].chain == chain] )) for chain in self.chains]
+
 
     def add_json(self):
         """ Add json files to the dataframe.
@@ -184,9 +190,10 @@ class Data:
         
         max_pd = pd.DataFrame(out_list)
     
-        ax = sns.lineplot(max_pd, x=col, y=score, hue=hue)
+        fig, ax = plt.subplots()
+        sns.lineplot(max_pd, x=col, y=score, hue=hue)
 
-        return(ax)
+        return(fig, ax)
     
     def plot_pae(self, index, cmap=cm.vik):
 
@@ -200,8 +207,71 @@ class Data:
         
         pae_array = np.array(local_json['pae'])
 
-        fig = plt.figure()
-        ax = plt.imshow(pae_array, cmap=cmap, vmin=0., vmax=30.)
-        plt.colorbar(ax)
+        fig, ax = plt.subplots()
+        res_max = sum(self.chain_length)
+        img = ax.imshow(
+            pae_array, cmap=cmap,
+            vmin=0., vmax=30.,
+            )#+extent=[0, res_max, 0, res_max])
+        plt.hlines(self.chain_length[:-1], xmin=0, xmax=res_max, colors='black')
+        plt.vlines(self.chain_length[:-1], ymin=0, ymax=res_max, colors='black')
+        plt.xlim(0,res_max)
+        plt.ylim(res_max,0)
+        ax.set_yticklabels(self.chains)
+        chain_pos = []
+        len_sum = 0
+        for longueur in self.chain_length:
+            chain_pos.append(len_sum+longueur/2)
+            len_sum += longueur
+
+        ax.set_yticks(chain_pos)
+        cbar = plt.colorbar(img)
+        cbar.set_label('Predicted Aligned Error (Å)', rotation=270)
+        cbar.ax.get_yaxis().labelpad = 15
+
 
         return(fig, ax)
+
+    def plot_plddt(self, index_list):
+
+
+        fig, ax = plt.subplots()
+
+        for index in index_list:
+
+            row = self.df.iloc[index]
+
+            if row['json'] is None:
+                return(None, None)
+
+            with open(row['json']) as f:
+                local_json = json.load(f)
+            
+            plddt_array = np.array(local_json['plddt'])
+
+            plt.plot(plddt_array)
+
+        plt.vlines(self.chain_length[:-1], ymin=0, ymax=100.0, colors='black')
+        plt.ylim(0,100)
+        plt.xlim(0,sum(self.chain_length))
+        plt.xlabel('Residue')
+        plt.ylabel('predicted LDDT')
+
+        return(fig, ax)
+
+    def show_3d(self, index):
+
+        row = self.df.iloc[index]
+
+        if row['pdb'] is None:
+            return(None, None)
+
+        import nglview as nv 
+
+        view = nv.show_file(row['pdb'])
+        #view.add_component(ref_coor[0])
+        #view.clear_representations(1)
+        #view[1].add_cartoon(selection="protein", color='blue')
+        #view[1].add_licorice(selection=":A", color='blue')
+        #view[0].add_licorice(selection=":A")
+        return view
