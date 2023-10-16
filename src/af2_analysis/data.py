@@ -275,3 +275,23 @@ class Data:
         #view[1].add_licorice(selection=":A", color='blue')
         #view[0].add_licorice(selection=":A")
         return view
+    
+    def compute_pdockq(self):
+        """
+        Compute pdockq from the pdb file.
+        
+        """
+
+        from pdb_numpy.analysis import compute_pdockQ
+
+        pdockq_list = []
+
+        for pdb in self.df['pdb']:
+            print(pdb)
+            model = pdb_numpy.Coor(pdb)
+            if pdb:
+                pdockq_list += compute_pdockQ(model)
+            else:
+                pdockq_list.append(None)
+
+        self.df['pdockq'] = pdockq_list
