@@ -9,8 +9,10 @@ import pdb_numpy
 import seaborn as sns
 import matplotlib.pyplot as plt
 from cmcrameri import cm
+from tqdm.auto import tqdm
 
 from .format import colabfold_1_5, default
+from . import sequence, plot
 
 class Data:
     """ Data class
@@ -286,12 +288,103 @@ class Data:
 
         pdockq_list = []
 
-        for pdb in self.df['pdb']:
-            print(pdb)
-            model = pdb_numpy.Coor(pdb)
+        for pdb in tqdm(self.df['pdb'], total=len(self.df['pdb'])):
             if pdb:
+                model = pdb_numpy.Coor(pdb)
                 pdockq_list += compute_pdockQ(model)
             else:
                 pdockq_list.append(None)
 
         self.df['pdockq'] = pdockq_list
+
+    def compute_pdockq2(self):
+        """
+        Compute pdockq2 from the pdb file.
+
+        $$ pDockQ_2 = \frac{L}{1 + exp [-k*(X_i-X_0)]} + b$$
+
+        with
+
+        $$ X_i = \langle \frac{1}{1+(\frac{PAE_{int}}{d_0})^2} \rangle - \langle pLDDT \rangle_{int}$$
+
+        Ref:
+        https://academic.oup.com/bioinformatics/article/39/7/btad424/7219714
+        """
+        cutoff = 8.0
+        L ,x0, k, b = 1.31034849e+00, 8.47326239e+01, 7.47157696e-02, 5.01886443e-03
+        d0 = 10.0
+        pdockq_list = []
+        for chain in self.chains:
+            pdockq_list.append([])
+
+        for pdb, json_path in tqdm(zip(self.df['pdb'], self.df['json']), total=len(self.df['pdb'])):
+            if pdb and json_path:
+                model = pdb_numpy.Coor(pdb)
+                model_CA = model.select_atoms('name CA')
+                for i, chain in enumerate(self.chains):
+                    print(i, chain)
+                    interface_sel = model_CA.select_atoms(f"(chain {chain} and within {cutoff} of not chain {chain}) or (not chain {chain} and within {cutoff} of chain {chain})")                    
+                    plddt_avg = np.mean(interface_sel.beta)
+
+                    chain_sel = model_CA.select_atoms(f"(chain {chain} and within {cutoff} of not chain {chain})")
+                    inter_chain_sel = model_CA.select_atoms(f"(not chain {chain} {chain} and within {cutoff} of chain {chain})")
+
+                    with open(json_path) as f:
+                        local_json = json.load(f)
+                    pae_array = np.array(local_json['pae'])
+
+
+                    # print(chain_sel.uniq_resid, inter_chain_sel.uniq_resid)
+                    print(f"pLDDT = {plddt_avg}")
+                    # print(len(chain_sel.uniq_resid), len(inter_chain_sel.uniq_resid))
+                    #if len(chain_sel.uniq_resid) + len(inter_chain_sel.uniq_resid) == 0:
+                    #    print(f"chain {chain} pdockq2 = None")
+                    #    pdockq_list[i].append(None)
+                    #    continue
+                    # print(chain_sel.uniq_resid, inter_chain_sel.uniq_resid)
+                    # print(pae_array)
+                    # print(pae_array.shape)
+                    # print(pae_array[chain_sel.uniq_resid][:, inter_chain_sel.uniq_resid])
+                    # print(pae_array[chain_sel.uniq_resid][:, inter_chain_sel.uniq_resid].shape)
+                    norm_if_interpae = np.mean(1/(1+(pae_array[chain_sel.uniq_resid][:, inter_chain_sel.uniq_resid]/d0)**2))
+                    norm_if_interpae_sym = np.mean(1/(1+(pae_array[inter_chain_sel.uniq_resid][:,chain_sel.uniq_resid]/d0)**2))
+                    print(f"norm_if_interpae = {norm_if_interpae:.3f}, symetry: {norm_if_interpae_sym:.3f}")
+                    x = norm_if_interpae * plddt_avg
+                    y = L / (1 + np.exp(-k*(x-x0)))+b
+                    print(f"chain {chain} pdockq2 = {y}")
+                    pdockq_list[i].append(y)
+                    
+            else:
+                for list in pdockq_list:
+                    list.append(None)
+
+        print(pdockq_list)
+        for i, chain in enumerate(self.chains):
+            self.df[f'pdockq2_{chain}'] = pdockq_list[i]
+
+    def plot_msa(self):
+        """
+        
+        
+        ..Warning only tested with colabfold 1.5
+        """
+
+        raw_list = os.listdir(self.dir)
+        file_list = []
+        for file in raw_list:
+            if file.endswith(".a3m"):
+                file_list.append(file)
+        
+        for a3m_file in file_list:
+            print(a3m_file)
+
+            a3m_lines = open(os.path.join(self.dir, a3m_file),"r").readlines()[1:]
+            seqs, mtx, nams = sequence.parse_a3m(a3m_lines=a3m_lines)
+            feature_dict = {}
+            feature_dict["msa"] = sequence.convert_aa_msa(seqs)
+            feature_dict['num_alignments'] = len(seqs)
+            feature_dict["asym_id"] = []
+            for i, chain_len in enumerate(self.chain_length):
+                feature_dict["asym_id"] += [i+1]*chain_len
+            fig = plot.plot_msa_v2(feature_dict)
+
