@@ -1,5 +1,6 @@
-# af2_analysis
- Analysis of alphafold and colabfold results
+# Alphafold2_analysis
+
+`af2_analysis` is a python package allowing a simplified analysis of alphafold and colabfold results.
 
 ## Installation
 
@@ -16,7 +17,7 @@ Create the `Data` object, giving the path of the directory containing the result
 
 ```python
 import af2_analysis
-my_data = af2_analysis.Data('SORBS1_CRKL_2')
+my_data = af2_analysis.Data('MY_AF2_RESULTS_DIR')
 ```
 
 Extracted data are available in the `df` attribute of the `Data` object. 
