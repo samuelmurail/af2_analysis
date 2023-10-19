@@ -1,4 +1,4 @@
-# Alphafold2_analysis
+# Alphafold2 Analysis
 
 `af2_analysis` is a python package allowing a simplified analysis of alphafold and colabfold results.
 

@@ -364,7 +364,7 @@ class Data:
 
     def plot_msa(self):
         """
-        
+        Plot the msa from the a3m file.
         
         ..Warning only tested with colabfold 1.5
         """

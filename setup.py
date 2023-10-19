@@ -2,14 +2,15 @@ from setuptools import setup, find_packages
 
 version = "0.0.1"
 
-with open('README.rst', encoding='utf-8') as readme_file:
+with open('README.md', encoding='utf-8') as readme_file:
     readme = readme_file.read()
 
 requirements = [
     'pandas>=2.0',
     'tqdm>=4.0',
     'seaborn>=0.11',
-    'pdb_numpy>=0.0.1'
+    'pdb_numpy>=0.0.1',
+    'cmcrameri>=1.7'
 ]
 
 setup(
