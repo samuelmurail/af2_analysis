@@ -215,8 +215,8 @@ class Data:
             pae_array, cmap=cmap,
             vmin=0., vmax=30.,
             )#+extent=[0, res_max, 0, res_max])
-        plt.hlines(self.chain_length[:-1], xmin=0, xmax=res_max, colors='black')
-        plt.vlines(self.chain_length[:-1], ymin=0, ymax=res_max, colors='black')
+        plt.hlines(np.cumsum(self.chain_length[:-1]), xmin=0, xmax=res_max, colors='black')
+        plt.vlines(np.cumsum(self.chain_length[:-1]), ymin=0, ymax=res_max, colors='black')
         plt.xlim(0,res_max)
         plt.ylim(res_max,0)
         ax.set_yticklabels(self.chains)
@@ -253,7 +253,7 @@ class Data:
 
             plt.plot(plddt_array)
 
-        plt.vlines(self.chain_length[:-1], ymin=0, ymax=100.0, colors='black')
+        plt.vlines(np.cumsum(self.chain_length[:-1]), ymin=0, ymax=100.0, colors='black')
         plt.ylim(0,100)
         plt.xlim(0,sum(self.chain_length))
         plt.xlabel('Residue')
@@ -268,9 +268,11 @@ class Data:
         if row['pdb'] is None:
             return(None, None)
 
-        import nglview as nv 
+        import nglview as nv
 
-        view = nv.show_file(row['pdb'])
+        # Bug with show_file
+        # view = nv.show_file(row['pdb'])
+        view = nv.show_structure_file(row['pdb'])
         #view.add_component(ref_coor[0])
         #view.clear_representations(1)
         #view[1].add_cartoon(selection="protein", color='blue')
@@ -322,7 +324,7 @@ class Data:
                 model = pdb_numpy.Coor(pdb)
                 model_CA = model.select_atoms('name CA')
                 for i, chain in enumerate(self.chains):
-                    print(i, chain)
+                    # print(i, chain)
                     interface_sel = model_CA.select_atoms(f"(chain {chain} and within {cutoff} of not chain {chain}) or (not chain {chain} and within {cutoff} of chain {chain})")                    
                     plddt_avg = np.mean(interface_sel.beta)
 
@@ -335,7 +337,7 @@ class Data:
 
 
                     # print(chain_sel.uniq_resid, inter_chain_sel.uniq_resid)
-                    print(f"pLDDT = {plddt_avg}")
+                    # print(f"pLDDT = {plddt_avg}")
                     # print(len(chain_sel.uniq_resid), len(inter_chain_sel.uniq_resid))
                     #if len(chain_sel.uniq_resid) + len(inter_chain_sel.uniq_resid) == 0:
                     #    print(f"chain {chain} pdockq2 = None")
@@ -348,17 +350,17 @@ class Data:
                     # print(pae_array[chain_sel.uniq_resid][:, inter_chain_sel.uniq_resid].shape)
                     norm_if_interpae = np.mean(1/(1+(pae_array[chain_sel.uniq_resid][:, inter_chain_sel.uniq_resid]/d0)**2))
                     norm_if_interpae_sym = np.mean(1/(1+(pae_array[inter_chain_sel.uniq_resid][:,chain_sel.uniq_resid]/d0)**2))
-                    print(f"norm_if_interpae = {norm_if_interpae:.3f}, symetry: {norm_if_interpae_sym:.3f}")
+                    # print(f"norm_if_interpae = {norm_if_interpae:.3f}, symetry: {norm_if_interpae_sym:.3f}")
                     x = norm_if_interpae * plddt_avg
                     y = L / (1 + np.exp(-k*(x-x0)))+b
-                    print(f"chain {chain} pdockq2 = {y}")
+                    # print(f"chain {chain} pdockq2 = {y}")
                     pdockq_list[i].append(y)
                     
             else:
                 for list in pdockq_list:
                     list.append(None)
 
-        print(pdockq_list)
+        # print(pdockq_list)
         for i, chain in enumerate(self.chains):
             self.df[f'pdockq2_{chain}'] = pdockq_list[i]
 
