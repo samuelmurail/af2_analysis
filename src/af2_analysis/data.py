@@ -10,6 +10,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from cmcrameri import cm
 from tqdm.auto import tqdm
+from scipy.spatial import distance_matrix
 
 from .format import colabfold_1_5, default
 from . import sequence, plot
@@ -62,6 +63,8 @@ class Data:
             self.extract_json()
 
         # Read the first pdb to extract chain lengths:
+        # THIS IS HAWFUL THAT SHOULD B REMOVED !!!!
+        # A different model type exist, the chain number is not the same
         first_model = pdb_numpy.Coor(self.df.loc[0, 'pdb'])
         self.chains = list(np.unique(first_model.models[0].chain))
         self.chain_length = [len(np.unique(first_model.models[0].uniq_resid[first_model.models[0].chain == chain] )) for chain in self.chains]
@@ -322,11 +325,12 @@ class Data:
         for pdb, json_path in tqdm(zip(self.df['pdb'], self.df['json']), total=len(self.df['pdb'])):
             if pdb and json_path:
                 model = pdb_numpy.Coor(pdb)
+                model_CB_CA = model.select_atoms('name CB or (resname GLY and name CA)')
                 model_CA = model.select_atoms('name CA')
                 for i, chain in enumerate(self.chains):
-                    # print(i, chain)
-                    interface_sel = model_CA.select_atoms(f"(chain {chain} and within {cutoff} of not chain {chain}) or (not chain {chain} and within {cutoff} of chain {chain})")                    
-                    plddt_avg = np.mean(interface_sel.beta)
+                    print(i, chain)
+                    #interface_sel = model_CB_CA.select_atoms(f"chain {chain} and within {cutoff} of not chain {chain}")                    
+                    #plddt_avg = np.mean(interface_sel.beta)
 
                     chain_sel = model_CA.select_atoms(f"(chain {chain} and within {cutoff} of not chain {chain})")
                     inter_chain_sel = model_CA.select_atoms(f"(not chain {chain} {chain} and within {cutoff} of chain {chain})")
@@ -335,22 +339,17 @@ class Data:
                         local_json = json.load(f)
                     pae_array = np.array(local_json['pae'])
 
+                    dist_mat = distance_matrix(chain_sel.xyz, inter_chain_sel.xyz)
+                
+                    indexes = np.where(dist_mat < cutoff)
+                    x_indexes = chain_sel.uniq_resid[indexes[0]]
+                    y_indexes = inter_chain_sel.uniq_resid[indexes[1]]
+                    pae_sel = pae_array[x_indexes, y_indexes]
+                    
+                    norm_if_interpae = np.mean(1/(1+(pae_sel/d0)**2))
 
-                    # print(chain_sel.uniq_resid, inter_chain_sel.uniq_resid)
-                    # print(f"pLDDT = {plddt_avg}")
-                    # print(len(chain_sel.uniq_resid), len(inter_chain_sel.uniq_resid))
-                    #if len(chain_sel.uniq_resid) + len(inter_chain_sel.uniq_resid) == 0:
-                    #    print(f"chain {chain} pdockq2 = None")
-                    #    pdockq_list[i].append(None)
-                    #    continue
-                    # print(chain_sel.uniq_resid, inter_chain_sel.uniq_resid)
-                    # print(pae_array)
-                    # print(pae_array.shape)
-                    # print(pae_array[chain_sel.uniq_resid][:, inter_chain_sel.uniq_resid])
-                    # print(pae_array[chain_sel.uniq_resid][:, inter_chain_sel.uniq_resid].shape)
-                    norm_if_interpae = np.mean(1/(1+(pae_array[chain_sel.uniq_resid][:, inter_chain_sel.uniq_resid]/d0)**2))
-                    norm_if_interpae_sym = np.mean(1/(1+(pae_array[inter_chain_sel.uniq_resid][:,chain_sel.uniq_resid]/d0)**2))
-                    # print(f"norm_if_interpae = {norm_if_interpae:.3f}, symetry: {norm_if_interpae_sym:.3f}")
+                    plddt_avg = np.mean(model_CB_CA.beta[x_indexes])
+
                     x = norm_if_interpae * plddt_avg
                     y = L / (1 + np.exp(-k*(x-x0)))+b
                     # print(f"chain {chain} pdockq2 = {y}")
