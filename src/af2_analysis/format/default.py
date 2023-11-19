@@ -87,7 +87,7 @@ def add_json(log_pd, directory):
     if 'recycle' not in log_pd.columns:
         last_recycle = log_pd.groupby(['query', 'seed', 'model', 'weight', 'state'])
     else:
-        last_recycle = log_pd.groupby(['query', 'seed', 'model', 'weight'])['recycle'].transform(max) == log_pd['recycle']
+        last_recycle = log_pd.groupby(['query', 'seed', 'model', 'weight'])['recycle'].transform("max") == log_pd['recycle']
     
     for i, last in tqdm(enumerate(last_recycle), total=len(last_recycle)):
         row = log_pd.iloc[i]

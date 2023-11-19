@@ -60,14 +60,16 @@ class Data:
             self.format = 'default'
             self.df = default.read_dir(directory)
             self.add_json()
-            self.extract_json()
+            #self.extract_json()
 
-        # Read the first pdb to extract chain lengths:
-        # THIS IS HAWFUL THAT SHOULD B REMOVED !!!!
-        # A different model type exist, the chain number is not the same
-        first_model = pdb_numpy.Coor(self.df.loc[0, 'pdb'])
-        self.chains = list(np.unique(first_model.models[0].chain))
-        self.chain_length = [len(np.unique(first_model.models[0].uniq_resid[first_model.models[0].chain == chain] )) for chain in self.chains]
+        self.chains = {}
+        self.chain_length = {}
+        for querie in self.df['query'].unique():
+            #print(querie, self.df[self.df['query'] == querie])
+            first_model = pdb_numpy.Coor(
+                self.df[self.df['query'] == querie].iloc[0]['pdb'])
+            self.chains[querie] = list(np.unique(first_model.models[0].chain))
+            self.chain_length[querie] = [len(np.unique(first_model.models[0].uniq_resid[first_model.models[0].chain == chain] )) for chain in self.chains[querie]]
 
 
     def add_json(self):
@@ -159,7 +161,7 @@ class Data:
 
         """
 
-        idx = self.df.groupby(['query', 'seed', 'model', 'weight'])['recycle'].transform(max) == self.df['recycle']
+        idx = self.df.groupby(['query', 'seed', 'model', 'weight'])['recycle'].transform("max") == self.df['recycle']
         self.df = self.df[idx]
 
 
@@ -213,19 +215,19 @@ class Data:
         pae_array = np.array(local_json['pae'])
 
         fig, ax = plt.subplots()
-        res_max = sum(self.chain_length)
+        res_max = sum(self.chain_length[row['query']])
         img = ax.imshow(
             pae_array, cmap=cmap,
             vmin=0., vmax=30.,
             )#+extent=[0, res_max, 0, res_max])
-        plt.hlines(np.cumsum(self.chain_length[:-1]), xmin=0, xmax=res_max, colors='black')
-        plt.vlines(np.cumsum(self.chain_length[:-1]), ymin=0, ymax=res_max, colors='black')
+        plt.hlines(np.cumsum(self.chain_length[row['query']][:-1]), xmin=0, xmax=res_max, colors='black')
+        plt.vlines(np.cumsum(self.chain_length[row['query']][:-1]), ymin=0, ymax=res_max, colors='black')
         plt.xlim(0,res_max)
         plt.ylim(res_max,0)
-        ax.set_yticklabels(self.chains)
+        ax.set_yticklabels(self.chains[row['query']])
         chain_pos = []
         len_sum = 0
-        for longueur in self.chain_length:
+        for longueur in self.chain_length[row['query']]:
             chain_pos.append(len_sum+longueur/2)
             len_sum += longueur
 
@@ -256,9 +258,9 @@ class Data:
 
             plt.plot(plddt_array)
 
-        plt.vlines(np.cumsum(self.chain_length[:-1]), ymin=0, ymax=100.0, colors='black')
+        plt.vlines(np.cumsum(self.chain_length[row['query']][:-1]), ymin=0, ymax=100.0, colors='black')
         plt.ylim(0,100)
-        plt.xlim(0,sum(self.chain_length))
+        plt.xlim(0,sum(self.chain_length[row['query']]))
         plt.xlabel('Residue')
         plt.ylabel('predicted LDDT')
 
@@ -319,7 +321,13 @@ class Data:
         L ,x0, k, b = 1.31034849e+00, 8.47326239e+01, 7.47157696e-02, 5.01886443e-03
         d0 = 10.0
         pdockq_list = []
-        for chain in self.chains:
+
+        max_chain_num = 0
+        for query in self.chains:
+            chain_num = len(self.chains[query])
+            if chain_num > max_chain_num:
+                max_chain_num = chain_num
+        for i in range(max_chain_num):
             pdockq_list.append([])
 
         for pdb, json_path in tqdm(zip(self.df['pdb'], self.df['json']), total=len(self.df['pdb'])):
@@ -327,8 +335,9 @@ class Data:
                 model = pdb_numpy.Coor(pdb)
                 model_CB_CA = model.select_atoms('name CB or (resname GLY and name CA)')
                 model_CA = model.select_atoms('name CA')
-                for i, chain in enumerate(self.chains):
-                    print(i, chain)
+                model_chains = np.unique(model_CA.chain)
+                for i, chain in enumerate(model_chains):
+                    # print(i, chain)
                     #interface_sel = model_CB_CA.select_atoms(f"chain {chain} and within {cutoff} of not chain {chain}")                    
                     #plddt_avg = np.mean(interface_sel.beta)
 
@@ -354,14 +363,16 @@ class Data:
                     y = L / (1 + np.exp(-k*(x-x0)))+b
                     # print(f"chain {chain} pdockq2 = {y}")
                     pdockq_list[i].append(y)
+                for i in range(len(model_chains), max_chain_num):
+                    pdockq_list[i].append(np.nan)
                     
             else:
                 for list in pdockq_list:
                     list.append(None)
 
         # print(pdockq_list)
-        for i, chain in enumerate(self.chains):
-            self.df[f'pdockq2_{chain}'] = pdockq_list[i]
+        for i in range(max_chain_num):
+            self.df[f'pdockq2_{chr(65+i)}'] = pdockq_list[i]
 
     def plot_msa(self):
         """
@@ -378,6 +389,7 @@ class Data:
         
         for a3m_file in file_list:
             print(a3m_file)
+            querie = a3m_file.split('/')[-1].split('.')[0]
 
             a3m_lines = open(os.path.join(self.dir, a3m_file),"r").readlines()[1:]
             seqs, mtx, nams = sequence.parse_a3m(a3m_lines=a3m_lines)
@@ -385,7 +397,8 @@ class Data:
             feature_dict["msa"] = sequence.convert_aa_msa(seqs)
             feature_dict['num_alignments'] = len(seqs)
             feature_dict["asym_id"] = []
-            for i, chain_len in enumerate(self.chain_length):
+            for i, chain_len in enumerate(self.chain_length[querie]):
                 feature_dict["asym_id"] += [i+1]*chain_len
             fig = plot.plot_msa_v2(feature_dict)
+
 
