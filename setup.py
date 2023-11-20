@@ -33,7 +33,7 @@ setup(
     license='GNUv2.0',
     zip_safe=False,
     classifiers=[
-        "Development Status :: 5 - Devloppment/Beta",
+        "Development Status :: 4 - Beta",
         "Environment :: Console",
         "Intended Audience :: Developers",
         "Natural Language :: English",
