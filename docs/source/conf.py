@@ -9,7 +9,7 @@
 project = 'AF2 Analysis'
 copyright = '2023, Samuel Murail'
 author = 'Samuel Murail'
-release = '0.0.1'
+release = '0.0.2'
 
 # If extensions (or modules to document with autodoc) are in another
 # directory, add these directories to sys.path here. If the directory is
