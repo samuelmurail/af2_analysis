@@ -1,17 +1,4 @@
-# Alphafold2 Analysis
-
-`af2_analysis` is a python package allowing a simplified analysis of alphafold and colabfold results.
-
-## Installation
-
-```bash
-git clone https://github.com/samuelmurail/af2_analysis
-cd af2_analysis
-python setup.py install
-```
-
-
-## Usage
+# Basic example
 
 Create the `Data` object, giving the path of the directory containing the results of the alphafold2/colabfold run. 
 
@@ -28,10 +15,10 @@ my_data.df
 
 - Compute pdockQ and pdockQ2:
 
-```python
+ ```python
 my_data.compute_pdockq()
 my_data.compute_pdockq2()
-```
+ ```
 
 - plot msa
 

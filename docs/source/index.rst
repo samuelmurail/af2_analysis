@@ -1,0 +1,27 @@
+.. AF2 Analysis documentation master file, created by
+   sphinx-quickstart on Mon Nov 20 13:03:43 2023.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+
+Welcome to AF2 Analysis's documentation!
+========================================
+
+``af2_analysis`` is a python library designed to facilitate analysis of AlphaFold results.
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Table of Contents:
+
+   readme
+   installation
+   basic_example
+   Github project <https://github.com/samuelmurail/af2_analysis>
+   af2_analysis
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
