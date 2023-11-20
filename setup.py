@@ -9,7 +9,7 @@ requirements = [
     'pandas>=2.0',
     'tqdm>=4.0',
     'seaborn>=0.11',
-    'pdb_numpy>=0.0.1',
+    'pdb_numpy>=0.0.2',
     'cmcrameri>=1.7'
 ]
 
