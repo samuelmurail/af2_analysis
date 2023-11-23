@@ -323,6 +323,32 @@ class Data:
 
         self.df["pdockq"] = pdockq_list
 
+
+    def compute_mpdockq(self):
+        """
+        Compute mpdockq from the pdb file.
+
+        """
+
+        from pdb_numpy.analysis import compute_pdockQ
+
+        pdockq_list = []
+
+        for pdb in tqdm(self.df["pdb"], total=len(self.df["pdb"])):
+            if pdb:
+                model = pdb_numpy.Coor(pdb)
+                pdockq_list += compute_pdockQ(
+                    model,
+                    cutoff=8.0,
+                    L=0.728,
+                    x0=309.375,
+                    k=0.098,
+                    b=0.262)
+            else:
+                pdockq_list.append(None)
+
+        self.df["mpdockq"] = pdockq_list
+
     def compute_pdockq2(self):
         """
         Compute pdockq2 from the pdb file.
