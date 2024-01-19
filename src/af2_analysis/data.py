@@ -230,13 +230,14 @@ class Data:
             vmax=30.0,
         )  # +extent=[0, res_max, 0, res_max])
         plt.hlines(
-            np.cumsum(self.chain_length[row["query"]][:-1]),
+            np.cumsum(self.chain_length[row["query"]][:-1] - 1),
             xmin=0,
             xmax=res_max,
             colors="black",
         )
+        print(np.cumsum(self.chain_length[row["query"]][:-1] - 1))
         plt.vlines(
-            np.cumsum(self.chain_length[row["query"]][:-1]),
+            np.cumsum(self.chain_length[row["query"]][:-1] - 1),
             ymin=0,
             ymax=res_max,
             colors="black",
