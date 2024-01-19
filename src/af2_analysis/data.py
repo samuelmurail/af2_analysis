@@ -12,6 +12,8 @@ from cmcrameri import cm
 from tqdm.auto import tqdm
 from scipy.spatial import distance_matrix
 
+import ipywidgets as widgets
+
 from .format import colabfold_1_5, default
 from . import sequence, plot
 
@@ -223,26 +225,30 @@ class Data:
 
         fig, ax = plt.subplots()
         res_max = sum(self.chain_length[row["query"]])
+
         img = ax.imshow(
             pae_array,
             cmap=cmap,
             vmin=0.0,
             vmax=30.0,
-        )  # +extent=[0, res_max, 0, res_max])
+        )
+
         plt.hlines(
             np.cumsum(self.chain_length[row["query"]][:-1]) - 0.5,
-            xmin=0,
+            xmin=-0.5,
             xmax=res_max,
             colors="black",
         )
+
         plt.vlines(
             np.cumsum(self.chain_length[row["query"]][:-1])- 0.5,
-            ymin=0,
+            ymin=-0.5,
             ymax=res_max,
             colors="black",
         )
-        plt.xlim(0, res_max)
-        plt.ylim(res_max, 0)
+
+        plt.xlim(-0.5, res_max-0.5)
+        plt.ylim(res_max-0.5, -0.5)
         ax.set_yticklabels(self.chains[row["query"]])
         chain_pos = []
         len_sum = 0
@@ -427,3 +433,46 @@ class Data:
             for i, chain_len in enumerate(self.chain_length[querie]):
                 feature_dict["asym_id"] += [i + 1] * chain_len
             fig = plot.plot_msa_v2(feature_dict)
+
+    def show_plot_info(self):
+        """
+        Need to solve the issue with:
+
+        ```
+        %matplotlib ipympl
+        ```
+
+        plots don´t update when changing the model number.
+
+        """
+
+        model_widget = widgets.IntSlider(
+            value=1,
+            min=1,
+            max=len(self.df),
+            step=1,
+            description='model:',
+            disabled=False,
+        )
+        display(model_widget)
+
+        def show_model(rank_num):
+            print(rank_num)
+            plddt_fig, plddt_ax = self.plot_plddt([rank_num - 1])
+            pae_fig, pae_ax = self.plot_pae(rank_num - 1)
+            view = self.show_3d(rank_num - 1)
+            #view.zoomTo()
+            return view
+            
+        output = widgets.Output()
+        display(output)
+        with output:
+            show_model(model_widget.value)
+            #logger.info(results['metric'][0][rank_num - 1]['print_line'])
+
+        def on_value_change(change):
+            output.clear_output()
+            with output:
+                show_model(model_widget.value)
+
+        model_widget.observe(on_value_change, names='value')
