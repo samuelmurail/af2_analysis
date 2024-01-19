@@ -10,7 +10,8 @@ requirements = [
     'tqdm>=4.0',
     'seaborn>=0.11',
     'pdb_numpy>=0.0.2',
-    'cmcrameri>=1.7'
+    'cmcrameri>=1.7',
+    'nglview>=3.0',
 ]
 
 setup(
