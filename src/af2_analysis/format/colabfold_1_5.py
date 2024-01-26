@@ -133,11 +133,25 @@ def add_pdb(log_pd, directory):
         if len(res) == 1:
             pdb_list.append(os.path.join(directory, res[0]))
             file_list.remove(res[0])
-        elif len(res) > 1:
-            logger.warning(f"Multiple pdb file for {reg}: {res}")
-            pdb_list.append(None)
+        elif len(res) == 2:
+
+            filter_res = []
+            for res_ in res:
+                if res_.find("_relaxed_") != -1:
+                    filter_res.append(res_)
+                file_list.remove(res_)
+            
+            if len(filter_res) == 1:
+                pdb_list.append(os.path.join(directory, filter_res[0]))
+            else:
+                logger.warning(f"Multiple pdb file for {reg}: {filter_res}")
+                pdb_list.append(None)                
+
+        elif len(res) > 2:
+                logger.warning(f"Multiple pdb file for {reg}: {res}")
+                pdb_list.append(None)
         else:
-            logger.info(f"Not founded : {reg}")
+            logger.warning(f"Not founded : {reg}")
             pdb_list.append(None)
 
     log_pd.loc[:, "pdb"] = pdb_list

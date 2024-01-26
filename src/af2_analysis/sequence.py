@@ -9,24 +9,24 @@ def convert_aa_msa(seqs):
 
     convert_dict = {
         "A": 0,
-        "C": 4,
+        "R": 1,
+        "N": 2,
         "D": 3,
+        "C": 4,
+        "Q": 5,
         "E": 6,
-        "F": 13,
         "G": 7,
         "H": 8,
         "I": 9,
-        "K": 11,
         "L": 10,
+        "K": 11,
         "M": 12,
-        "N": 2,
+        "F": 13,
         "P": 14,
-        "Q": 5,
-        "R": 1,
         "S": 15,
         "T": 16,
-        "V": 19,
         "W": 17,
+        "V": 19,
         "Y": 18,
         "X": 20,
         "-": 21,
@@ -41,6 +41,7 @@ def convert_aa_msa(seqs):
 
 
 def parse_a3m(a3m_lines=None, a3m_file=None, filter_qid=0.15, filter_cov=0.5, N=100000):
+
     def seqid(a, b):
         return sum(c1 == c2 for c1, c2 in zip(a, b))
 
@@ -109,4 +110,5 @@ def parse_a3m(a3m_lines=None, a3m_file=None, filter_qid=0.15, filter_cov=0.5, N=
         seqs = [seqs[i] for i in sid]
         mtx = [mtx[i] for i in sid]
         nams = [nams[i] for i in sid]
-    return seqs[1:], mtx[1:], nams[1:]
+    # return seqs[1:], mtx[1:], nams[1:]
+    return seqs, mtx, nams

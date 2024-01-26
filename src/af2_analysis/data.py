@@ -31,11 +31,13 @@ class Data:
         Dataframe containing the information extracted from the `log.txt` file.
     """
 
-    def __init__(self, directory=None):
+    def __init__(self, directory=None, csv=None):
         """ """
 
         if directory is not None:
             self.read_directory(directory)
+        elif csv is not None:
+            self.import_csv(csv)
 
     def read_directory(self, directory, keep_recycles=False):
         """Read a directory.
@@ -63,6 +65,56 @@ class Data:
             self.df = default.read_dir(directory)
             self.add_json()
             # self.extract_json()
+
+        self.chains = {}
+        self.chain_length = {}
+        for querie in self.df["query"].unique():
+            # print(querie, self.df[self.df['query'] == querie])
+            first_model = pdb_numpy.Coor(
+                self.df[self.df["query"] == querie].iloc[0]["pdb"]
+            )
+            self.chains[querie] = list(np.unique(first_model.models[0].chain))
+            self.chain_length[querie] = [
+                len(
+                    np.unique(
+                        first_model.models[0].uniq_resid[
+                            first_model.models[0].chain == chain
+                        ]
+                    )
+                )
+                for chain in self.chains[querie]
+            ]
+
+    def export_csv(self, path):
+        """Export the dataframe to a csv file.
+
+        Parameters
+        ----------
+        path : str
+            Path to the csv file.
+
+        Returns
+        -------
+        None
+        """
+
+        self.df.to_csv(path, index=False)
+
+    def import_csv(self, path):
+        """Import a csv file to the dataframe.
+
+        Parameters
+        ----------
+        path : str
+            Path to the csv file.
+
+        Returns
+        -------
+        None
+        """
+
+        self.df = pd.read_csv(path)
+        self.dir = os.path.dirname(self.df['pdb'][0])
 
         self.chains = {}
         self.chain_length = {}
@@ -407,9 +459,20 @@ class Data:
         for i in range(max_chain_num):
             self.df[f"pdockq2_{chr(65+i)}"] = pdockq_list[i]
 
-    def plot_msa(self):
+    def plot_msa(self, filter_qid=0.15, filter_cov=0.4):
         """
         Plot the msa from the a3m file.
+
+        Parameters
+        ----------
+        filter_qid : float
+            Minimal sequence identity to keep a sequence.
+        filter_cov : float
+            Minimal coverage to keep a sequence.
+
+        Returns
+        -------
+        None
 
         ..Warning only tested with colabfold 1.5
         """
@@ -421,17 +484,21 @@ class Data:
                 file_list.append(file)
 
         for a3m_file in file_list:
-            print(a3m_file)
+            print(f"Reading MSA file:{a3m_file}")
             querie = a3m_file.split("/")[-1].split(".")[0]
 
             a3m_lines = open(os.path.join(self.dir, a3m_file), "r").readlines()[1:]
-            seqs, mtx, nams = sequence.parse_a3m(a3m_lines=a3m_lines)
+            seqs, mtx, nams = sequence.parse_a3m(
+                a3m_lines=a3m_lines,
+                filter_qid=filter_qid,
+                filter_cov=filter_cov)
             feature_dict = {}
             feature_dict["msa"] = sequence.convert_aa_msa(seqs)
             feature_dict["num_alignments"] = len(seqs)
             feature_dict["asym_id"] = []
             for i, chain_len in enumerate(self.chain_length[querie]):
                 feature_dict["asym_id"] += [i + 1] * chain_len
+
             fig = plot.plot_msa_v2(feature_dict)
 
     def show_plot_info(self):

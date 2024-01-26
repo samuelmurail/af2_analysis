@@ -9,6 +9,7 @@ def plot_msa_v2(feature_dict, sort_lines=True, dpi=100):
     """
 
     seq = feature_dict["msa"][0]
+
     if "asym_id" in feature_dict:
         Ls = [0]
         k = feature_dict["asym_id"][0]
