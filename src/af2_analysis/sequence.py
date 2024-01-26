@@ -99,6 +99,9 @@ def parse_a3m(a3m_lines=None, a3m_file=None, filter_qid=0.15, filter_cov=0.5, N=
         else:
             seqs[-1] += line
 
+    print(f"- Reading {n:6} sequences.")
+
+
     # filter last entry
     do_filter()
 

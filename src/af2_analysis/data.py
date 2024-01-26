@@ -492,6 +492,7 @@ class Data:
                 a3m_lines=a3m_lines,
                 filter_qid=filter_qid,
                 filter_cov=filter_cov)
+            print(f"- Keeping {len(seqs):6} sequences for plotting.")
             feature_dict = {}
             feature_dict["msa"] = sequence.convert_aa_msa(seqs)
             feature_dict["num_alignments"] = len(seqs)
@@ -500,6 +501,7 @@ class Data:
                 feature_dict["asym_id"] += [i + 1] * chain_len
 
             fig = plot.plot_msa_v2(feature_dict)
+            plt.show()
 
     def show_plot_info(self):
         """
