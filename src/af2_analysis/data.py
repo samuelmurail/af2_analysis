@@ -496,9 +496,12 @@ class Data:
             feature_dict = {}
             feature_dict["msa"] = sequence.convert_aa_msa(seqs)
             feature_dict["num_alignments"] = len(seqs)
-            feature_dict["asym_id"] = []
-            for i, chain_len in enumerate(self.chain_length[querie]):
-                feature_dict["asym_id"] += [i + 1] * chain_len
+
+            if len(seqs) == sum(self.chain_length[querie]):
+                feature_dict["asym_id"] = []
+                for i, chain_len in enumerate(self.chain_length[querie]):
+                    feature_dict["asym_id"] += [i + 1.] * chain_len
+                feature_dict["asym_id"] = np.array(feature_dict["asym_id"])
 
             fig = plot.plot_msa_v2(feature_dict)
             plt.show()

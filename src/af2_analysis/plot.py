@@ -9,6 +9,7 @@ def plot_msa_v2(feature_dict, sort_lines=True, dpi=100):
     """
 
     seq = feature_dict["msa"][0]
+    #print("len(seq), seq", len(seq), seq)
 
     if "asym_id" in feature_dict:
         Ls = [0]
@@ -28,9 +29,20 @@ def plot_msa_v2(feature_dict, sort_lines=True, dpi=100):
     except:
         N = feature_dict["num_alignments"]
 
+    # print("asym_id:", feature_dict["asym_id"])
+    # print(len(feature_dict["asym_id"]))
+    # print(f"Ln: {Ln}  Ls:{Ls}")
+
     msa = feature_dict["msa"][:N]
     gap = msa != 21
     qid = msa == seq
+
+    # print("gap.shape:", gap.shape)
+    # for i in range(len(Ls)):
+    #    print(f"i: {i}  Ls[i]: {Ls[i]}  Ln[i+1]: {Ln[i+1]}")
+    #    print(f"gap[:, Ln[i]: Ln[i+1]]: {gap[:, Ln[i]: Ln[i+1]]}")
+    #    print(f"gap[:, Ln[i]: Ln[i+1]].max(-1): {gap[:, Ln[i]: Ln[i+1]].max(-1)}")
+
 
     gapid = np.stack([gap[:, Ln[i] : Ln[i + 1]].max(-1) for i in range(len(Ls))], -1)
     lines = []
