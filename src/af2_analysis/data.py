@@ -184,7 +184,7 @@ class Data:
                 new_column[keys].append(data[keys])
 
         for keys in new_column.keys():
-            self.df[keys] = np.nan
+            self.df[keys] = None
             new_col = pd.Series(new_column[keys], index=index_list)
             self.df[keys].iloc[index_list] = new_col
 
@@ -393,7 +393,7 @@ class Data:
         pdockq_list = []
 
         for pdb in tqdm(self.df["pdb"], total=len(self.df["pdb"])):
-            if pdb:
+            if (pdb is not None and pdb is not np.nan):
                 model = pdb_numpy.Coor(pdb)
                 pdockq_list += compute_pdockQ(
                     model,
@@ -437,7 +437,7 @@ class Data:
         for pdb, json_path in tqdm(
             zip(self.df["pdb"], self.df["json"]), total=len(self.df["pdb"])
         ):
-            if pdb and json_path:
+            if (pdb is not None and pdb is not np.nan and json_path is not None and json_path is not np.nan):
                 model = pdb_numpy.Coor(pdb)
                 with open(json_path) as f:
                     local_json = json.load(f)
@@ -449,7 +449,7 @@ class Data:
                     if i < len(pdockq2):
                         pdockq_list[i].append(pdockq2[i][0])
                     else:
-                        pdockq_list[i].append(np.nan)
+                        pdockq_list[i].append(None)
 
             else:
                 for i in range(max_chain_num):
@@ -548,3 +548,46 @@ class Data:
                 show_model(model_widget.value)
 
         model_widget.observe(on_value_change, names='value')
+
+
+    def extract_inter_chain_pae(self, fun=np.mean):
+        """ Read the PAE matrix and extract the average inter chain PAE.
+        
+        Parameters
+        ----------
+        None
+        
+        Returns
+        -------
+        None
+        """
+        pae_list = []
+        
+        for query, json_path in tqdm(
+                        zip(self.df["query"], self.df["json"]), total=len(self.df["json"])
+            ):
+            if (json_path is not None and json_path is not np.nan):
+                with open(json_path) as f:
+                    local_json = json.load(f)
+                pae_array = np.array(local_json["pae"])
+                
+                chain_lens = self.chain_length[query]
+                chain_len_sums = np.cumsum([0] + chain_lens)
+                pae_chain_array = np.empty((len(chain_lens), len(chain_lens)))
+                chain_ids = self.chains[query]
+                
+                pae_dict = {}
+                
+                for i in range(len(chain_lens)):
+                    for j in range(len(chain_lens)):
+                        pae_val = fun(pae_array[chain_len_sums[i]:chain_len_sums[i+1],chain_len_sums[j]:chain_len_sums[j+1]])
+                        pae_dict[f"PAE_{chain_ids[i]}_{chain_ids[j]}"] = pae_val
+                
+                pae_list.append(pae_dict)
+            else:
+                pae_list.append({})
+
+        pae_df = pd.DataFrame(pae_list)
+        
+        for col in pae_df.columns:
+            self.df[col] = pae_df[col]
