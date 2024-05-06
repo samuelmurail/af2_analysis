@@ -29,6 +29,50 @@ class Data:
         Format of the data.
     df : pandas.DataFrame
         Dataframe containing the information extracted from the `log.txt` file.
+    chains : dict
+        Dictionary containing the chains of each query.
+    chain_length : dict
+        Dictionary containing the length of each chain of each query.
+    
+    Methods
+    -------
+    read_directory(directory, keep_recycles=False)
+        Read a directory.
+    export_csv(path)
+        Export the dataframe to a csv file.
+    import_csv(path)
+        Import a csv file to the dataframe.
+    add_json()
+        Add json files to the dataframe.
+    extract_json()
+        Extract json files to the dataframe.
+    add_pdb()
+        Add pdb files to the dataframe.
+    add_fasta(csv)
+        Add fasta sequence to the dataframe.
+    keep_last_recycle()
+        Keep only the last recycle for each query.
+    plot_maxscore_as_col(score, col, hue='query')
+        Plot the maxscore as a function of a column.
+    plot_pae(index, cmap=cm.vik)
+        Plot the PAE matrix.
+    plot_plddt(index_list)
+        Plot the pLDDT.
+    show_3d(index)
+        Show the 3D structure.
+    compute_pdockq()
+        Compute pdockq from the pdb file.
+    compute_mpdockq()
+        Compute mpdockq from the pdb file.
+    compute_pdockq2()
+        Compute pdockq2 from the pdb file.
+    plot_msa(filter_qid=0.15, filter_cov=0.4)
+        Plot the msa from the a3m file.
+    show_plot_info()
+        Show the plot info.
+    extract_inter_chain_pae(fun=np.mean)
+        Read the PAE matrix and extract the average inter chain PAE.
+
     """
 
     def __init__(self, directory=None, csv=None):
@@ -459,6 +503,76 @@ class Data:
         for i in range(max_chain_num):
             self.df[f"pdockq2_{chr(65+i)}"] = pdockq_list[i]
 
+
+    def compute_piTM(self):
+        r"""Compute the piTM score as define in [2]_.
+
+        .. math::
+            piTM = \max_{i \in \mathcal{I}} \frac{1}{I} \sum_{j \in \mathcal{I}}  \frac{1}{1 + [\langle e_{ij} \rangle / d_0 (I)]^2}
+
+        with:
+
+        .. math::
+            d_0(I) = \begin{cases} 1.25 \sqrt[3]{I -15} -1.8\text{,} & \text{if } I \geq 22 \\ 0.02 I \text{,} & \text{if } I < 22  \end{cases}
+        
+
+        Implementation was inspired from `predicted_tm_score_v1()` in https://github.com/FreshAirTonight/af2complex/blob/main/src/alphafold/common/confidence.py
+
+        References
+        ----------
+        .. [2] Mu Gao, Davi Nakajima An, Jerry M. Parks & Jeffrey Skolnick. 
+            AF2Complex predicts direct physical interactions in multimeric proteins with deep learning
+            *Nature Communications*. volume 13, Article number: 1744 (2022).
+            https://www.nature.com/articles/s41467-022-29394-2
+        """
+
+        from pdb_numpy.analysis import compute_piTM
+
+        piTM_chain_list = []
+        piTM_list = []
+
+        max_chain_num = 0
+        for query in self.chains:
+            chain_num = len(self.chains[query])
+            if chain_num > max_chain_num:
+                max_chain_num = chain_num
+
+        for i in range(max_chain_num):
+            piTM_chain_list.append([])
+
+        for pdb, json_path in tqdm(
+            zip(self.df["pdb"], self.df["json"]), total=len(self.df["pdb"])
+        ):
+            # print(pdb, json_path)
+            if (pdb is not None and pdb is not np.nan and json_path is not None and json_path is not np.nan):
+                model = pdb_numpy.Coor(pdb)
+                with open(json_path) as f:
+                    local_json = json.load(f)
+                pae_array = np.array(local_json["pae"])
+
+                piTM, piTM_chain = compute_piTM(model, pae_array)
+                # print(piTM, piTM_chain)
+
+                piTM_list.append(piTM[0])
+
+                for i in range(max_chain_num):
+                    # print(i, len(piTM_chain))
+                    if i < len(piTM_chain):
+                        piTM_chain_list[i].append(piTM_chain[i][0])
+                    else:
+                        piTM_chain_list[i].append(None)
+
+            else:
+                piTM_list.append(None)
+                for i in range(max_chain_num):
+                    piTM_chain_list[i].append(None)
+
+        # print(piTM_chain_list)
+        self.df["piTM"] = piTM_list
+        for i in range(max_chain_num):
+            self.df[f"piTM_{chr(65+i)}"] = piTM_chain_list[i]
+
+
     def plot_msa(self, filter_qid=0.15, filter_cov=0.4):
         """
         Plot the msa from the a3m file.
@@ -591,3 +705,29 @@ class Data:
         
         for col in pae_df.columns:
             self.df[col] = pae_df[col]
+
+
+def concat_data(data_list):
+    """ Concatenate data from a list of Data objects.
+
+    Parameters
+    ----------
+    data_list : list
+        List of Data objects.
+
+    Returns
+    -------
+    Data
+        Concatenated Data object.   
+    """
+
+    concat = Data(directory=None, csv=None)
+
+    concat.df = pd.concat([data.df for data in data_list], ignore_index=True)
+    concat.chains = data_list[0].chains
+    concat.chain_length = data_list[0].chain_length
+    for i in range(1, len(data_list)):
+        concat.chains.update(data_list[i].chains)
+        concat.chain_length.update(data_list[i].chain_length)
+    
+    return concat

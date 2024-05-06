@@ -8,24 +8,39 @@ from MDAnalysis.analysis import align, diffusionmap, pca
 from collections import Counter
 import pandas as pd
 import pdb_numpy
+from tqdm.auto import tqdm
+
+
+# Autorship information
+__author__ = "Alaa Reguei"
+__copyright__ = "Copyright 2023, RPBS"
+__credits__ = ["Samuel Murail", "Alaa Reguei"]
+__license__ = "GNU General Public License v2.0"
+__version__ = "0.0.2"
+__maintainer__ = "Samuel Murail"
+__email__ = "samuel.murail@u-paris.fr"
+__status__ = "Beta"
+
 
 def chain_pep(pdb_file) :
 
     """Search for peptide chain ID.
 
-        This function searches for the peptide chain ID of a protein-peptide complex by using the PDB numpy package.
+    This function searches for the peptide chain ID of a protein-peptide complex by using
+    the PDB numpy package.
 
-         For each PDB file, the local coordinates will be loaded, extracting the chains of the complex and limiting to the last one.
+    For each PDB file, the local coordinates will be loaded, extracting the chains of the
+    complex and limiting to the last one.
 
-        Parameters
-        ----------
-        pdb_file : str
-            Path to the protein-peptide complex PDB file.
+    Parameters
+    ----------
+    pdb_file : str
+        Path to the protein-peptide complex PDB file.
 
-        Returns
-        -------
-        chain : str
-            The peptide chain ID.
+    Returns
+    -------
+    chain : str
+        The peptide chain ID.
     """
     local_coor = pdb_numpy.Coor(pdb_file)
     chain = np.unique(local_coor.chain)
@@ -34,25 +49,24 @@ def chain_pep(pdb_file) :
 def scale(rms, d0=8.5):
 
     """Scaling RMS values.
+    To avoid the problem of arbitrarily large RMS values that are essentially equally bad, 
+    this function scales RMS values using the inverse square scaling technique adapted
+    from the S-score formula.
 
-        To avoid the problem of arbitrarily large RMS values that are essentially equally bad, 
+    [Sankar Basu, Björn Wallner https://doi.org/10.1371/journal.pone.0161879]
 
-        this function scales RMS values using the inverse square scaling technique adapted from the S-score formula.
+    Parameters
+    ----------
+    rms : float or numpy.ndarray
+        RMS values as single values or matrix.
 
-        [Sankar Basu, Björn Wallner https://doi.org/10.1371/journal.pone.0161879]
+    d0 : float
+        Scaling factor, fixed to 8.5 for LRMS.
 
-        Parameters
-        ----------
-        rms : float or numpy.ndarray
-            RMS values as single values or matrix.
-
-        d0 : float
-            Scaling factor, fixed to 8.5 for LRMS.
-
-        Returns
-        -------
-        rms_scale : float or numpy.ndarray
-            Scaled RMS values as single values or matrix.
+    Returns
+    -------
+    rms_scale : float or numpy.ndarray
+        Scaled RMS values as single values or matrix.
     """
 
     rms_scale = 1 / (1 + (rms / d0) ** 2)
@@ -63,17 +77,16 @@ def clustering (my_data_df, threshold , show_dendrogram=True , show_cluster_dist
 
     """Clustering of AlphaFold Protein-Peptide Complex results.
 
-    After checking for the absence of missing values, the function starts by aligning the protein chains of different 
-    
-    predicted models of each PDB before characterizing the different protein-peptide contact residues.
+    After checking for the absence of missing values, the function starts by aligning the protein
+    chains of different predicted models of each PDB before characterizing the different
+    protein-peptide contact residues. The search for contact residues is done within 4 angstroms
+    by default. These residues will be used to compute the distance matrix of the different 
+    peptide chains, where the output array will be scaled using the `scale` function before
+    calculating the new matrix of 1-scaled matrix. This new matrix will be used to perform
+    hierarchical ascending classification and characterize clusters by defining a cutoff threshold.
 
-    The search for contact residues is done within 4 angstroms by default. These residues will be used to compute 
-    
-    the distance matrix of the different peptide chains, where the output array will be scaled using the `scale` function
-     
-    before calculating the new matrix of 1-scaled matrix. This new matrix will be used to perform hierarchical ascending classification and characterize clusters by defining a cutoff threshold.
-
-    Optionally, this function can also plot the dendrogram of each PDB and the clusters distribution plot using the `clusters_distribution`.
+    Optionally, this function can also plot the dendrogram of each PDB and the clusters distribution
+    plot using the `clusters_distribution`.
 
     Parameters
     ----------
@@ -101,7 +114,7 @@ def clustering (my_data_df, threshold , show_dendrogram=True , show_cluster_dist
         null_number =  sum(pd.isnull(my_data_df[my_data_df['query'] == pdb]['pdb']))
         assert null_number == sum(pd.isnull(my_data_df[my_data_df['query'] == pdb]['pdb'][-null_number:])), f"Missing pdb data in the middle of the query {pdb}"
         print("Read all structures")
-        u = mda.Universe(files[0], files)
+        u = get_univ(files)
         chain_pep_value=chain_pep(files[0])
         print("align structures")
         aligner = align.AlignTraj(u, u, select=f"backbone and not chainID {chain_pep_value}", in_memory=True).run(verbose=True)
@@ -126,7 +139,6 @@ def clustering (my_data_df, threshold , show_dendrogram=True , show_cluster_dist
         if show_dendrogram :
             # plot the dendrogram with the threshold line
             plt.figure(figsize=(15, 5))
-            plt.figure(figsize=(15, 5))
             dendrogram(Z)
             plt.axhline(float(threshold), color='k', ls='--')
             plt.title('Hierarchical Cluster Dendrogram -{}'.format(pdb))
@@ -140,13 +152,48 @@ def clustering (my_data_df, threshold , show_dendrogram=True , show_cluster_dist
         clusters_distribution(my_data_df)
 
 
+def get_univ(files):
+    """Concatenating PDB trajectories.
+
+    This function concatenates the different PDB files of a trajectory into a single PDB file.
+
+    Parameters
+    ----------
+    files : list
+        List of PDB files to concatenate.
+    out_pdb : str
+        Path to the output concatenated PDB file.
+
+    Returns
+    -------
+    None
+    """
+
+    if len(files) < 3000:
+        return mda.Universe(files[0], files)
+
+    print("Start concat pdb files")
+    first_coor = pdb_numpy.Coor(files[0])
+
+    for file in tqdm(files[1:], total=len(files[1:])):
+
+        coor = pdb_numpy.Coor(file)
+        first_coor.models.append(coor.models[0])
+
+    print("Write concat pdb files")
+    out_pdb = "concatened.pdb"
+    first_coor.write(out_pdb)
+    print("Save concat pdb files")
+
+    return mda.Universe("concatened.pdb")
+
 def clusters_distribution(my_data_df):
 
     """Plotting the clusters distribution.
 
-    This function plots the distribution of clusters of all PDB queries. It starts by determining the number of clusters 
-
-    found for each query before preparing a DataFrame presenting all found with their corresponding PDB code. 
+    This function plots the distribution of clusters of all PDB queries. It starts
+    by determining the number of clusters found for each query before preparing
+    a DataFrame presenting all found with their corresponding PDB code. 
 
     A histogram of the clusters distribution will be created from the DataFrame.
 
@@ -179,9 +226,9 @@ def Cluster_reordering(my_data_df) :
 
     """Reordering clusters by size.
 
-    This function proposes a new cluster order based on the size of clusters. Starting from the DataFrame cluster column, 
-
-    this function ranks the clusters according to their sizes before reordering them in a decreasing way from huge clusters to small ones. 
+    This function proposes a new cluster order based on the size of clusters. Starting from
+    the DataFrame cluster column, this function ranks the clusters according to their
+    sizes before reordering them in a decreasing way from huge clusters to small ones. 
 
     The new cluster order will be added as a column to this input DataFrame.
 
@@ -223,13 +270,12 @@ def compute_pc (my_data_df , n_components=3 , plot_pca=True ) :
 
     """Compute Principal Components for Alphafold Protein-Peptide Complex.
 
-    This function computes the Principal Components (PCs) for a protein-peptide complex predicted by Alphafold.
-
-    After checking for the absence of missing values, the function aligns the protein chains before calculating the PCs using the PCA module from the MDAnalysis package.
-
-    The results are then updated in the input DataFrame. By default, this function computes the first three principal components. 
-
-    Optionally, it can also plot the PCs, defaulting to the first two components if the `plot_pca` parameter is set to `True`.
+    This function computes the Principal Components (PCs) for a protein-peptide complex predicted by
+    Alphafold. After checking for the absence of missing values, the function aligns the protein
+    chains before calculating the PCs using the PCA module from the MDAnalysis package. The results
+    are then updated in the input DataFrame. By default, this function computes the first three
+    principal components. Optionally, it can also plot the PCs, defaulting to the first two components
+    if the `plot_pca` parameter is set to `True`.
 
     Parameters
     ----------
@@ -255,7 +301,7 @@ def compute_pc (my_data_df , n_components=3 , plot_pca=True ) :
         # Check that only the last df row are missing
         null_number =  sum(pd.isnull(my_data_df[my_data_df['query'] == pdb]['pdb']))
         assert null_number == sum(pd.isnull(my_data_df[my_data_df['query'] == pdb]['pdb'][-null_number:])), f"Missing pdb data in the middle of the query {pdb}"
-        u = mda.Universe(files[0],files)
+        u = get_univ(files)
         chain_pep_value=chain_pep(files[0])
         aligner = align.AlignTraj(u, u, select=f"backbone and not chainID {chain_pep_value}",in_memory=True).run()
         pc = pca.PCA(u, select=(f"backbone and chainID {chain_pep_value}"),align=True, mean=None,n_components=None).run()
