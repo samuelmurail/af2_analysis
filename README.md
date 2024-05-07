@@ -1,5 +1,5 @@
 <img src="https://raw.githubusercontent.com/samuelmurail/af2_analysis/master/docs/source/logo.jpeg" alt="AF2 Analysis Logo" width="200"
-style="align: center;"/>
+style="display: block; margin: auto;"/>
 
 # Alphafold2 Analysis
 

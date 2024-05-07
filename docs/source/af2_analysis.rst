@@ -29,6 +29,12 @@ af2\_analysis.sequence module
    :undoc-members:
    :show-inheritance:
 
+af2\_analysis.format module
+-----------------------------
+
+.. include:: af2_analysis.format.rst
+
+
 Module contents
 ---------------
 

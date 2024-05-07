@@ -72,7 +72,6 @@ class Data:
         Show the plot info.
     extract_inter_chain_pae(fun=np.mean)
         Read the PAE matrix and extract the average inter chain PAE.
-
     """
 
     def __init__(self, directory=None, csv=None):
