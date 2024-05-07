@@ -7,6 +7,11 @@
 Welcome to AF2 Analysis's documentation!
 ========================================
 
+.. image:: https://raw.githubusercontent.com/samuelmurail/af2_analysis/master/docs/source/logo.jpeg
+  :width: 300
+  :align: center
+  :alt: AF2 Analysis Logo
+
 ``af2_analysis`` is a python library designed to facilitate analysis of AlphaFold results.
 
 .. toctree::

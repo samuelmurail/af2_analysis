@@ -1,3 +1,6 @@
+<img src="https://raw.githubusercontent.com/samuelmurail/af2_analysis/master/docs/source/logo.jpeg" alt="AF2 Analysis Logo" width="200"
+style="align: center;"/>
+
 # Alphafold2 Analysis
 
 `af2_analysis` is a python package allowing a simplified analysis of alphafold and colabfold results.

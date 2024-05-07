@@ -1,0 +1,7 @@
+Create a simple logo for a library called "AF2 Analysis". This library is a python library designed to facilitate analysis of Alphafold2 results.
+
+The logo should be simple and modern, and should include the name of the library ("AF2 Analysis") as well as an icon or symbol that represents the library's focus on structural bioinformatics prediction. 
+
+The logo should be suitable for use on the library's website, documentation, and other promotional materials.
+
+As the library is developed in Paris Cité university, it should show the Eiffel tower surrounded by viruses and enzymes as well as differents graphics (scatterplot, lineplot and matrix). The logo should have Blue color as dominant color, and the background should be white. The logo should be square or round with a "Art nouveau" / "Tiffany" style from 1920-1930
