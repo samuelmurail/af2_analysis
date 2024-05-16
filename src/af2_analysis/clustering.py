@@ -9,6 +9,8 @@ from collections import Counter
 import pandas as pd
 import pdb_numpy
 from tqdm.auto import tqdm
+import os
+import shutil
 
 
 # Autorship information
@@ -265,7 +267,58 @@ def Cluster_reordering(my_data_df) :
     my_data_df["New_clusters_order"]=new_cluster
 
 
+def get_pdb(my_data_df,metric ,ascending=False):
+    
+    """Sorts and copies top structures for each cluster based on the provided metric for each query in the DataFrame.
+    Parameters
+    ----------
+    my_data_df : pandas.DataFrame
+        DataFrame containing Alphafold data for the protein-peptide complex and the different clusters.
+    metric : str
+        The metric based on which the sorting will be performed.
+    ascending : bool, optional
+        Specifies the sorting order. If False (default), structures are sorted in descending order of the metric; if True, in ascending order.
+    
+    Returns
+    -------
+    None
+    
+    The function sorts the structures based on the provided metric, selecting either the top 5 structures for queries with a single cluster 
+    or the top 3 structures per cluster for queries with multiple clusters. 
+    It then copies these top structures into respective folders organized by query and cluster.
+    """
+    Clusters = 'clusters'
 
+    if not os.path.exists(Clusters): 
+        os.makedirs(Clusters) 
+    for pdb in my_data_df['query'].unique().tolist():
+        sub_df = my_data_df[my_data_df["query"] == pdb]
+        nclusters = sub_df['Clusters'].unique().tolist()
+        pdb_folder = os.path.join(Clusters, pdb)  
+        if not os.path.exists(pdb_folder): 
+            os.makedirs(pdb_folder)  
+            
+        if len(nclusters) == 1:
+            top_structures = sub_df.sort_values(by=metric, ascending=ascending).iloc[0:5]["pdb"].tolist()
+            print(f"This structure presents {pdb} {len(nclusters)} clusters according to the chosen threshold ")
+            #print(f"Top 5 structures for {pdb}: {top_structures}")
+            for file in top_structures : 
+                shutil.copy(file, pdb_folder)
+                
+        # If nclusters is greater than 2, take the top 3 structure from each cluster
+        else:
+            print(f"This structure presents {pdb} {len(nclusters)} clusters according to the chosen threshold ")
+            grouped_df = sub_df.groupby('Clusters')
+            for i in nclusters : 
+                group_for_cluster_i = grouped_df.get_group(i)
+                top_structure = group_for_cluster_i.sort_values(by=metric, ascending=ascending).iloc[0:3]["pdb"]
+                #print(f"Top structure for cluster {i} in {pdb}: {top_structure}")
+                cluster_folder = os.path.join(pdb_folder,  f"cluster_{i}")  
+                if not os.path.exists(cluster_folder): 
+                    os.makedirs(cluster_folder)  
+                for file in top_structure:
+                    shutil.copy(file, cluster_folder)
+                    
 def compute_pc (my_data_df , n_components=3 , plot_pca=True ) :
 
     """Compute Principal Components for Alphafold Protein-Peptide Complex.
