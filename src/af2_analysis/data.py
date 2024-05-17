@@ -619,6 +619,80 @@ class Data:
             fig = plot.plot_msa_v2(feature_dict)
             plt.show()
 
+
+    def count_msa_seq(self):
+        """
+        Plot the msa from the a3m file.
+
+        Parameters
+        ----------
+
+
+        Returns
+        -------
+        None
+
+        ..Warning only tested with colabfold 1.5
+        """
+
+        raw_list = os.listdir(self.dir)
+        file_list = []
+        for file in raw_list:
+            if file.endswith(".a3m"):
+                file_list.append(file)
+
+        alignement_len = {}
+
+        for a3m_file in file_list:
+            print(f"Reading MSA file:{a3m_file}")
+            querie = a3m_file.split("/")[-1].split(".")[0]
+
+            a3m_lines = open(os.path.join(self.dir, a3m_file), "r").readlines()[1:]
+            seqs, mtx, nams = sequence.parse_a3m(
+                a3m_lines=a3m_lines,
+                filter_qid=0,
+                filter_cov=0)
+            feature_dict = {}
+            feature_dict["msa"] = sequence.convert_aa_msa(seqs)
+            feature_dict["num_alignments"] = len(seqs)
+
+            seq_dict = {}
+            for chain in self.chains[querie]: seq_dict[chain] = 0
+            
+
+            chain_len_list = self.chain_length[querie]
+            chain_list = self.chains[querie]
+            seq_len = sum(chain_len_list)
+
+            # Treat the cases of homomers
+            # I compare the length of each sequence with the other ones
+            # It is wrong and should be FIXED
+            # The original sequence should be retrieved from eg. the pdb file
+            if len(seqs[0]) != seq_len:
+                new_chain_len = []
+                new_chain_list = []
+                for i, seq_len in enumerate(chain_len_list):
+                    if seq_len not in chain_len_list[:i]:
+                        new_chain_len.append(seq_len)
+                        new_chain_list.append(chain_list[i])
+
+                chain_len_list = new_chain_len
+                chain_list = new_chain_list
+                seq_len = sum(chain_len_list)
+
+            assert len(seqs[0]) == seq_len, f"len(seqs[0])={len(seqs[0])} != seq_len={seq_len}"
+
+            for seq in seqs:
+                start = 0
+                for i, num in enumerate(chain_len_list):
+                    gap_num = seq[start:start+num].count("-")
+                    if gap_num < num:
+                        seq_dict[chain_list[i]] += 1
+                    start += num
+
+            alignement_len[querie] = seq_dict # [seq_dict[chain] for chain in self.chains[querie]]
+        return alignement_len
+
     def show_plot_info(self):
         """
         Need to solve the issue with:
