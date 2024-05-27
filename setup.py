@@ -6,7 +6,7 @@ with open('README.md', encoding='utf-8') as readme_file:
     readme = readme_file.read()
 
 requirements = [
-    'pandas>=1.7',
+    'pandas>=1.3.4',
     'tqdm>=4.0',
     'seaborn>=0.11',
     'pdb_numpy>=0.0.2',
