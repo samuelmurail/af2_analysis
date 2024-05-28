@@ -81,6 +81,7 @@ class Data:
         if directory is not None:
             self.read_directory(directory)
         elif csv is not None:
+            self.format = 'csv'
             self.import_csv(csv)
 
     def read_directory(self, directory, keep_recycles=False):
@@ -311,7 +312,7 @@ class Data:
 
         return (fig, ax)
 
-    def plot_pae(self, index, cmap=cm.vik):
+    def get_pae(self, index):
         row = self.df.iloc[index]
 
         if row["json"] is None:
@@ -321,6 +322,13 @@ class Data:
             local_json = json.load(f)
 
         pae_array = np.array(local_json["pae"])
+
+        return pae_array
+
+    def plot_pae(self, index, cmap=cm.vik):
+
+        row = self.df.iloc[index]
+        pae_array = self.get_pae(index)
 
         fig, ax = plt.subplots()
         res_max = sum(self.chain_length[row["query"]])
@@ -362,30 +370,45 @@ class Data:
 
         return (fig, ax)
 
+    def get_plddt(self, index):
+
+        row = self.df.iloc[index]
+
+        if self.format in ["AF3_webserver", 'csv']:
+            model = pdb_numpy.Coor(row['pdb'])
+            plddt_array = model.models[0].beta[model.models[0].name == 'CA']
+            return plddt_array
+
+
+        if row["json"] is None:
+            return (None, None)
+
+        with open(row["json"]) as f:
+            local_json = json.load(f)
+
+        if "plddt" in local_json:
+            plddt_array = np.array(local_json["plddt"])
+        else:
+            return (None, None)
+
+        return plddt_array
+
     def plot_plddt(self, index_list):
         fig, ax = plt.subplots()
 
         for index in index_list:
-            row = self.df.iloc[index]
-
-            if row["json"] is None:
-                return (None, None)
-
-            with open(row["json"]) as f:
-                local_json = json.load(f)
-
-            plddt_array = np.array(local_json["plddt"])
+            plddt_array = self.get_plddt(index)
 
             plt.plot(plddt_array)
 
         plt.vlines(
-            np.cumsum(self.chain_length[row["query"]][:-1]),
+            np.cumsum(self.chain_length[self.df.iloc[index_list[0]]["query"]][:-1]),
             ymin=0,
             ymax=100.0,
             colors="black",
         )
         plt.ylim(0, 100)
-        plt.xlim(0, sum(self.chain_length[row["query"]]))
+        plt.xlim(0, sum(self.chain_length[self.df.iloc[index_list[0]]["query"]]))
         plt.xlabel("Residue")
         plt.ylabel("predicted LDDT")
 
@@ -697,7 +720,7 @@ class Data:
             alignement_len[querie] = seq_dict # [seq_dict[chain] for chain in self.chains[querie]]
         return alignement_len
 
-    def show_plot_info(self):
+    def show_plot_info(self, cmap=cm.vik):
         """
         Need to solve the issue with:
 
@@ -718,17 +741,60 @@ class Data:
             disabled=False,
         )
         display(model_widget)
-
+        
+        
         def show_model(rank_num):
-            print(rank_num)
-            plddt_fig, plddt_ax = self.plot_plddt([rank_num - 1])
-            pae_fig, pae_ax = self.plot_pae(rank_num - 1)
-            view = self.show_3d(rank_num - 1)
-            #view.zoomTo()
-            return view
-            
-        output = widgets.Output()
+
+            fig, (ax_plddt, ax_pae) = plt.subplots(1, 2, figsize=(10, 4))
+            plddt_array = self.get_plddt(model_widget.value-1)
+            plddt_plot, = ax_plddt.plot(plddt_array)
+            query = self.df.iloc[model_widget.value-1]['query']
+            ax_plddt.vlines(
+                np.cumsum(self.chain_length[query][:-1]),
+                ymin=0,
+                ymax=100.0,
+                colors="black",
+            )
+            ax_plddt.set_ylim(0, 100)
+            res_max = sum(self.chain_length[query])
+            ax_plddt.set_xlim(0, res_max)
+            ax_plddt.set_xlabel("Residue")
+            ax_plddt.set_ylabel("predicted LDDT")
+
+            pae_array = self.get_pae(model_widget.value-1)
+            ax_pae.imshow(
+                pae_array,
+                cmap=cmap,
+                vmin=0.0,
+                vmax=30.0,
+            )
+            ax_pae.vlines(
+                np.cumsum(self.chain_length[query][:-1]),
+                ymin=-0.5,
+                ymax=res_max,
+                colors="yellow",
+            )
+            ax_pae.hlines(
+                np.cumsum(self.chain_length[query][:-1]),
+                xmin=-0.5,
+                xmax=res_max,
+                colors="yellow",
+            )
+            ax_pae.set_xlim(-0.5, res_max-0.5)
+            ax_pae.set_ylim(res_max-0.5, -0.5)
+            chain_pos = []
+            len_sum = 0
+            for longueur in self.chain_length[query]:
+                chain_pos.append(len_sum + longueur / 2)
+                len_sum += longueur
+            ax_pae.set_yticks(chain_pos)
+            ax_pae.set_yticklabels(self.chains[query])
+            plt.show(fig)
+
+        
+        output = widgets.Output(layout={'width': '95%'})
         display(output)
+
         with output:
             show_model(model_widget.value)
             #logger.info(results['metric'][0][rank_num - 1]['print_line'])
