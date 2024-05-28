@@ -11,10 +11,11 @@ import matplotlib.pyplot as plt
 from cmcrameri import cm
 from tqdm.auto import tqdm
 from scipy.spatial import distance_matrix
+import json
 
 import ipywidgets as widgets
 
-from .format import colabfold_1_5, default
+from .format import colabfold_1_5, af3_webserver, default
 from . import sequence, plot
 
 
@@ -103,6 +104,9 @@ class Data:
             self.df = colabfold_1_5.read_log(directory, keep_recycles)
             self.add_pdb()
             self.add_json()
+        elif os.path.isfile(os.path.join(directory, "terms_of_use.md")):
+            self.format = "AF3_webserver"
+            self.df = af3_webserver.read_dir(directory)
         else:
             self.format = "default"
             self.df = default.read_dir(directory)
@@ -622,7 +626,7 @@ class Data:
 
     def count_msa_seq(self):
         """
-        Plot the msa from the a3m file.
+        Count for each chain the number of sequences in the MSA.
 
         Parameters
         ----------
