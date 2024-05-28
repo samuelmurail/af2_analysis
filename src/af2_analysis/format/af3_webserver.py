@@ -24,7 +24,7 @@ def read_dir(directory):
             token = file[:-4].split("_")
 
             model = int(token[-1])
-            query = token[1]
+            query = "_".join(token[1:-2])
             json_score = os.path.join(directory, f'fold_{query}_summary_confidences_{model}.json')
             with open(json_score, 'r') as f_in:
                 json_dict = json.load(f_in)
