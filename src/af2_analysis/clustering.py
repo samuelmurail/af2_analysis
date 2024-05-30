@@ -73,7 +73,7 @@ def scale(rms, d0=8.5):
     return rms_scale
 
 
-def clustering (my_data_df, threshold , show_dendrogram=True , show_cluster_distribution= True) :
+def clustering (my_data_df, threshold=0.3, contact_cutoff=4.0, show_dendrogram=True , show_cluster_distribution= True) :
 
     """Clustering of AlphaFold Protein-Peptide Complex results.
 
@@ -108,18 +108,25 @@ def clustering (my_data_df, threshold , show_dendrogram=True , show_cluster_dist
 
     clust_threshold = []
     query_list = my_data_df['query'].unique().tolist()
+
     for pdb in query_list:
+
         files = [file for file in my_data_df[my_data_df['query'] == pdb]['pdb'] if not pd.isnull(file)]
-        # Check that only the last df row are missing
+
+        # Check that only the last df rows are missing
         null_number =  sum(pd.isnull(my_data_df[my_data_df['query'] == pdb]['pdb']))
         assert null_number == sum(pd.isnull(my_data_df[my_data_df['query'] == pdb]['pdb'][-null_number:])), f"Missing pdb data in the middle of the query {pdb}"
+
         print("Read all structures")
         u = read_numerous_pdb(files)
         chain_pep_value=chain_pep(files[0])
+
         print("align structures")
-        aligner = align.AlignTraj(u, u, select=f"backbone and not chainID {chain_pep_value}", in_memory=True).run(verbose=True)
+        align.AlignTraj(u, u, select=f"backbone and not chainID {chain_pep_value}", in_memory=True).run(verbose=True)
+
+
         print("Extract contact residues")
-        cutoff = 4.0
+        cutoff = contact_cutoff
         peptide_contact = u.select_atoms(f'chainID {chain_pep_value} and around {cutoff} not chainID {chain_pep_value}')
         resid_contact_list = []
         for _ in u.trajectory:
@@ -127,11 +134,14 @@ def clustering (my_data_df, threshold , show_dendrogram=True , show_cluster_dist
                 resid_contact_list.append(residue.resnum)
 
         resid_contact_list = set(resid_contact_list)
+
+
         print("Compute distance Matrix")
         #matrix = diffusionmap.DistanceMatrix(u, select=f"backbone and chainID {chain_pep_value}").run(verbose=True)
         matrix = diffusionmap.DistanceMatrix(u, select=f'chainID {chain_pep_value} and resid {" ".join([str(res) for res in resid_contact_list])} and backbone').run(verbose=True)
         dist = 1 - scale(matrix.dist_matrix)
         h, w = dist.shape
+        
         print("Compute Linkage clustering")
         Z = linkage(dist[np.triu_indices(h, 1)], method='average')
         clust_threshold.extend(fcluster(Z, float(threshold), criterion='distance').tolist())
