@@ -746,7 +746,7 @@ class Data:
         def show_model(rank_num):
 
             fig, (ax_plddt, ax_pae) = plt.subplots(1, 2, figsize=(10, 4))
-            plddt_array = self.get_plddt(model_widget.value-1)
+            plddt_array = self.get_plddt(rank_num-1)
             plddt_plot, = ax_plddt.plot(plddt_array)
             query = self.df.iloc[model_widget.value-1]['query']
             ax_plddt.vlines(
@@ -761,7 +761,7 @@ class Data:
             ax_plddt.set_xlabel("Residue")
             ax_plddt.set_ylabel("predicted LDDT")
 
-            pae_array = self.get_pae(model_widget.value-1)
+            pae_array = self.get_pae(rank_num-1)
             ax_pae.imshow(
                 pae_array,
                 cmap=cmap,

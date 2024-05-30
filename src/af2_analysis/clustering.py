@@ -1,14 +1,12 @@
 import seaborn as sns
-import af2_analysis
 import numpy as np
 import matplotlib.pyplot as plt
 import MDAnalysis as mda
 from scipy.cluster.hierarchy import linkage, dendrogram, fcluster
 from MDAnalysis.analysis import align, diffusionmap, pca
-from collections import Counter
+from MDAnalysis.coordinates.memory import MemoryReader
 import pandas as pd
 import pdb_numpy
-from tqdm.auto import tqdm
 import os
 import shutil
 
@@ -116,7 +114,7 @@ def clustering (my_data_df, threshold , show_dendrogram=True , show_cluster_dist
         null_number =  sum(pd.isnull(my_data_df[my_data_df['query'] == pdb]['pdb']))
         assert null_number == sum(pd.isnull(my_data_df[my_data_df['query'] == pdb]['pdb'][-null_number:])), f"Missing pdb data in the middle of the query {pdb}"
         print("Read all structures")
-        u = get_univ(files)
+        u = read_numerous_pdb(files)
         chain_pep_value=chain_pep(files[0])
         print("align structures")
         aligner = align.AlignTraj(u, u, select=f"backbone and not chainID {chain_pep_value}", in_memory=True).run(verbose=True)
@@ -154,40 +152,56 @@ def clustering (my_data_df, threshold , show_dendrogram=True , show_cluster_dist
         clusters_distribution(my_data_df)
 
 
-def get_univ(files):
-    """Concatenating PDB trajectories.
+def read_numerous_pdb(pdb_files, batch_size=1000):
+    """
+    Read a large number of PDB files in batches and combine them into a single MDAnalysis Universe.
 
-    This function concatenates the different PDB files of a trajectory into a single PDB file.
+    Discussed in:
+    https://github.com/MDAnalysis/mdanalysis/issues/4590
 
     Parameters
     ----------
-    files : list
-        List of PDB files to concatenate.
-    out_pdb : str
-        Path to the output concatenated PDB file.
+    pdb_files : list of str
+        List of file paths to the PDB files to be read.
+    batch_size : int, optional
+        Number of PDB files to read in each batch. Default is 1000.
 
     Returns
     -------
-    None
+    MDAnalysis.Universe
+        A single MDAnalysis Universe containing the combined frames from all the PDB files.
+        
+    Notes
+    -----
+    - This function reads PDB files in batches to avoid memory issues.
+    - Each batch of PDB files is loaded into a temporary Universe, and the positions of each frame
+      are stored in a list.
+    - The list of frames is then converted into a numpy array and used to create a new Universe with
+      a MemoryReader, combining all the frames.
+    
+    Example
+    -------
+    >>> pdb_files = ['file1.pdb', 'file2.pdb', ...]
+    >>> combined_universe = read_numerous_pdb(pdb_files, batch_size=1000)
+    >>> print(combined_universe)
     """
 
-    if len(files) < 3000:
-        return mda.Universe(files[0], files)
+    all_frames = []
+    
+    for i in range(0, len(pdb_files), batch_size):
+        # print(f"Reading frames {i:5} to {i+batch_size:5}, total : {len(pdb_files[i:i+batch_size])} frames")
+        local_u = mda.Universe(pdb_files[0], pdb_files[i:i+batch_size])
+        for ts in local_u.trajectory:
+            all_frames.append(ts.positions.copy())
+        del local_u
+    
+    # print("Convert to numpy")
+    frames_array = np.array(all_frames)
+    del all_frames
+    
+    # print(frames_array.shape)
+    return mda.Universe(pdb_files[0], frames_array, format=MemoryReader, order='fac')
 
-    print("Start concat pdb files")
-    first_coor = pdb_numpy.Coor(files[0])
-
-    for file in tqdm(files[1:], total=len(files[1:])):
-
-        coor = pdb_numpy.Coor(file)
-        first_coor.models.append(coor.models[0])
-
-    print("Write concat pdb files")
-    out_pdb = "concatened.pdb"
-    first_coor.write(out_pdb)
-    print("Save concat pdb files")
-
-    return mda.Universe("concatened.pdb")
 
 def clusters_distribution(my_data_df):
 
@@ -354,7 +368,7 @@ def compute_pc (my_data_df , n_components=3 , plot_pca=True ) :
         # Check that only the last df row are missing
         null_number =  sum(pd.isnull(my_data_df[my_data_df['query'] == pdb]['pdb']))
         assert null_number == sum(pd.isnull(my_data_df[my_data_df['query'] == pdb]['pdb'][-null_number:])), f"Missing pdb data in the middle of the query {pdb}"
-        u = get_univ(files)
+        u = read_numerous_pdb(files)
         chain_pep_value=chain_pep(files[0])
         aligner = align.AlignTraj(u, u, select=f"backbone and not chainID {chain_pep_value}",in_memory=True).run()
         pc = pca.PCA(u, select=(f"backbone and chainID {chain_pep_value}"),align=True, mean=None,n_components=None).run()
