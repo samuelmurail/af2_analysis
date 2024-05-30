@@ -73,7 +73,7 @@ def scale(rms, d0=8.5):
     return rms_scale
 
 
-def clustering (my_data_df, threshold=0.3, contact_cutoff=4.0, show_dendrogram=True , show_cluster_distribution= True) :
+def clustering (my_data_df, threshold=0.3, contact_cutoff=4.0, show_dendrogram=True , show_cluster_distribution= False) :
 
     """Clustering of AlphaFold Protein-Peptide Complex results.
 
@@ -141,7 +141,7 @@ def clustering (my_data_df, threshold=0.3, contact_cutoff=4.0, show_dendrogram=T
         matrix = diffusionmap.DistanceMatrix(u, select=f'chainID {chain_pep_value} and resid {" ".join([str(res) for res in resid_contact_list])} and backbone').run(verbose=True)
         dist = 1 - scale(matrix.dist_matrix)
         h, w = dist.shape
-        
+
         print("Compute Linkage clustering")
         Z = linkage(dist[np.triu_indices(h, 1)], method='average')
         clust_threshold.extend(fcluster(Z, float(threshold), criterion='distance').tolist())
@@ -149,7 +149,7 @@ def clustering (my_data_df, threshold=0.3, contact_cutoff=4.0, show_dendrogram=T
         if show_dendrogram :
             # plot the dendrogram with the threshold line
             plt.figure(figsize=(15, 5))
-            dendrogram(Z)
+            dendrogram(Z, color_threshold=float(threshold))
             plt.axhline(float(threshold), color='k', ls='--')
             plt.title('Hierarchical Cluster Dendrogram -{}'.format(pdb))
             plt.xlabel('Data Point Indexes')
