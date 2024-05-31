@@ -166,6 +166,7 @@ def hierarchical(df, threshold=0.3, contact_cutoff=4.0,
         clusters_distribution(df)
 
 
+
 def read_numerous_pdb(pdb_files, batch_size=1000):
     """Read a large number of PDB files in batches and combine
     them into a single MDAnalysis Universe.
@@ -408,7 +409,7 @@ def compute_pc(df, n_components=2) :
         df[f"PC{i+1}"] = pc_list[i] + null_number * [np.nan]
 
 
-def plot_pca(df , X="PC1", Y="PC2", show_legend=False, min_clust_num=5, **kwargs) :
+def plot_pc(df , X="PC1", Y="PC2", show_legend=False, min_clust_num=5, **kwargs) :
     """Plotting principal components.
 
     This function helps in visualizing the pre-computed principal
@@ -451,7 +452,7 @@ def plot_pca(df , X="PC1", Y="PC2", show_legend=False, min_clust_num=5, **kwargs
         plt.figure(figsize=(10, 6))
         sns.scatterplot(keep_clust_df,
                         x=X, y=Y, hue="cluster", linewidth = 0, **kwargs)
-        sns.scatterplot(sub_df[~sub_df['cluster'].isin(keep_clust)],
+        sns.scatterplot(sub_df[~sub_df['cluster'].isin(keep_clust)], alpha=0.4,
                         x=X, y=Y, linewidth = 0, color="gray", **kwargs)
 
         # Calculer les limites des axes
