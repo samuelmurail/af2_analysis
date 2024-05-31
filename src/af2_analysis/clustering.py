@@ -151,7 +151,8 @@ def hierarchical(df, threshold=0.3, contact_cutoff=4.0,
             u,
             select=f'chainID {chain_pep_value} and resnum {" ".join([str(res) for res in resid_contact_list])} and backbone'
             ).run(verbose=True)
-        print(matrix.dist_matrix)
+        
+        print(f"Max RMSD is {np.max(matrix.dist_matrix):.2f} A")
         dist = 1 - scale(matrix.dist_matrix)
         h, w = dist.shape
 
@@ -219,7 +220,7 @@ def read_numerous_pdb(pdb_files, batch_size=1000):
         for file in pdb_files[1:]:
             local_model = pdb_numpy.Coor(file)
             model.models.append(local_model.models[0])
-        model.write("tmp.pdb")
+        model.write("tmp.pdb", overwrite=True)
         return mda.Universe("tmp.pdb", "tmp.pdb")
         
     for i in range(0, len(pdb_files), batch_size):
