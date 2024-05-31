@@ -43,8 +43,16 @@ def chain_pep(pdb_file) :
         The peptide chain ID.
     """
     local_coor = pdb_numpy.Coor(pdb_file)
-    chain = np.unique(local_coor.chain)
-    return chain[-1]
+    chains = np.unique(local_coor.chain)
+
+    # Get the smallest chain
+    min_num = len(local_coor.chain)
+    for chain in chains:
+        if len(local_coor.chain[local_coor.chain == chain]) < min_num:
+            min_num = len(local_coor.chain[local_coor.chain == chain])
+            chain_value = chain
+
+    return chain
 
 def scale(rms, d0=8.5):
 
@@ -119,7 +127,9 @@ def hierarchical(df, threshold=0.3, contact_cutoff=4.0,
 
         print("Read all structures")
         u = read_numerous_pdb(files)
-        chain_pep_value=chain_pep(files[0])
+        assert u.trajectory.n_frames == len(files), f"Number of frames {u.trajectory.n_frames} different from number of files {len(files)}"
+        chain_pep_value = chain_pep(files[0])
+        print(f"Peptide chain is :{chain_pep_value}")
 
         print("align structures")
         align.AlignTraj(u, u, select=f"backbone and not chainID {chain_pep_value}", in_memory=True).run(verbose=True)
@@ -133,14 +143,16 @@ def hierarchical(df, threshold=0.3, contact_cutoff=4.0,
                 resid_contact_list.append(residue.resnum)
 
         resid_contact_list = set(resid_contact_list)
-
+        print(f"Contact residues : {resid_contact_list}")
 
         print("Compute distance Matrix")
         #matrix = diffusionmap.DistanceMatrix(u, select=f"backbone and chainID {chain_pep_value}").run(verbose=True)
         matrix = diffusionmap.DistanceMatrix(
             u,
-            select=f'chainID {chain_pep_value} and resid {" ".join([str(res) for res in resid_contact_list])} and backbone'
+            select=f'chainID {chain_pep_value} and resnum {" ".join([str(res) for res in resid_contact_list])} and backbone'
             ).run(verbose=True)
+        
+        print(f"Max RMSD is {np.max(matrix.dist_matrix):.2f} A")
         dist = 1 - scale(matrix.dist_matrix)
         h, w = dist.shape
 
@@ -164,6 +176,7 @@ def hierarchical(df, threshold=0.3, contact_cutoff=4.0,
 
     if show_cluster_distribution : 
         clusters_distribution(df)
+
 
 
 def read_numerous_pdb(pdb_files, batch_size=1000):
@@ -201,7 +214,15 @@ def read_numerous_pdb(pdb_files, batch_size=1000):
     """
 
     all_frames = []
-    
+
+    if pdb_files[0].endswith('.cif'):
+        model = pdb_numpy.Coor(pdb_files[0])
+        for file in pdb_files[1:]:
+            local_model = pdb_numpy.Coor(file)
+            model.models.append(local_model.models[0])
+        model.write("tmp.pdb", overwrite=True)
+        return mda.Universe("tmp.pdb", "tmp.pdb")
+        
     for i in range(0, len(pdb_files), batch_size):
         # print(f"Reading frames {i:5} to {i+batch_size:5}, total : {len(pdb_files[i:i+batch_size])} frames")
         local_u = mda.Universe(pdb_files[0], pdb_files[i:i+batch_size])
@@ -408,7 +429,7 @@ def compute_pc(df, n_components=2) :
         df[f"PC{i+1}"] = pc_list[i] + null_number * [np.nan]
 
 
-def plot_pca(df , X="PC1", Y="PC2", show_legend=False, min_clust_num=5, **kwargs) :
+def plot_pc(df , X="PC1", Y="PC2", show_legend=False, min_clust_num=5, **kwargs) :
     """Plotting principal components.
 
     This function helps in visualizing the pre-computed principal
@@ -451,7 +472,11 @@ def plot_pca(df , X="PC1", Y="PC2", show_legend=False, min_clust_num=5, **kwargs
         plt.figure(figsize=(10, 6))
         sns.scatterplot(keep_clust_df,
                         x=X, y=Y, hue="cluster", linewidth = 0, **kwargs)
+<<<<<<< HEAD
         sns.scatterplot(sub_df[~sub_df['cluster'].isin(keep_clust)], alpha=0.5,
+=======
+        sns.scatterplot(sub_df[~sub_df['cluster'].isin(keep_clust)], alpha=0.4,
+>>>>>>> 93ccbdeece1e16ce1b7ee4953a71539235bfff2a
                         x=X, y=Y, linewidth = 0, color="gray", **kwargs)
 
         # Calculer les limites des axes

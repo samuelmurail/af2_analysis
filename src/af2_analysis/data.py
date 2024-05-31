@@ -869,6 +869,7 @@ def concat_data(data_list):
     concat.df = pd.concat([data.df for data in data_list], ignore_index=True)
     concat.chains = data_list[0].chains
     concat.chain_length = data_list[0].chain_length
+    concat.format = data_list[0].format
     for i in range(1, len(data_list)):
         concat.chains.update(data_list[i].chains)
         concat.chain_length.update(data_list[i].chain_length)
