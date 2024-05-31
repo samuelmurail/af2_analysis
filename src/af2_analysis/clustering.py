@@ -43,8 +43,16 @@ def chain_pep(pdb_file) :
         The peptide chain ID.
     """
     local_coor = pdb_numpy.Coor(pdb_file)
-    chain = np.unique(local_coor.chain)
-    return chain[-1]
+    chains = np.unique(local_coor.chain)
+
+    # Get the smallest chain
+    min_num = len(local_coor.chain)
+    for chain in chains:
+        if len(local_coor.chain[local_coor.chain == chain]) < min_num:
+            min_num = len(local_coor.chain[local_coor.chain == chain])
+            chain_value = chain
+
+    return chain
 
 def scale(rms, d0=8.5):
 
@@ -119,7 +127,9 @@ def hierarchical(df, threshold=0.3, contact_cutoff=4.0,
 
         print("Read all structures")
         u = read_numerous_pdb(files)
-        chain_pep_value=chain_pep(files[0])
+        assert u.trajectory.n_frames == len(files), f"Number of frames {u.trajectory.n_frames} different from number of files {len(files)}"
+        chain_pep_value = chain_pep(files[0])
+        print(f"Peptide chain is :{chain_pep_value}")
 
         print("align structures")
         align.AlignTraj(u, u, select=f"backbone and not chainID {chain_pep_value}", in_memory=True).run(verbose=True)
@@ -133,14 +143,15 @@ def hierarchical(df, threshold=0.3, contact_cutoff=4.0,
                 resid_contact_list.append(residue.resnum)
 
         resid_contact_list = set(resid_contact_list)
-
+        print(f"Contact residues : {resid_contact_list}")
 
         print("Compute distance Matrix")
         #matrix = diffusionmap.DistanceMatrix(u, select=f"backbone and chainID {chain_pep_value}").run(verbose=True)
         matrix = diffusionmap.DistanceMatrix(
             u,
-            select=f'chainID {chain_pep_value} and resid {" ".join([str(res) for res in resid_contact_list])} and backbone'
+            select=f'chainID {chain_pep_value} and resnum {" ".join([str(res) for res in resid_contact_list])} and backbone'
             ).run(verbose=True)
+        print(matrix.dist_matrix)
         dist = 1 - scale(matrix.dist_matrix)
         h, w = dist.shape
 
@@ -202,7 +213,15 @@ def read_numerous_pdb(pdb_files, batch_size=1000):
     """
 
     all_frames = []
-    
+
+    if pdb_files[0].endswith('.cif'):
+        model = pdb_numpy.Coor(pdb_files[0])
+        for file in pdb_files[1:]:
+            local_model = pdb_numpy.Coor(file)
+            model.models.append(local_model.models[0])
+        model.write("tmp.pdb")
+        return mda.Universe("tmp.pdb", "tmp.pdb")
+        
     for i in range(0, len(pdb_files), batch_size):
         # print(f"Reading frames {i:5} to {i+batch_size:5}, total : {len(pdb_files[i:i+batch_size])} frames")
         local_u = mda.Universe(pdb_files[0], pdb_files[i:i+batch_size])
