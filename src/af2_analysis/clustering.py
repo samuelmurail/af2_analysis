@@ -472,11 +472,7 @@ def plot_pc(df , X="PC1", Y="PC2", show_legend=False, min_clust_num=5, **kwargs)
         plt.figure(figsize=(10, 6))
         sns.scatterplot(keep_clust_df,
                         x=X, y=Y, hue="cluster", linewidth = 0, **kwargs)
-<<<<<<< HEAD
         sns.scatterplot(sub_df[~sub_df['cluster'].isin(keep_clust)], alpha=0.5,
-=======
-        sns.scatterplot(sub_df[~sub_df['cluster'].isin(keep_clust)], alpha=0.4,
->>>>>>> 93ccbdeece1e16ce1b7ee4953a71539235bfff2a
                         x=X, y=Y, linewidth = 0, color="gray", **kwargs)
 
         # Calculer les limites des axes
