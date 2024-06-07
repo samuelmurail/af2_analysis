@@ -14,7 +14,7 @@ import json
 
 import ipywidgets as widgets
 
-from .format import colabfold_1_5, af3_webserver, default
+from .format import colabfold_1_5, af3_webserver, afpulldown, default
 from . import sequence, plot
 
 
@@ -107,6 +107,9 @@ class Data:
         elif os.path.isfile(os.path.join(directory, "terms_of_use.md")):
             self.format = "AF3_webserver"
             self.df = af3_webserver.read_dir(directory)
+        elif os.path.isfile(os.path.join(directory, 'ranking_debug.json')):
+            self.format = "AlphaPulldown"
+            self.df = afpulldown.read_dir(directory)
         else:
             self.format = "default"
             self.df = default.read_dir(directory)
@@ -874,3 +877,26 @@ def concat_data(data_list):
         concat.chain_length.update(data_list[i].chain_length)
     
     return concat
+
+def read_multiple_alphapuldown(directory):
+    """Read multiple directories containing AlphaPulldown data.
+
+    Parameters
+    ----------
+    directory : str
+        Path to the directory containing the directories.
+
+    Returns
+    -------
+    Data
+        Concatenated Data object.
+    """
+
+    dir_list = [name for name in os.listdir(directory) if os.path.isdir(name)]
+    data_list = []
+
+    for dir in dir_list:
+        if 'ranking_debug.json' in os.listdir(os.path.join(directory, dir)):
+            data_list.append(Data(os.path.join(directory, dir)))
+
+    return concat_data(data_list)
