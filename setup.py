@@ -7,11 +7,13 @@ with open('README.md', encoding='utf-8') as readme_file:
 
 requirements = [
     'pandas>=1.3.4',
+    'numpy>=1.21',
     'tqdm>=4.0',
     'seaborn>=0.11',
     'pdb_numpy>=0.0.6',
     'cmcrameri>=1.7',
     'nglview>=3.0',
+    'ipywidgets>=7.6,
 ]
 
 setup(

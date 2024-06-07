@@ -1,4 +1,4 @@
-from string import ascii_uppercase, ascii_lowercase
+from string import ascii_lowercase
 import numpy as np
 
 

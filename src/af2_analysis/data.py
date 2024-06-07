@@ -10,7 +10,6 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from cmcrameri import cm
 from tqdm.auto import tqdm
-from scipy.spatial import distance_matrix
 import json
 
 import ipywidgets as widgets
