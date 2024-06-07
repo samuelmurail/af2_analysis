@@ -13,7 +13,7 @@ requirements = [
     'pdb_numpy>=0.0.6',
     'cmcrameri>=1.7',
     'nglview>=3.0',
-    'ipywidgets>=7.6,
+    'ipywidgets>=7.6',
 ]
 
 setup(
