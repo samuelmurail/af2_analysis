@@ -52,7 +52,7 @@ def read_dir(directory, query=None):
         token = model.split("_")
         
         if query is None:
-            query_local = directory
+            query_local = os.path.basename(os.path.normpath(directory))
         else:
             query_local = query
             

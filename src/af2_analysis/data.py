@@ -323,7 +323,12 @@ class Data:
         with open(row["json"]) as f:
             local_json = json.load(f)
 
-        pae_array = np.array(local_json["pae"])
+        if 'pae' in local_json:
+            pae_array = np.array(local_json["pae"])
+        elif 'predicted_aligned_error' in local_json[0]:
+            pae_array = np.array(local_json[0]["predicted_aligned_error"])
+        else:
+            raise ValueError("No PAE found in the json file.")
 
         return pae_array
 
@@ -331,6 +336,7 @@ class Data:
 
         row = self.df.iloc[index]
         pae_array = self.get_pae(index)
+
 
         fig, ax = plt.subplots()
         res_max = sum(self.chain_length[row["query"]])
@@ -376,7 +382,7 @@ class Data:
 
         row = self.df.iloc[index]
 
-        if self.format in ["AF3_webserver", 'csv']:
+        if self.format in ["AF3_webserver", 'csv', "AlphaPulldown"]:
             model = pdb_numpy.Coor(row['pdb'])
             plddt_array = model.models[0].beta[model.models[0].name == 'CA']
             return plddt_array
@@ -892,11 +898,13 @@ def read_multiple_alphapuldown(directory):
         Concatenated Data object.
     """
 
-    dir_list = [name for name in os.listdir(directory) if os.path.isdir(name)]
+    dir_list = [name for name in os.listdir(directory) if os.path.isdir(os.path.join(directory, name))]
     data_list = []
 
     for dir in dir_list:
         if 'ranking_debug.json' in os.listdir(os.path.join(directory, dir)):
             data_list.append(Data(os.path.join(directory, dir)))
 
+    if len(data_list) == 0:
+        raise ValueError("No AlphaPulldown data found in the directory.")
     return concat_data(data_list)
