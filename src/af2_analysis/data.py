@@ -16,6 +16,7 @@ import ipywidgets as widgets
 
 from .format import colabfold_1_5, af3_webserver, afpulldown, default
 from . import sequence, plot
+from .analysis import compute_LIS_matrix
 
 
 class Data:
@@ -314,28 +315,11 @@ class Data:
 
         return (fig, ax)
 
-    def get_pae(self, index):
-        row = self.df.iloc[index]
-
-        if row["json"] is None:
-            return (None, None)
-
-        with open(row["json"]) as f:
-            local_json = json.load(f)
-
-        if 'pae' in local_json:
-            pae_array = np.array(local_json["pae"])
-        elif 'predicted_aligned_error' in local_json[0]:
-            pae_array = np.array(local_json[0]["predicted_aligned_error"])
-        else:
-            raise ValueError("No PAE found in the json file.")
-
-        return pae_array
 
     def plot_pae(self, index, cmap=cm.vik):
 
         row = self.df.iloc[index]
-        pae_array = self.get_pae(index)
+        pae_array = get_pae(row['json'])
 
 
         fig, ax = plt.subplots()
@@ -517,9 +501,10 @@ class Data:
         ):
             if (pdb is not None and pdb is not np.nan and json_path is not None and json_path is not np.nan):
                 model = pdb_numpy.Coor(pdb)
-                with open(json_path) as f:
-                    local_json = json.load(f)
-                pae_array = np.array(local_json["pae"])
+                # with open(json_path) as f:
+                #     local_json = json.load(f)
+                # pae_array = np.array(local_json["pae"]) 
+                pae_array = get_pae(json_path)
 
                 pdockq2 = compute_pdockQ2(model, pae_array)
 
@@ -537,6 +522,34 @@ class Data:
         for i in range(max_chain_num):
             self.df[f"pdockq2_{chr(65+i)}"] = pdockq_list[i]
 
+
+    def compute_LIS_matrix(self, pae_cutoff=12.0):
+        """
+        Compute the LIS score as define in [1]_.
+
+        Implementation was inspired from implementation in https://github.com/flyark/AFM-LIS
+
+        """
+        LIS_matrix_list = []
+
+        max_chain_num = 0
+        for query in self.chains:
+            chain_num = len(self.chains[query])
+            if chain_num > max_chain_num:
+                max_chain_num = chain_num
+
+        for pdb, json_path in tqdm(
+            zip(self.df["pdb"], self.df["json"]), total=len(self.df["pdb"])
+        ):
+            if (pdb is not None and pdb is not np.nan and json_path is not None and json_path is not np.nan):
+                model = pdb_numpy.Coor(pdb)
+                pae_array = get_pae(json_path)
+                LIS_matrix = compute_LIS_matrix(model, pae_array, pae_cutoff)
+                LIS_matrix_list.append(LIS_matrix)
+            else:
+                LIS_matrix_list.append(None)
+
+        self.df["LIS"] = LIS_matrix_list
 
     def compute_piTM(self):
         r"""Compute the piTM score as define in [2]_.
@@ -757,6 +770,7 @@ class Data:
             plddt_array = self.get_plddt(rank_num-1)
             plddt_plot, = ax_plddt.plot(plddt_array)
             query = self.df.iloc[model_widget.value-1]['query']
+            json_file = self.df.iloc[model_widget.value-1]['json']
             ax_plddt.vlines(
                 np.cumsum(self.chain_length[query][:-1]),
                 ymin=0,
@@ -769,7 +783,7 @@ class Data:
             ax_plddt.set_xlabel("Residue")
             ax_plddt.set_ylabel("predicted LDDT")
 
-            pae_array = self.get_pae(rank_num-1)
+            pae_array = get_pae(json_file)
             ax_pae.imshow(
                 pae_array,
                 cmap=cmap,
@@ -813,6 +827,115 @@ class Data:
                 show_model(model_widget.value)
 
         model_widget.observe(on_value_change, names='value')
+
+
+    def show_plot_(self, cmap=cm.vik):
+        """
+        Use with
+        ```
+        %matplotlib widget
+        ```
+        """
+
+        
+        model_widget = widgets.IntSlider(
+            value=1,
+            min=1,
+            max=len(self.df),
+            step=1,
+            description='model:',
+            disabled=False,
+        )
+        display(model_widget)
+        
+        
+        print("YO")
+        rank_num = 1
+
+        fig, (ax_plddt, ax_pae) = plt.subplots(1, 2, figsize=(10, 4))
+        plddt_array = self.get_plddt(rank_num-1)
+        plddt_plot, = ax_plddt.plot(plddt_array)
+        query = self.df.iloc[model_widget.value-1]['query']
+        json_file = self.df.iloc[model_widget.value-1]['json']
+        vline_plot = ax_plddt.vlines(
+            np.cumsum(self.chain_length[query][:-1]),
+            ymin=0,
+            ymax=100.0,
+            colors="black",
+        )
+        ax_plddt.set_ylim(0, 100)
+        res_max = sum(self.chain_length[query])
+        ax_plddt.set_xlim(0, res_max)
+        ax_plddt.set_xlabel("Residue")
+        ax_plddt.set_ylabel("predicted LDDT")
+
+        pae_array = get_pae(json_file)
+        pae_plot = ax_pae.imshow(
+            pae_array,
+            cmap=cmap,
+            vmin=0.0,
+            vmax=30.0,
+        )
+        vline_pae = ax_pae.vlines(
+            np.cumsum(self.chain_length[query][:-1]),
+            ymin=-0.5,
+            ymax=res_max,
+            colors="yellow",
+        )
+        hline_pae = ax_pae.hlines(
+            np.cumsum(self.chain_length[query][:-1]),
+            xmin=-0.5,
+            xmax=res_max,
+            colors="yellow",
+        )
+        ax_pae.set_xlim(-0.5, res_max-0.5)
+        ax_pae.set_ylim(res_max-0.5, -0.5)
+        chain_pos = []
+        len_sum = 0
+        for longueur in self.chain_length[query]:
+            chain_pos.append(len_sum + longueur / 2)
+            len_sum += longueur
+        ax_pae.set_yticks(chain_pos)
+        ax_pae.set_yticklabels(self.chains[query])
+        plt.show(fig)
+
+        def update_model(change):
+            rank_num = model_widget.value
+            #print("Update")
+            plddt_array = self.get_plddt(rank_num-1)
+            res_num = len(plddt_array)
+            plddt_plot.set_data(range(res_num), plddt_array)
+            ax_plddt.set_xlim(0, len(plddt_array))
+
+            query = self.df.iloc[rank_num-1]['query']
+            vline_plot.set_segments(
+                [np.array([[x, 0], [x, 100]]) for x in np.cumsum(self.chain_length[query][:-1])]
+            )
+            #ax_plddt.set_title(self.chain_length[query][:-1])
+            
+            json_file = self.df.iloc[rank_num-1]['json']
+            pae_array = get_pae(json_file)
+            pae_plot.set_extent((0, res_num,0, res_num))
+            pae_plot.set_data(pae_array)
+            ax_pae.set_xlim(0, res_num)
+            ax_pae.set_ylim(0, res_num)
+
+            vline_pae.set_segments(
+                [np.array([[x, -0.5], [x, res_num]]) for x in np.cumsum(self.chain_length[query][:-1])]
+            )
+            hline_pae.set_segments(
+                [np.array([[-0.5, res_num-x], [res_num, res_num-x]]) for x in np.cumsum(self.chain_length[query][:-1])]
+            )
+            chain_pos = []
+            len_sum = 0
+            for longueur in self.chain_length[query]:
+                chain_pos.append(res_num - (len_sum + longueur / 2))
+                len_sum += longueur
+            ax_pae.set_yticks(chain_pos)
+            ax_pae.set_yticklabels(self.chains[query])
+            fig.canvas.draw()
+        
+        model_widget.observe(update_model, names='value')
 
 
     def extract_inter_chain_pae(self, fun=np.mean):
@@ -908,3 +1031,22 @@ def read_multiple_alphapuldown(directory):
     if len(data_list) == 0:
         raise ValueError("No AlphaPulldown data found in the directory.")
     return concat_data(data_list)
+
+
+def get_pae(json_file):
+
+
+    if json_file is None:
+        return (None, None)
+
+    with open(json_file) as f:
+        local_json = json.load(f)
+
+    if 'pae' in local_json:
+        pae_array = np.array(local_json["pae"])
+    elif 'predicted_aligned_error' in local_json[0]:
+        pae_array = np.array(local_json[0]["predicted_aligned_error"])
+    else:
+        raise ValueError("No PAE found in the json file.")
+
+    return pae_array
