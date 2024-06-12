@@ -63,8 +63,7 @@ def compute_LIS_matrix(
 
             submatrix = trans_matrix[i_start: i_end, j_start:j_end]
 
-            mean_lis = submatrix[submatrix > 0].mean()
-            if not np.isnan(mean_lis):
-                LIS_array[i, j] = mean_lis
+            if np.any(submatrix > 0):
+                LIS_array[i, j] = submatrix[submatrix > 0].mean()
 
     return(LIS_array)

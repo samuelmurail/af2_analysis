@@ -829,7 +829,7 @@ class Data:
         model_widget.observe(on_value_change, names='value')
 
 
-    def show_plot_(self, cmap=cm.vik):
+    def show_plot(self, cmap=cm.vik):
         """
         Use with
         ```

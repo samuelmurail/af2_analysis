@@ -185,7 +185,7 @@ def add_json(log_pd, directory):
 
     # Get the last recycle:
     last_recycle = (
-        log_pd.groupby(["query", "seed", "model", "weight"])["recycle"].transform(max)
+        log_pd.groupby(["query", "seed", "model", "weight"])["recycle"].transform('max')
         == log_pd["recycle"]
     )
 
