@@ -4,6 +4,23 @@ from tqdm.auto import tqdm
 from . import data
 
 def extract_pae_pep(my_data, fun = np.mean):
+    """Extract the PAE score for the peptide-peptide interface.
+
+    Parameters
+    ----------
+    my_data : AF2Data
+        object containing the data
+    fun : function
+        function to apply to the PAE scores
+    
+    Returns
+    -------
+    None
+        The `log_pd` dataframe is modified in place.
+    """
+
+    my_data.extract_inter_chain_pae()
+
     pep_rec_pae_list = []
     rec_pep_pae_list = []
     
@@ -27,6 +44,20 @@ def extract_pae_pep(my_data, fun = np.mean):
 
 
 def extract_plddt_pep(my_data, fun = np.mean):
+    """Extract the pLDDT score for the peptide-peptide interface.
+    
+    Parameters
+    ----------
+    my_data : AF2Data
+        object containing the data
+    fun : function
+        function to apply to the pLDDT scores
+    
+    Returns
+    -------
+    None
+        The `log_pd` dataframe is modified in place.
+    """
     pep_plddt_list = []
     
     for i, (query, pdb) in tqdm(enumerate(zip(my_data.df['query'], my_data.df['pdb'])), total=len(my_data.df)):
@@ -39,14 +70,29 @@ def extract_plddt_pep(my_data, fun = np.mean):
     
     my_data.df['plddt_pep'] = pep_plddt_list
 
-def compute_LIS_pep(my_data):
+def compute_LIS_pep(my_data, pae_cutoff=12.0, fun = np.max):
+    """Compute the LIS score for the peptide-peptide interface.
+    
+    Parameters
+    ----------
+    my_data : AF2Data
+        object containing the data
+    pae_cutoff : float
+        cutoff for native contacts, default is 8.0 A
+    fun : function
+        function to apply to the LIS matrix
+        
+    Returns
+    -------
+    None
+        The `log_pd` dataframe is modified in place.
+    
+    """
 
-    my_data.compute_LIS_matrix()
+    my_data.compute_LIS_matrix(pae_cutoff=pae_cutoff)
 
     pep_LIS_list = []
     pep_LIS2_list = []
-
-    fun = np.max
     
     for query, LIS in zip(my_data.df['query'], my_data.df['LIS']):
         chain_num = len(my_data.chains[query])
@@ -56,3 +102,40 @@ def compute_LIS_pep(my_data):
     
     my_data.df['LIS_rec_pep'] = pep_LIS2_list
     my_data.df['LIS_pep_rec'] = pep_LIS_list
+
+
+def compute_pdockq2_lig(my_data):
+    """Compute the LIS score for the peptide-peptide interface.
+    
+    Parameters
+    ----------
+    my_data : AF2Data
+        object containing the data
+    pae_cutoff : float
+        cutoff for native contacts, default is 8.0 A
+    fun : function
+        function to apply to the LIS matrix
+        
+    Returns
+    -------
+    None
+        The `log_pd` dataframe is modified in place.
+    
+    """
+
+    my_data.compute_pdockq2()
+
+    old_query = ""
+    pdockq2_list  = []
+    
+    for index, row in my_data.df.iterrows():
+
+        if row["query"] != old_query:
+            old_query = row["query"]
+            chains = my_data.chains[old_query]
+            lig_chain = chains[-1]
+            rec_chains = chains[:-1]
+            
+        pdockq2_list.append(row[f'pdockq2_{lig_chain}'])
+
+    my_data.df['pdockq2_lig'] = pdockq2_list    

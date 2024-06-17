@@ -81,7 +81,7 @@ def scale(rms, d0=8.5):
     return rms_scale
 
 
-def hierarchical(df, threshold=0.3, contact_cutoff=4.0,
+def hierarchical(df, threshold=0.2, contact_cutoff=4.0,
                  show_dendrogram=True , show_cluster_distribution= False) :
     """Clustering of AlphaFold Protein-Peptide Complex results.
 

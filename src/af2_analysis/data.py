@@ -348,7 +348,6 @@ class Data:
 
         plt.xlim(-0.5, res_max-0.5)
         plt.ylim(res_max-0.5, -0.5)
-        ax.set_yticklabels(self.chains[row["query"]])
         chain_pos = []
         len_sum = 0
         for longueur in self.chain_length[row["query"]]:
@@ -356,6 +355,7 @@ class Data:
             len_sum += longueur
 
         ax.set_yticks(chain_pos)
+        ax.set_yticklabels(self.chains[row["query"]])
         cbar = plt.colorbar(img)
         cbar.set_label("Predicted Aligned Error (Å)", rotation=270)
         cbar.ax.get_yaxis().labelpad = 15
