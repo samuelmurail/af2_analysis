@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "af2-analysis"
 version = "0.0.2"
-dynamic = ["readme"]
+dynamic = ["readme", "dependencies"]
 description = "`AF2 analysis` is a python library allowing analysis of Alphafold results."
 license = {text = "GNUv2.0"}
 requires-python = ">=3.7"
@@ -35,16 +35,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Topic :: Software Development",
 ]
-dependencies = [
-    "cmcrameri>=1.7",
-    "ipywidgets>=7.6",
-    "nglview>=3.0",
-    "numpy>=1.21",
-    "pandas>=1.3.4",
-    "pdb_numpy>=0.0.6",
-    "seaborn>=0.11",
-    "tqdm>=4.0",
-]
+
 
 [project.scripts]
 af2_analysis = "af2_analysis.__main__:main"
@@ -56,3 +47,4 @@ Homepage = "https://github.com/samuelmurail/af2_analysis"
 [tool.setuptools.dynamic]
 # version = {attr = "af2_analysis.VERSION"}
 readme = {file = ["README.md"]}
+dependencies = {file = ["requirements.txt"]}
