@@ -31,7 +31,8 @@ steps:
 
 - script: |
     pip install pytest pytest-azurepipelines pytest-cov
-    python setup.py build_ext --inplace
+    # python setup.py build_ext --inplace
+    pip install .
     pytest --cov-report=xml --cov=af2_analysis
   displayName: 'pytest'
 
