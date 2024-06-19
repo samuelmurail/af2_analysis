@@ -1,6 +1,8 @@
 <img src="https://raw.githubusercontent.com/samuelmurail/af2_analysis/master/docs/source/logo.jpeg" alt="AF2 Analysis Logo" width="200"
 style="display: block; margin: auto;"/>
 
+[![Documentation Status](https://readthedocs.org/projects/af2-analysis/badge/?version=latest)](https://af2-analysis.readthedocs.io/en/latest/?badge=latest)
+
 [![codecov](https://codecov.io/gh/samuelmurail/af2_analysis/graph/badge.svg?token=WOJYQKKOP7)](https://codecov.io/gh/samuelmurail/af2_analysis)
 
 [![Build Status](https://dev.azure.com/samuelmurailRPBS/af2_analysis/_apis/build/status%2Fsamuelmurail.af2_analysis?branchName=main)](https://dev.azure.com/samuelmurailRPBS/af2_analysis/_build/latest?definitionId=2&branchName=main)
