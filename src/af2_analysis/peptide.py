@@ -39,8 +39,8 @@ def extract_pae_pep(my_data, fun = np.mean):
         pep_rec_pae_list.append(pep_rec_pae)
         rec_pep_pae_list.append(rec_pep_pae)
     
-    my_data.df['PAE_pep_rec'] = pep_rec_pae_list
-    my_data.df['PAE_rec_pep'] = rec_pep_pae_list
+    my_data.df.loc[:, 'PAE_pep_rec'] = pep_rec_pae_list
+    my_data.df.loc[:, 'PAE_rec_pep'] = rec_pep_pae_list
 
 
 def extract_plddt_pep(my_data, fun = np.mean):
@@ -68,7 +68,7 @@ def extract_plddt_pep(my_data, fun = np.mean):
         plddt = my_data.get_plddt(i)
         pep_plddt_list.append(fun(plddt[cum_sum_chain[-2]:cum_sum_chain[-1]]))
     
-    my_data.df['plddt_pep'] = pep_plddt_list
+    my_data.df.loc[:, 'plddt_pep'] = pep_plddt_list
 
 def compute_LIS_pep(my_data, pae_cutoff=12.0, fun = np.max):
     """Compute the LIS score for the peptide-peptide interface.
@@ -100,8 +100,8 @@ def compute_LIS_pep(my_data, pae_cutoff=12.0, fun = np.max):
         pep_LIS_list.append(fun(LIS[0:chain_num-1,chain_num - 1]))
         pep_LIS2_list.append(fun(LIS[chain_num - 1, 0:chain_num-1]))
     
-    my_data.df['LIS_rec_pep'] = pep_LIS2_list
-    my_data.df['LIS_pep_rec'] = pep_LIS_list
+    my_data.df.loc[:, 'LIS_rec_pep'] = pep_LIS2_list
+    my_data.df.loc[:, 'LIS_pep_rec'] = pep_LIS_list
 
 
 def compute_pdockq2_lig(my_data):
@@ -138,4 +138,4 @@ def compute_pdockq2_lig(my_data):
             
         pdockq2_list.append(row[f'pdockq2_{lig_chain}'])
 
-    my_data.df['pdockq2_lig'] = pdockq2_list    
+    my_data.df.loc[:, 'pdockq2_lig'] = pdockq2_list    

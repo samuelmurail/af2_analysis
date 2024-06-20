@@ -116,6 +116,20 @@ class Data:
             self.df = default.read_dir(directory)
             self.add_json()
             # self.extract_json()
+        
+        self.set_chain_length()
+
+    def set_chain_length(self):
+        """ Find chain information from the dataframe.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
 
         self.chains = {}
         self.chain_length = {}
@@ -467,7 +481,7 @@ class Data:
             else:
                 pdockq_list.append(None)
 
-        self.df["mpdockq"] = pdockq_list
+        self.df.loc[:, "mpdockq"] = pdockq_list
 
     def compute_pdockq2(self):
         """
@@ -520,7 +534,7 @@ class Data:
 
         # print(pdockq_list)
         for i in range(max_chain_num):
-            self.df[f"pdockq2_{chr(65+i)}"] = pdockq_list[i]
+            self.df.loc[:, f"pdockq2_{chr(65+i)}"] = pdockq_list[i]
 
 
     def compute_LIS_matrix(self, pae_cutoff=12.0):
@@ -549,7 +563,7 @@ class Data:
             else:
                 LIS_matrix_list.append(None)
 
-        self.df["LIS"] = LIS_matrix_list
+        self.df.loc[:, "LIS"] = LIS_matrix_list
 
     def compute_piTM(self):
         r"""Compute the piTM score as define in [2]_.
@@ -615,9 +629,9 @@ class Data:
                     piTM_chain_list[i].append(None)
 
         # print(piTM_chain_list)
-        self.df["piTM"] = piTM_list
+        self.df.loc[:, "piTM"] = piTM_list
         for i in range(max_chain_num):
-            self.df[f"piTM_{chr(65+i)}"] = piTM_chain_list[i]
+            self.df.loc[:, f"piTM_{chr(65+i)}"] = piTM_chain_list[i]
 
 
     def plot_msa(self, filter_qid=0.15, filter_cov=0.4):
@@ -978,7 +992,7 @@ class Data:
         pae_df = pd.DataFrame(pae_list)
         
         for col in pae_df.columns:
-            self.df[col] = pae_df[col]
+            self.df.loc[:,col] = pae_df[col]
 
 
 def concat_data(data_list):
