@@ -15,8 +15,9 @@ def test_cf_1_5_5_relax():
  
     assert my_data.format == 'colabfold_1.5'
     assert len(my_data.df) == 40
+    print(my_data.df.columns)
     assert (my_data.df.columns == np.array(['query', 'seed', 'model', 'weight', 'recycle', 'pLDDT', 'pTM', 'ipTM',
-       'ranking_confidence', 'pdb', 'json'])).all()
+       'ranking_confidence', 'pdb', 'relaxed_pdb', 'json'])).all()
 
     query = my_data.df.iloc[0]['query']
 
@@ -24,10 +25,8 @@ def test_cf_1_5_5_relax():
     assert my_data.chains[query] == ['A', 'B']
 
     # There should be only 5 relaxed structures
-    relaxed_num = 0
-    for i, row in my_data.df.iterrows():
-        if 'unrelaxed' not in row['pdb']:
-            relaxed_num += 1
+
+    relaxed_num = sum(my_data.df['relaxed_pdb'].notna())
 
     assert relaxed_num == 5
     assert list(my_data.df['recycle']) == [

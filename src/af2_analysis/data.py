@@ -18,7 +18,6 @@ from .format import colabfold_1_5, af3_webserver, afpulldown, default
 from . import sequence, plot
 from .analysis import compute_LIS_matrix
 
-
 class Data:
     """Data class
 
@@ -73,6 +72,7 @@ class Data:
         Show the plot info.
     extract_inter_chain_pae(fun=np.mean)
         Read the PAE matrix and extract the average inter chain PAE.
+    
     """
 
     def __init__(self, directory=None, csv=None):
@@ -539,10 +539,11 @@ class Data:
 
     def compute_LIS_matrix(self, pae_cutoff=12.0):
         """
-        Compute the LIS score as define in [1]_.
+        Compute the LIS score as define in [1].
 
-        Implementation was inspired from implementation in https://github.com/flyark/AFM-LIS
+        Implementation was inspired from implementation in:
 
+        [1] https://github.com/flyark/AFM-LIS
         """
         LIS_matrix_list = []
 

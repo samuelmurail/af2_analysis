@@ -123,6 +123,7 @@ def add_pdb(log_pd, directory):
             file_list.append(file)
 
     pdb_list = []
+    relaxed_pdb_list = []
 
     for _, row in tqdm(log_pd.iterrows(), total=log_pd.shape[0]):
         # reg = fr"{row['query']}_.*_{row['weight']}_model_{row['model']}_seed_{row['seed']:03d}\.r{row['recycle']}\.pdb"
@@ -132,18 +133,21 @@ def add_pdb(log_pd, directory):
 
         if len(res) == 1:
             pdb_list.append(os.path.join(directory, res[0]))
+            relaxed_pdb_list.append(None)
             file_list.remove(res[0])
         elif len(res) == 2:
-
             filter_res = []
             for res_ in res:
                 if res_.find("_relaxed_") != -1:
                     filter_res.append(res_)
+                    relaxed_pdb_list.append(os.path.join(directory, res_))
+                elif res_.find("_unrelaxed_") != -1:
+                    pdb_list.append(os.path.join(directory, res_))
+                else:
+                    logger.warning(f"Unknown pdb file for {reg}: {res_}")
                 file_list.remove(res_)
             
-            if len(filter_res) == 1:
-                pdb_list.append(os.path.join(directory, filter_res[0]))
-            else:
+            if len(filter_res) != 1:
                 logger.warning(f"Multiple pdb file for {reg}: {filter_res}")
                 pdb_list.append(None)                
 
@@ -155,6 +159,8 @@ def add_pdb(log_pd, directory):
             pdb_list.append(None)
 
     log_pd.loc[:, "pdb"] = pdb_list
+    if not all(v is None for v in relaxed_pdb_list):
+        log_pd.loc[:, "relaxed_pdb"] = relaxed_pdb_list
 
 
 def add_json(log_pd, directory):

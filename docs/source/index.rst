@@ -21,6 +21,7 @@ Welcome to AF2 Analysis's documentation!
    readme
    installation
    notebooks/basic_example.ipynb
+   notebooks/basic_example_2.ipynb
    Github project <https://github.com/samuelmurail/af2_analysis>
    af2_analysis
 
