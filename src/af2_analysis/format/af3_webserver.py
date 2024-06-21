@@ -12,7 +12,19 @@ logger.setLevel(logging.INFO)
 
 
 def read_dir(directory):
-    """Extract pdb list from a directory."""
+    """Extract pdb list from a directory.
+    
+    Parameters
+    ----------
+    directory : str
+        Path to the directory containing the pdb files.
+    
+    Returns
+    -------
+    log_pd : pandas.DataFrame
+        Dataframe containing the information extracted from the directory.
+    
+    """
 
     logger.info(f"Reading {directory}")
 

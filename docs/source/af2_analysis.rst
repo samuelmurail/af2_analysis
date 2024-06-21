@@ -33,12 +33,3 @@ af2\_analysis.format module
 -----------------------------
 
 .. include:: af2_analysis.format.rst
-
-
-Module contents
----------------
-
-.. automodule:: af2_analysis
-   :members:
-   :undoc-members:
-   :show-inheritance:

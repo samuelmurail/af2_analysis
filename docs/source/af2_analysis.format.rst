@@ -4,6 +4,22 @@ af2\_analysis.format package
 Submodules
 ----------
 
+af2\_analysis.format.af3\_webserver module
+------------------------------------------
+
+.. automodule:: af2_analysis.format.af3_webserver
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+af2\_analysis.format.afpulldown module
+--------------------------------------
+
+.. automodule:: af2_analysis.format.afpulldown
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 af2\_analysis.format.colabfold\_1\_5 module
 -------------------------------------------
 
@@ -16,14 +32,6 @@ af2\_analysis.format.default module
 -----------------------------------
 
 .. automodule:: af2_analysis.format.default
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: af2_analysis.format
    :members:
    :undoc-members:
    :show-inheritance:

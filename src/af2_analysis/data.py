@@ -440,8 +440,7 @@ class Data:
 
     def compute_pdockq(self):
         """
-        Compute pdockq from the pdb file.
-
+        Compute the pdockq from the pdb file.
         """
 
         from pdb_numpy.analysis import compute_pdockQ
@@ -484,17 +483,20 @@ class Data:
         self.df.loc[:, "mpdockq"] = pdockq_list
 
     def compute_pdockq2(self):
-        """
-        Compute pdockq2 from the pdb file.
+        r"""
+        Compute pdockq2 from the pdb file [1]_.
 
-        $$ pDockQ_2 = \frac{L}{1 + exp [-k*(X_i-X_0)]} + b$$
+        .. math::
+            pDockQ_2 = \frac{L}{1 + exp [-k*(X_i-X_0)]} + b
 
         with
 
-        $$ X_i = \langle \frac{1}{1+(\frac{PAE_{int}}{d_0})^2} \rangle - \langle pLDDT \rangle_{int}$$
+        .. math::
+            X_i = \langle \frac{1}{1+(\frac{PAE_{int}}{d_0})^2} \rangle - \langle pLDDT \rangle_{int}
 
-        Ref:
-        https://academic.oup.com/bioinformatics/article/39/7/btad424/7219714
+        References:
+        
+        .. [1] : https://academic.oup.com/bioinformatics/article/39/7/btad424/7219714
         """
 
         from pdb_numpy.analysis import compute_pdockQ2
@@ -539,11 +541,11 @@ class Data:
 
     def compute_LIS_matrix(self, pae_cutoff=12.0):
         """
-        Compute the LIS score as define in [1].
+        Compute the LIS score as define in [2]_.
 
         Implementation was inspired from implementation in:
 
-        [1] https://github.com/flyark/AFM-LIS
+        .. [2] https://github.com/flyark/AFM-LIS
         """
         LIS_matrix_list = []
 
@@ -567,7 +569,7 @@ class Data:
         self.df.loc[:, "LIS"] = LIS_matrix_list
 
     def compute_piTM(self):
-        r"""Compute the piTM score as define in [2]_.
+        r"""Compute the piTM score as define in [3]_.
 
         .. math::
             piTM = \max_{i \in \mathcal{I}} \frac{1}{I} \sum_{j \in \mathcal{I}}  \frac{1}{1 + [\langle e_{ij} \rangle / d_0 (I)]^2}
@@ -582,10 +584,13 @@ class Data:
 
         References
         ----------
-        .. [2] Mu Gao, Davi Nakajima An, Jerry M. Parks & Jeffrey Skolnick. 
+        .. [3] Mu Gao, Davi Nakajima An, Jerry M. Parks & Jeffrey Skolnick. 
             AF2Complex predicts direct physical interactions in multimeric proteins with deep learning
             *Nature Communications*. volume 13, Article number: 1744 (2022).
             https://www.nature.com/articles/s41467-022-29394-2
+        
+        .. warning::
+            IT IS NOT WORKING !!
         """
 
         from pdb_numpy.analysis import compute_piTM
