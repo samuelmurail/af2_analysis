@@ -1,4 +1,5 @@
 import numpy as np
+import pdb_numpy
 
 from tqdm.auto import tqdm
 from . import data
@@ -69,6 +70,50 @@ def extract_plddt_pep(my_data, fun = np.mean):
         pep_plddt_list.append(fun(plddt[cum_sum_chain[-2]:cum_sum_chain[-1]]))
     
     my_data.df.loc[:, 'plddt_pep'] = pep_plddt_list
+
+
+def extract_plddt_contact_pep(my_data, fun = np.mean, cutoff=8.0):
+    """Extract the pLDDT score for the peptide-peptide interface.
+    
+    Parameters
+    ----------
+    my_data : AF2Data
+        object containing the data
+    fun : function
+        function to apply to the pLDDT scores
+    
+    Returns
+    -------
+    None
+        The `log_pd` dataframe is modified in place.
+    """
+    lig_plddt_list = []
+    rec_plddt_list = []
+    
+    for i, (query, pdb) in tqdm(enumerate(zip(my_data.df['query'], my_data.df['pdb'])), total=len(my_data.df)):
+        
+        chain_length = my_data.chain_length[query]
+        chains = my_data.chains[query]
+        cum_sum_chain = np.cumsum([0] + chain_length)
+
+        model = pdb_numpy.Coor(pdb)
+        model_CA = model.select_atoms("name CA")
+        contact_lig = model_CA.select_atoms(f"chain {chains[-1]} and within {cutoff} of chain {' '.join(chains[:-1])}")
+        contact_rec = model_CA.select_atoms(f"chain {' '.join(chains[:-1])} and within {cutoff} of chain {chains[-1]}")
+
+        if contact_lig.len > 0:
+            lig_plddt_list.append(fun(contact_lig.beta))
+        else:
+            lig_plddt_list.append(0)
+        
+        if contact_rec.len > 0:
+            rec_plddt_list.append(fun(contact_rec.beta))
+        else:
+            rec_plddt_list.append(0)
+    
+    my_data.df.loc[:, 'plddt_contact_lig'] = lig_plddt_list
+    my_data.df.loc[:, 'plddt_contact_rec'] = rec_plddt_list
+
 
 def compute_LIS_pep(my_data, pae_cutoff=12.0, fun = np.max):
     """Compute the LIS score for the peptide-peptide interface.

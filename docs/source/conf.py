@@ -38,7 +38,8 @@ extensions = [
     'sphinxarg.ext',
     'sphinx.ext.mathjax',
     'numpydoc',
-    'myst_parser'
+    'myst_parser',
+    'nbsphinx',
     ]
 
 templates_path = ['_templates']
@@ -48,7 +49,7 @@ exclude_patterns = []
 # You can specify multiple suffix as a list of string:
 #
 # source_suffix = ['.rst', '.md']
-source_suffix = ['.rst', '.ipynb', '.md']
+source_suffix = ['.rst', '.md']
 
 
 # -- Options for HTML output -------------------------------------------------

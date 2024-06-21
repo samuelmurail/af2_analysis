@@ -992,7 +992,7 @@ class Data:
         pae_df = pd.DataFrame(pae_list)
         
         for col in pae_df.columns:
-            self.df.loc[:,col] = pae_df[col]
+            self.df.loc[:, col] = pae_df.loc[:, col].to_numpy()
 
 
 def concat_data(data_list):

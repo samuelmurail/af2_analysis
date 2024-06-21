@@ -20,7 +20,7 @@ Welcome to AF2 Analysis's documentation!
 
    readme
    installation
-   basic_example
+   notebooks/basic_example.ipynb
    Github project <https://github.com/samuelmurail/af2_analysis>
    af2_analysis
 
