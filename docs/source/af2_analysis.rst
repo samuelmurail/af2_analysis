@@ -32,4 +32,7 @@ af2\_analysis.sequence module
 af2\_analysis.format module
 -----------------------------
 
-.. include:: af2_analysis.format.rst
+.. toctree::
+   :maxdepth: 2
+
+   af2_analysis.format.rst

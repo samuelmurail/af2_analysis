@@ -694,7 +694,7 @@ class Data:
 
         Parameters
         ----------
-
+        None
 
         Returns
         -------

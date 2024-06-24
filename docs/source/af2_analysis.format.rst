@@ -1,8 +1,6 @@
 af2\_analysis.format package
 ============================
 
-Submodules
-----------
 
 af2\_analysis.format.af3\_webserver module
 ------------------------------------------

@@ -22,7 +22,7 @@ Welcome to AF2 Analysis's documentation!
    installation
    notebooks/basic_example.ipynb
    Github project <https://github.com/samuelmurail/af2_analysis>
-   af2_analysis
+   modules
 
 Indices and tables
 ==================

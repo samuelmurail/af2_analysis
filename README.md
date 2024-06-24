@@ -1,15 +1,14 @@
-<img src="https://raw.githubusercontent.com/samuelmurail/af2_analysis/master/docs/source/logo.jpeg" alt="AF2 Analysis Logo" width="200"
-style="display: block; margin: auto;"/>
+
 
 [![Documentation Status](https://readthedocs.org/projects/af2-analysis/badge/?version=latest)](https://af2-analysis.readthedocs.io/en/latest/?badge=latest)
-
 [![codecov](https://codecov.io/gh/samuelmurail/af2_analysis/graph/badge.svg?token=WOJYQKKOP7)](https://codecov.io/gh/samuelmurail/af2_analysis)
-
 [![Build Status](https://dev.azure.com/samuelmurailRPBS/af2_analysis/_apis/build/status%2Fsamuelmurail.af2_analysis?branchName=main)](https://dev.azure.com/samuelmurailRPBS/af2_analysis/_build/latest?definitionId=2&branchName=main)
-
 [![PyPI - Version](https://img.shields.io/pypi/v/af2-analysis)](https://pypi.org/project/af2-analysis/)
+[![Downloads](https://static.pepy.tech/badge/af2-analysis)](https://pepy.tech/project/af2-analysis)
 
 # Alphafold2 Analysis
+
+<img src="https://raw.githubusercontent.com/samuelmurail/af2_analysis/master/docs/source/logo.jpeg" alt="AF2 Analysis Logo" width="200" style="display: block; margin: auto;"/>
 
 `af2_analysis` is a python package allowing a simplified analysis of alphafold and colabfold results.
 
