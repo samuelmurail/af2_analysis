@@ -4,7 +4,7 @@ import pdb_numpy
 from tqdm.auto import tqdm
 from . import data
 
-def extract_pae_pep(my_data, fun = np.mean):
+def extract_pae_pep(my_data, fun = np.mean, verbose=True):
     """Extract the PAE score for the peptide-peptide interface.
 
     Parameters
@@ -20,13 +20,17 @@ def extract_pae_pep(my_data, fun = np.mean):
         The `log_pd` dataframe is modified in place.
     """
 
-    my_data.extract_inter_chain_pae()
+    my_data.extract_inter_chain_pae(verbose=verbose)
 
     pep_rec_pae_list = []
     rec_pep_pae_list = []
     
+    disable = False if verbose else True
+
     for i, (query, json) in tqdm(
-        enumerate(zip(my_data.df['query'], my_data.df['json'])), total=len(my_data.df)):
+        enumerate(zip(my_data.df['query'], my_data.df['json'])),
+        total=len(my_data.df),
+        disable=disable):
         
         chain_length = my_data.chain_length[query]
         cum_sum_chain = np.cumsum([0] + chain_length)
@@ -44,7 +48,7 @@ def extract_pae_pep(my_data, fun = np.mean):
     my_data.df.loc[:, 'PAE_rec_pep'] = rec_pep_pae_list
 
 
-def extract_plddt_pep(my_data, fun = np.mean):
+def extract_plddt_pep(my_data, fun = np.mean, verbose=True):
     """Extract the pLDDT score for the peptide-peptide interface.
     
     Parameters
@@ -60,8 +64,12 @@ def extract_plddt_pep(my_data, fun = np.mean):
         The `log_pd` dataframe is modified in place.
     """
     pep_plddt_list = []
+
+    disable = False if verbose else True
     
-    for i, (query, pdb) in tqdm(enumerate(zip(my_data.df['query'], my_data.df['pdb'])), total=len(my_data.df)):
+    for i, (query, pdb) in tqdm(enumerate(zip(my_data.df['query'], my_data.df['pdb'])),
+                                total=len(my_data.df),
+                                disable=disable):
         
         chain_length = my_data.chain_length[query]
         cum_sum_chain = np.cumsum([0] + chain_length)
@@ -72,7 +80,7 @@ def extract_plddt_pep(my_data, fun = np.mean):
     my_data.df.loc[:, 'plddt_pep'] = pep_plddt_list
 
 
-def extract_plddt_contact_pep(my_data, fun = np.mean, cutoff=8.0):
+def extract_plddt_contact_pep(my_data, fun = np.mean, cutoff=8.0, verbose=True):
     """Extract the pLDDT score for the peptide-peptide interface.
     
     Parameters
@@ -90,7 +98,11 @@ def extract_plddt_contact_pep(my_data, fun = np.mean, cutoff=8.0):
     lig_plddt_list = []
     rec_plddt_list = []
     
-    for i, (query, pdb) in tqdm(enumerate(zip(my_data.df['query'], my_data.df['pdb'])), total=len(my_data.df)):
+    disable = False if verbose else True
+
+    for i, (query, pdb) in tqdm(enumerate(zip(my_data.df['query'], my_data.df['pdb'])),
+                                total=len(my_data.df),
+                                disable=disable):
         
         chain_length = my_data.chain_length[query]
         chains = my_data.chains[query]
@@ -115,7 +127,7 @@ def extract_plddt_contact_pep(my_data, fun = np.mean, cutoff=8.0):
     my_data.df.loc[:, 'plddt_contact_rec'] = rec_plddt_list
 
 
-def compute_LIS_pep(my_data, pae_cutoff=12.0, fun = np.max):
+def compute_LIS_pep(my_data, pae_cutoff=12.0, fun = np.max, verbose=True):
     """Compute the LIS score for the peptide-peptide interface.
     
     Parameters
@@ -134,7 +146,7 @@ def compute_LIS_pep(my_data, pae_cutoff=12.0, fun = np.max):
     
     """
 
-    my_data.compute_LIS_matrix(pae_cutoff=pae_cutoff)
+    my_data.compute_LIS_matrix(pae_cutoff=pae_cutoff, verbose=verbose)
 
     pep_LIS_list = []
     pep_LIS2_list = []
@@ -149,7 +161,7 @@ def compute_LIS_pep(my_data, pae_cutoff=12.0, fun = np.max):
     my_data.df.loc[:, 'LIS_pep_rec'] = pep_LIS_list
 
 
-def compute_pdockq2_lig(my_data):
+def compute_pdockq2_lig(my_data, verbose=True):
     """Compute the LIS score for the peptide-peptide interface.
     
     Parameters
@@ -168,7 +180,7 @@ def compute_pdockq2_lig(my_data):
     
     """
 
-    my_data.compute_pdockq2()
+    my_data.compute_pdockq2(verbose=verbose)
 
     old_query = ""
     pdockq2_list  = []
