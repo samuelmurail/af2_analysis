@@ -148,14 +148,14 @@ def add_pdb(log_pd, directory, verbose=True):
                 else:
                     logger.warning(f"Unknown pdb file for {reg}: {res_}")
                 file_list.remove(res_)
-            
+
             if len(filter_res) != 1:
                 logger.warning(f"Multiple pdb file for {reg}: {filter_res}")
-                pdb_list.append(None)                
+                pdb_list.append(None)
 
         elif len(res) > 2:
-                logger.warning(f"Multiple pdb file for {reg}: {res}")
-                pdb_list.append(None)
+            logger.warning(f"Multiple pdb file for {reg}: {res}")
+            pdb_list.append(None)
         else:
             logger.warning(f"Not founded : {reg}")
             pdb_list.append(None)
@@ -193,13 +193,15 @@ def add_json(log_pd, directory, verbose=True):
 
     # Get the last recycle:
     last_recycle = (
-        log_pd.groupby(["query", "seed", "model", "weight"])["recycle"].transform('max')
+        log_pd.groupby(["query", "seed", "model", "weight"])["recycle"].transform("max")
         == log_pd["recycle"]
     )
 
     disable = False if verbose else True
 
-    for i, last in tqdm(enumerate(last_recycle), total=len(last_recycle), disable=disable):
+    for i, last in tqdm(
+        enumerate(last_recycle), total=len(last_recycle), disable=disable
+    ):
         row = log_pd.iloc[i]
         file_state = False
 

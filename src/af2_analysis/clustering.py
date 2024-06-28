@@ -22,8 +22,7 @@ __email__ = "samuel.murail@u-paris.fr"
 __status__ = "Beta"
 
 
-def chain_pep(pdb_file) :
-
+def chain_pep(pdb_file):
     """Search for peptide chain ID.
 
     This function searches for the peptide chain ID of a protein-peptide complex by using
@@ -54,10 +53,10 @@ def chain_pep(pdb_file) :
 
     return chain
 
-def scale(rms, d0=8.5):
 
+def scale(rms, d0=8.5):
     """Scaling RMS values.
-    To avoid the problem of arbitrarily large RMS values that are essentially equally bad, 
+    To avoid the problem of arbitrarily large RMS values that are essentially equally bad,
     this function scales RMS values using the inverse square scaling technique adapted
     from the S-score formula.
 
@@ -81,14 +80,19 @@ def scale(rms, d0=8.5):
     return rms_scale
 
 
-def hierarchical(df, threshold=0.2, contact_cutoff=4.0,
-                 show_dendrogram=True , show_cluster_distribution= False) :
+def hierarchical(
+    df,
+    threshold=0.2,
+    contact_cutoff=4.0,
+    show_dendrogram=True,
+    show_cluster_distribution=False,
+):
     """Clustering of AlphaFold Protein-Peptide Complex results.
 
     After checking for the absence of missing values, the function starts by aligning the protein
     chains of different predicted models of each PDB before characterizing the different
     protein-peptide contact residues. The search for contact residues is done within 4 angstroms
-    by default. These residues will be used to compute the distance matrix of the different 
+    by default. These residues will be used to compute the distance matrix of the different
     peptide chains, where the output array will be scaled using the `scale` function before
     calculating the new matrix of 1-scaled matrix. This new matrix will be used to perform
     hierarchical ascending classification and characterize clusters by defining a cutoff threshold.
@@ -113,70 +117,77 @@ def hierarchical(df, threshold=0.2, contact_cutoff=4.0,
         The function modifies the input DataFrame by appending the Cluster column, but does not return a value.
     """
 
-
     clust_threshold = []
-    query_list = df['query'].unique().tolist()
+    query_list = df["query"].unique().tolist()
 
     for pdb in query_list:
-
-        files = [file for file in df[df['query'] == pdb]['pdb'] if not pd.isnull(file)]
+        files = [file for file in df[df["query"] == pdb]["pdb"] if not pd.isnull(file)]
 
         # Check that only the last df rows are missing
-        null_number =  sum(pd.isnull(df[df['query'] == pdb]['pdb']))
-        assert null_number == sum(pd.isnull(df[df['query'] == pdb]['pdb'][-null_number:])), f"Missing pdb data in the middle of the query {pdb}"
+        null_number = sum(pd.isnull(df[df["query"] == pdb]["pdb"]))
+        assert null_number == sum(
+            pd.isnull(df[df["query"] == pdb]["pdb"][-null_number:])
+        ), f"Missing pdb data in the middle of the query {pdb}"
 
         print("Read all structures")
         u = read_numerous_pdb(files)
-        assert u.trajectory.n_frames == len(files), f"Number of frames {u.trajectory.n_frames} different from number of files {len(files)}"
+        assert u.trajectory.n_frames == len(
+            files
+        ), f"Number of frames {u.trajectory.n_frames} different from number of files {len(files)}"
         chain_pep_value = chain_pep(files[0])
         print(f"Peptide chain is :{chain_pep_value}")
 
         print("align structures")
-        align.AlignTraj(u, u, select=f"backbone and not chainID {chain_pep_value}", in_memory=True).run(verbose=True)
+        align.AlignTraj(
+            u, u, select=f"backbone and not chainID {chain_pep_value}", in_memory=True
+        ).run(verbose=True)
 
         print("Extract contact residues")
         cutoff = contact_cutoff
-        peptide_contact = u.select_atoms(f'chainID {chain_pep_value} and around {cutoff} not chainID {chain_pep_value}')
+        peptide_contact = u.select_atoms(
+            f"chainID {chain_pep_value} and around {cutoff} not chainID {chain_pep_value}"
+        )
         resid_contact_list = []
         for _ in u.trajectory:
-            for residue in peptide_contact.groupby('residues'):
+            for residue in peptide_contact.groupby("residues"):
                 resid_contact_list.append(residue.resnum)
 
         resid_contact_list = set(resid_contact_list)
         print(f"Contact residues : {resid_contact_list}")
 
         print("Compute distance Matrix")
-        #matrix = diffusionmap.DistanceMatrix(u, select=f"backbone and chainID {chain_pep_value}").run(verbose=True)
+        # matrix = diffusionmap.DistanceMatrix(u, select=f"backbone and chainID {chain_pep_value}").run(verbose=True)
         matrix = diffusionmap.DistanceMatrix(
             u,
-            select=f'chainID {chain_pep_value} and resnum {" ".join([str(res) for res in resid_contact_list])} and backbone'
-            ).run(verbose=True)
-        
+            select=f'chainID {chain_pep_value} and resnum {" ".join([str(res) for res in resid_contact_list])} and backbone',
+        ).run(verbose=True)
+
         print(f"Max RMSD is {np.max(matrix.dist_matrix):.2f} A")
         dist = 1 - scale(matrix.dist_matrix)
         h, w = dist.shape
 
         print("Compute Linkage clustering")
-        Z = linkage(dist[np.triu_indices(h, 1)], method='average')
-        clust_threshold.extend(fcluster(Z, float(threshold), criterion='distance').tolist())
+        Z = linkage(dist[np.triu_indices(h, 1)], method="average")
+        clust_threshold.extend(
+            fcluster(Z, float(threshold), criterion="distance").tolist()
+        )
 
         print(f"{len(np.unique(clust_threshold))} clusters founded for {pdb}")
 
-        if show_dendrogram :
+        if show_dendrogram:
             # plot the dendrogram with the threshold line
             plt.figure(figsize=(15, 5))
             dendrogram(Z, color_threshold=float(threshold))
-            plt.axhline(float(threshold), color='k', ls='--')
-            plt.title('Hierarchical Cluster Dendrogram -{}'.format(pdb))
-            plt.xlabel('Data Point Indexes')
-            plt.ylabel('Distance')
+            plt.axhline(float(threshold), color="k", ls="--")
+            plt.title("Hierarchical Cluster Dendrogram -{}".format(pdb))
+            plt.xlabel("Data Point Indexes")
+            plt.ylabel("Distance")
             plt.show()
 
     df["cluster"] = clust_threshold + null_number * [-1]
 
-    if show_cluster_distribution : 
+    if show_cluster_distribution:
         clusters_distribution(df)
-
 
 
 def read_numerous_pdb(pdb_files, batch_size=1000):
@@ -197,7 +208,7 @@ def read_numerous_pdb(pdb_files, batch_size=1000):
     -------
     MDAnalysis.Universe
         A single MDAnalysis Universe containing the combined frames from all the PDB files.
-        
+
     Notes
     -----
     - This function reads PDB files in batches to avoid memory issues.
@@ -205,7 +216,7 @@ def read_numerous_pdb(pdb_files, batch_size=1000):
       are stored in a list.
     - The list of frames is then converted into a numpy array and used to create a new Universe with
       a MemoryReader, combining all the frames.
-    
+
     Example
     -------
     >>> pdb_files = ['file1.pdb', 'file2.pdb', ...]
@@ -215,27 +226,27 @@ def read_numerous_pdb(pdb_files, batch_size=1000):
 
     all_frames = []
 
-    if pdb_files[0].endswith('.cif'):
+    if pdb_files[0].endswith(".cif"):
         model = pdb_numpy.Coor(pdb_files[0])
         for file in pdb_files[1:]:
             local_model = pdb_numpy.Coor(file)
             model.models.append(local_model.models[0])
         model.write("tmp.pdb", overwrite=True)
         return mda.Universe("tmp.pdb", "tmp.pdb")
-        
+
     for i in range(0, len(pdb_files), batch_size):
         # print(f"Reading frames {i:5} to {i+batch_size:5}, total : {len(pdb_files[i:i+batch_size])} frames")
-        local_u = mda.Universe(pdb_files[0], pdb_files[i:i+batch_size])
+        local_u = mda.Universe(pdb_files[0], pdb_files[i : i + batch_size])
         for ts in local_u.trajectory:
             all_frames.append(ts.positions.copy())
         del local_u
-    
+
     # print("Convert to numpy")
     frames_array = np.array(all_frames)
     del all_frames
-    
+
     # print(frames_array.shape)
-    return mda.Universe(pdb_files[0], frames_array, format=MemoryReader, order='fac')
+    return mda.Universe(pdb_files[0], frames_array, format=MemoryReader, order="fac")
 
 
 def clusters_distribution(df):
@@ -243,7 +254,7 @@ def clusters_distribution(df):
 
     This function plots the distribution of clusters of all PDB queries. It starts
     by determining the number of clusters found for each query before preparing
-    a DataFrame presenting all found with their corresponding PDB code. 
+    a DataFrame presenting all found with their corresponding PDB code.
 
     A histogram of the clusters distribution will be created from the DataFrame.
 
@@ -256,28 +267,35 @@ def clusters_distribution(df):
     -------
     None
     """
-    query_list = df['query'].unique().tolist()
+    query_list = df["query"].unique().tolist()
     n_cluster = []
     for pdb in query_list:
         sub_df = df[df["query"] == pdb]
-        n_cluster.append({'pdb': pdb, 'n_clusters': len(np.unique(sub_df["cluster"]))})
+        n_cluster.append({"pdb": pdb, "n_clusters": len(np.unique(sub_df["cluster"]))})
     df = pd.DataFrame(n_cluster)
     plt.figure(figsize=(10, 6))
-    sns.histplot(data=df, x='n_clusters' , palette="Dark2", hue='n_clusters', discrete=True, stat="percent")
-    plt.xlabel('Number of Clusters')
-    plt.ylabel('Frequency')
-    plt.title(' Clusters Distribution')
-    plt.xlim(0,90)
+    sns.histplot(
+        data=df,
+        x="n_clusters",
+        palette="Dark2",
+        hue="n_clusters",
+        discrete=True,
+        stat="percent",
+    )
+    plt.xlabel("Number of Clusters")
+    plt.ylabel("Frequency")
+    plt.title(" Clusters Distribution")
+    plt.xlim(0, 90)
     plt.tight_layout()
     plt.show()
 
 
-def Cluster_reordering(df) : 
+def Cluster_reordering(df):
     """Reordering clusters by size.
 
     This function proposes a new cluster order based on the size of clusters. Starting from
     the DataFrame cluster column, this function ranks the clusters according to their
-    sizes before reordering them in a decreasing way from huge clusters to small ones. 
+    sizes before reordering them in a decreasing way from huge clusters to small ones.
 
     The new cluster order will be added as a column to this input DataFrame.
 
@@ -292,13 +310,12 @@ def Cluster_reordering(df) :
         Updated Alphafold DataFrame.
     """
 
-    query_list=df['query'].unique().tolist()
+    query_list = df["query"].unique().tolist()
     clust_dict = {}
     convert_dict = {}
-    new_cluster=[]
+    new_cluster = []
 
     for pdb in query_list:
-
         sub_df = df[df["query"] == pdb]
         n_clusters = len(np.unique(sub_df["cluster"]))
 
@@ -306,16 +323,23 @@ def Cluster_reordering(df) :
             if sum(sub_df["cluster"] == clust) > 0:
                 clust_dict[clust] = sum(sub_df["cluster"] == clust)
 
-        order_dict = {k: v for k, v in sorted(clust_dict.items(),key=lambda item: item[1], reverse=True)}
+        order_dict = {
+            k: v
+            for k, v in sorted(
+                clust_dict.items(), key=lambda item: item[1], reverse=True
+            )
+        }
         for i, key in enumerate(order_dict):
-            #print(key)
+            # print(key)
             if key != -1:
                 convert_dict[key] = i + 1
-        
+
         convert_dict[-1] = -1
-        sub_df["New_clusters_order"] = [convert_dict[clust] for clust in sub_df["cluster"]]
-        #create a list of new cluster to add it to the original dataframe
-        new_cluster.extend([convert_dict[clust] for clust in sub_df["cluster"]]) 
+        sub_df["New_clusters_order"] = [
+            convert_dict[clust] for clust in sub_df["cluster"]
+        ]
+        # create a list of new cluster to add it to the original dataframe
+        new_cluster.extend([convert_dict[clust] for clust in sub_df["cluster"]])
 
     df["New_clusters_order"] = new_cluster
 
@@ -332,55 +356,65 @@ def get_pdb(df, metric, ascending=False):
         The metric based on which the sorting will be performed.
     ascending : bool, optional
         Specifies the sorting order. If False (default), structures are sorted in descending order of the metric; if True, in ascending order.
-    
+
     Returns
     -------
     None
-    
+
     The function sorts the structures based on the provided metric,
-    selecting either the top 5 structures for queries with a single cluster 
-    or the top 3 structures per cluster for queries with multiple clusters. 
+    selecting either the top 5 structures for queries with a single cluster
+    or the top 3 structures per cluster for queries with multiple clusters.
     It then copies these top structures into respective folders organized
     by query and cluster.
     """
-    Clusters = 'clusters'
+    Clusters = "clusters"
 
-    if not os.path.exists(Clusters): 
+    if not os.path.exists(Clusters):
         os.makedirs(Clusters)
-    
-    for pdb in df['query'].unique().tolist():
 
+    for pdb in df["query"].unique().tolist():
         sub_df = df[df["query"] == pdb]
-        nclusters = sub_df['cluster'].unique().tolist()
+        nclusters = sub_df["cluster"].unique().tolist()
         pdb_folder = os.path.join(Clusters, pdb)
 
-        if not os.path.exists(pdb_folder): 
-            os.makedirs(pdb_folder)  
-            
+        if not os.path.exists(pdb_folder):
+            os.makedirs(pdb_folder)
+
         if len(nclusters) == 1:
-            top_structures = sub_df.sort_values(by=metric, ascending=ascending).iloc[0:5]["pdb"].tolist()
-            print(f"This structure presents {pdb} {len(nclusters)} clusters according to the chosen threshold ")
-            #print(f"Top 5 structures for {pdb}: {top_structures}")
-            for file in top_structures : 
+            top_structures = (
+                sub_df.sort_values(by=metric, ascending=ascending)
+                .iloc[0:5]["pdb"]
+                .tolist()
+            )
+            print(
+                f"This structure presents {pdb} {len(nclusters)} clusters according to the chosen threshold "
+            )
+            # print(f"Top 5 structures for {pdb}: {top_structures}")
+            for file in top_structures:
                 shutil.copy(file, pdb_folder)
-                
+
         # If nclusters is greater than 2, take the top 3 structure from each cluster
         else:
-            print(f"This structure presents {pdb} {len(nclusters)} clusters according to the chosen threshold ")
-            grouped_df = sub_df.groupby('cluster')
+            print(
+                f"This structure presents {pdb} {len(nclusters)} clusters according to the chosen threshold "
+            )
+            grouped_df = sub_df.groupby("cluster")
 
-            for i in nclusters : 
+            for i in nclusters:
                 group_for_cluster_i = grouped_df.get_group(i)
-                top_structure = group_for_cluster_i.sort_values(by=metric, ascending=ascending).iloc[0:3]["pdb"]
-                #print(f"Top structure for cluster {i} in {pdb}: {top_structure}")
-                cluster_folder = os.path.join(pdb_folder,  f"cluster_{i}")
+                top_structure = group_for_cluster_i.sort_values(
+                    by=metric, ascending=ascending
+                ).iloc[0:3]["pdb"]
+                # print(f"Top structure for cluster {i} in {pdb}: {top_structure}")
+                cluster_folder = os.path.join(pdb_folder, f"cluster_{i}")
 
-                if not os.path.exists(cluster_folder): 
-                    os.makedirs(cluster_folder)  
+                if not os.path.exists(cluster_folder):
+                    os.makedirs(cluster_folder)
                 for file in top_structure:
                     shutil.copy(file, cluster_folder)
-                    
-def compute_pc(df, n_components=2) :
+
+
+def compute_pc(df, n_components=2):
     """Compute Principal Components for Alphafold Protein-Peptide Complex.
 
     This function computes the Principal Components (PCs) for a protein-peptide complex predicted by
@@ -407,29 +441,38 @@ def compute_pc(df, n_components=2) :
     for i in range(n_components):
         pc_list.append([])
 
-    query_list = df['query'].unique().tolist()
+    query_list = df["query"].unique().tolist()
 
     for pdb in query_list:
-
-        files = [file for file in df[df['query'] == pdb]['pdb'] if not pd.isnull(file)]
+        files = [file for file in df[df["query"] == pdb]["pdb"] if not pd.isnull(file)]
         # Check that only the last df row are missing
-        null_number =  sum(pd.isnull(df[df['query'] == pdb]['pdb']))
-        assert null_number == sum(pd.isnull(df[df['query'] == pdb]['pdb'][-null_number:])), f"Missing pdb data in the middle of the query {pdb}"
+        null_number = sum(pd.isnull(df[df["query"] == pdb]["pdb"]))
+        assert null_number == sum(
+            pd.isnull(df[df["query"] == pdb]["pdb"][-null_number:])
+        ), f"Missing pdb data in the middle of the query {pdb}"
         u = read_numerous_pdb(files)
-        chain_pep_value=chain_pep(files[0])
+        chain_pep_value = chain_pep(files[0])
 
-        align.AlignTraj(u, u, select=f"backbone and not chainID {chain_pep_value}",in_memory=True).run()
-        pc = pca.PCA(u, select=(f"backbone and chainID {chain_pep_value}"),align=True, mean=None,n_components=n_components).run()
+        align.AlignTraj(
+            u, u, select=f"backbone and not chainID {chain_pep_value}", in_memory=True
+        ).run()
+        pc = pca.PCA(
+            u,
+            select=(f"backbone and chainID {chain_pep_value}"),
+            align=True,
+            mean=None,
+            n_components=n_components,
+        ).run()
         backbone = u.select_atoms(f"backbone and chainID {chain_pep_value}")
         transformed = pc.transform(backbone, n_components)
         for i in range(n_components):
-            pc_list[i].extend(transformed[:,i].tolist())
-    
+            pc_list[i].extend(transformed[:, i].tolist())
+
     for i in range(n_components):
         df[f"PC{i+1}"] = pc_list[i] + null_number * [np.nan]
 
 
-def plot_pc(df , X="PC1", Y="PC2", show_legend=False, min_clust_num=5, **kwargs) :
+def plot_pc(df, X="PC1", Y="PC2", show_legend=False, min_clust_num=5, **kwargs):
     """Plotting principal components.
 
     This function helps in visualizing the pre-computed principal
@@ -444,7 +487,7 @@ def plot_pc(df , X="PC1", Y="PC2", show_legend=False, min_clust_num=5, **kwargs)
         DataFrame containing Alphafold data.
     X : str ,optional
         Name of the column representing the X-axis (default is 'PC1').
-    Y : str ,optional 
+    Y : str ,optional
         Name of the column representing the Y-axis (default is 'PC2').
     show_legend : bool, optional
         Whether to show the legend (default is `False`).
@@ -453,11 +496,10 @@ def plot_pc(df , X="PC1", Y="PC2", show_legend=False, min_clust_num=5, **kwargs)
     -------
     None
     """
-    query_list = df['query'].unique().tolist()
+    query_list = df["query"].unique().tolist()
     for pdb in query_list:
-
         sub_df = df[df["query"] == pdb]
-        #sub_df["cluster"] = list(sub_df["cluster"])
+        # sub_df["cluster"] = list(sub_df["cluster"])
 
         # Filter out cluster that are less than min_clust_num
         keep_clust = []
@@ -466,14 +508,20 @@ def plot_pc(df , X="PC1", Y="PC2", show_legend=False, min_clust_num=5, **kwargs)
                 keep_clust.append(cluster)
 
         keep_clust_df = sub_df[sub_df["cluster"].isin(keep_clust)]
-        keep_clust_df["cluster"] = keep_clust_df["cluster"].astype('category')
+        keep_clust_df["cluster"] = keep_clust_df["cluster"].astype("category")
 
         # Plot seaborn scatterplot
         plt.figure(figsize=(10, 6))
-        sns.scatterplot(keep_clust_df,
-                        x=X, y=Y, hue="cluster", linewidth = 0, **kwargs)
-        sns.scatterplot(sub_df[~sub_df['cluster'].isin(keep_clust)], alpha=0.5,
-                        x=X, y=Y, linewidth = 0, color="gray", **kwargs)
+        sns.scatterplot(keep_clust_df, x=X, y=Y, hue="cluster", linewidth=0, **kwargs)
+        sns.scatterplot(
+            sub_df[~sub_df["cluster"].isin(keep_clust)],
+            alpha=0.5,
+            x=X,
+            y=Y,
+            linewidth=0,
+            color="gray",
+            **kwargs,
+        )
 
         # Calculer les limites des axes
         max_range = max(max(sub_df[X]), max(sub_df[Y]))
@@ -484,23 +532,22 @@ def plot_pc(df , X="PC1", Y="PC2", show_legend=False, min_clust_num=5, **kwargs)
         ## Définir les limites des axes avec le tampon
         # plt.xlim(-range_val - buffer, range_val + buffer)
         # plt.ylim(-range_val - buffer, range_val + buffer)
-        
+
         ## Ajouter des titres et des labels
-        plt.axhline(0, color='black', linestyle='--', linewidth=1) 
-        #Ligne horizontale à y=0
-        plt.axvline(0, color='black', linestyle='--', linewidth=1) 
-        #Ligne verticale à x=0
+        plt.axhline(0, color="black", linestyle="--", linewidth=1)
+        # Ligne horizontale à y=0
+        plt.axvline(0, color="black", linestyle="--", linewidth=1)
+        # Ligne verticale à x=0
         plt.title(f"{X} vs {Y} - {pdb}")
         plt.xlabel(X)
         plt.ylabel(Y)
 
         ## Afficher la légende avec un titre plus lisible
         if show_legend:
-            plt.legend(title='Clusters', loc='upper right')
+            plt.legend(title="Clusters", loc="upper right")
         else:
-            plt.legend([],[], frameon=False)
+            plt.legend([], [], frameon=False)
 
         ## Afficher le graphique
         plt.grid(True)
         plt.show()
-

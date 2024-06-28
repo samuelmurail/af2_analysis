@@ -18,6 +18,7 @@ from .format import colabfold_1_5, af3_webserver, afpulldown, default
 from . import sequence, plot
 from .analysis import compute_LIS_matrix, get_pae
 
+
 class Data:
     """Data class
 
@@ -33,7 +34,7 @@ class Data:
         Dictionary containing the chains of each query.
     chain_length : dict
         Dictionary containing the length of each chain of each query.
-    
+
     Methods
     -------
     read_directory(directory, keep_recycles=False)
@@ -64,7 +65,7 @@ class Data:
         Plot the msa from the a3m file.
     show_plot_info()
         Show the plot info.
-    
+
     """
 
     def __init__(self, directory=None, csv=None, verbose=True):
@@ -73,7 +74,7 @@ class Data:
         if directory is not None:
             self.read_directory(directory, verbose=verbose)
         elif csv is not None:
-            self.format = 'csv'
+            self.format = "csv"
             self.import_csv(csv)
 
     def read_directory(self, directory, keep_recycles=False, verbose=True):
@@ -104,7 +105,7 @@ class Data:
         elif os.path.isfile(os.path.join(directory, "terms_of_use.md")):
             self.format = "AF3_webserver"
             self.df = af3_webserver.read_dir(directory)
-        elif os.path.isfile(os.path.join(directory, 'ranking_debug.json')):
+        elif os.path.isfile(os.path.join(directory, "ranking_debug.json")):
             self.format = "AlphaPulldown"
             self.df = afpulldown.read_dir(directory)
         else:
@@ -112,11 +113,11 @@ class Data:
             self.df = default.read_dir(directory)
             self.add_json()
             # self.extract_json()
-        
+
         self.set_chain_length()
 
     def set_chain_length(self):
-        """ Find chain information from the dataframe.
+        """Find chain information from the dataframe.
 
         Parameters
         ----------
@@ -175,7 +176,7 @@ class Data:
         """
 
         self.df = pd.read_csv(path)
-        self.dir = os.path.dirname(self.df['pdb'][0])
+        self.dir = os.path.dirname(self.df["pdb"][0])
 
         self.chains = {}
         self.chain_length = {}
@@ -325,12 +326,9 @@ class Data:
 
         return (fig, ax)
 
-
     def plot_pae(self, index, cmap=cm.vik):
-
         row = self.df.iloc[index]
-        pae_array = get_pae(row['json'])
-
+        pae_array = get_pae(row["json"])
 
         fig, ax = plt.subplots()
         res_max = sum(self.chain_length[row["query"]])
@@ -350,14 +348,14 @@ class Data:
         )
 
         plt.vlines(
-            np.cumsum(self.chain_length[row["query"]][:-1])- 0.5,
+            np.cumsum(self.chain_length[row["query"]][:-1]) - 0.5,
             ymin=-0.5,
             ymax=res_max,
             colors="black",
         )
 
-        plt.xlim(-0.5, res_max-0.5)
-        plt.ylim(res_max-0.5, -0.5)
+        plt.xlim(-0.5, res_max - 0.5)
+        plt.ylim(res_max - 0.5, -0.5)
         chain_pos = []
         len_sum = 0
         for longueur in self.chain_length[row["query"]]:
@@ -373,12 +371,11 @@ class Data:
         return (fig, ax)
 
     def get_plddt(self, index):
-
         row = self.df.iloc[index]
 
-        if self.format in ["AF3_webserver", 'csv', "AlphaPulldown"]:
-            model = pdb_numpy.Coor(row['pdb'])
-            plddt_array = model.models[0].beta[model.models[0].name == 'CA']
+        if self.format in ["AF3_webserver", "csv", "AlphaPulldown"]:
+            model = pdb_numpy.Coor(row["pdb"])
+            plddt_array = model.models[0].beta[model.models[0].name == "CA"]
             return plddt_array
 
         if row["json"] is None:
@@ -463,9 +460,8 @@ class Data:
 
             a3m_lines = open(os.path.join(self.dir, a3m_file), "r").readlines()[1:]
             seqs, mtx, nams = sequence.parse_a3m(
-                a3m_lines=a3m_lines,
-                filter_qid=filter_qid,
-                filter_cov=filter_cov)
+                a3m_lines=a3m_lines, filter_qid=filter_qid, filter_cov=filter_cov
+            )
             print(f"- Keeping {len(seqs):6} sequences for plotting.")
             feature_dict = {}
             feature_dict["msa"] = sequence.convert_aa_msa(seqs)
@@ -474,12 +470,11 @@ class Data:
             if len(seqs) == sum(self.chain_length[querie]):
                 feature_dict["asym_id"] = []
                 for i, chain_len in enumerate(self.chain_length[querie]):
-                    feature_dict["asym_id"] += [i + 1.] * chain_len
+                    feature_dict["asym_id"] += [i + 1.0] * chain_len
                 feature_dict["asym_id"] = np.array(feature_dict["asym_id"])
 
             fig = plot.plot_msa_v2(feature_dict)
             plt.show()
-
 
     def count_msa_seq(self):
         """
@@ -510,16 +505,15 @@ class Data:
 
             a3m_lines = open(os.path.join(self.dir, a3m_file), "r").readlines()[1:]
             seqs, mtx, nams = sequence.parse_a3m(
-                a3m_lines=a3m_lines,
-                filter_qid=0,
-                filter_cov=0)
+                a3m_lines=a3m_lines, filter_qid=0, filter_cov=0
+            )
             feature_dict = {}
             feature_dict["msa"] = sequence.convert_aa_msa(seqs)
             feature_dict["num_alignments"] = len(seqs)
 
             seq_dict = {}
-            for chain in self.chains[querie]: seq_dict[chain] = 0
-            
+            for chain in self.chains[querie]:
+                seq_dict[chain] = 0
 
             chain_len_list = self.chain_length[querie]
             chain_list = self.chains[querie]
@@ -541,17 +535,21 @@ class Data:
                 chain_list = new_chain_list
                 seq_len = sum(chain_len_list)
 
-            assert len(seqs[0]) == seq_len, f"len(seqs[0])={len(seqs[0])} != seq_len={seq_len}"
+            assert (
+                len(seqs[0]) == seq_len
+            ), f"len(seqs[0])={len(seqs[0])} != seq_len={seq_len}"
 
             for seq in seqs:
                 start = 0
                 for i, num in enumerate(chain_len_list):
-                    gap_num = seq[start:start+num].count("-")
+                    gap_num = seq[start : start + num].count("-")
                     if gap_num < num:
                         seq_dict[chain_list[i]] += 1
                     start += num
 
-            alignement_len[querie] = seq_dict # [seq_dict[chain] for chain in self.chains[querie]]
+            alignement_len[
+                querie
+            ] = seq_dict  # [seq_dict[chain] for chain in self.chains[querie]]
         return alignement_len
 
     def show_plot_info(self, cmap=cm.vik):
@@ -571,19 +569,17 @@ class Data:
             min=1,
             max=len(self.df),
             step=1,
-            description='model:',
+            description="model:",
             disabled=False,
         )
         display(model_widget)
-        
-        
-        def show_model(rank_num):
 
+        def show_model(rank_num):
             fig, (ax_plddt, ax_pae) = plt.subplots(1, 2, figsize=(10, 4))
-            plddt_array = self.get_plddt(rank_num-1)
-            plddt_plot, = ax_plddt.plot(plddt_array)
-            query = self.df.iloc[model_widget.value-1]['query']
-            json_file = self.df.iloc[model_widget.value-1]['json']
+            plddt_array = self.get_plddt(rank_num - 1)
+            (plddt_plot,) = ax_plddt.plot(plddt_array)
+            query = self.df.iloc[model_widget.value - 1]["query"]
+            json_file = self.df.iloc[model_widget.value - 1]["json"]
             ax_plddt.vlines(
                 np.cumsum(self.chain_length[query][:-1]),
                 ymin=0,
@@ -615,8 +611,8 @@ class Data:
                 xmax=res_max,
                 colors="yellow",
             )
-            ax_pae.set_xlim(-0.5, res_max-0.5)
-            ax_pae.set_ylim(res_max-0.5, -0.5)
+            ax_pae.set_xlim(-0.5, res_max - 0.5)
+            ax_pae.set_ylim(res_max - 0.5, -0.5)
             chain_pos = []
             len_sum = 0
             for longueur in self.chain_length[query]:
@@ -626,21 +622,19 @@ class Data:
             ax_pae.set_yticklabels(self.chains[query])
             plt.show(fig)
 
-        
-        output = widgets.Output(layout={'width': '95%'})
+        output = widgets.Output(layout={"width": "95%"})
         display(output)
 
         with output:
             show_model(model_widget.value)
-            #logger.info(results['metric'][0][rank_num - 1]['print_line'])
+            # logger.info(results['metric'][0][rank_num - 1]['print_line'])
 
         def on_value_change(change):
             output.clear_output()
             with output:
                 show_model(model_widget.value)
 
-        model_widget.observe(on_value_change, names='value')
-
+        model_widget.observe(on_value_change, names="value")
 
     def show_plot(self, cmap=cm.vik):
         """
@@ -650,26 +644,24 @@ class Data:
         ```
         """
 
-        
         model_widget = widgets.IntSlider(
             value=1,
             min=1,
             max=len(self.df),
             step=1,
-            description='model:',
+            description="model:",
             disabled=False,
         )
         display(model_widget)
-        
-        
+
         print("YO")
         rank_num = 1
 
         fig, (ax_plddt, ax_pae) = plt.subplots(1, 2, figsize=(10, 4))
-        plddt_array = self.get_plddt(rank_num-1)
-        plddt_plot, = ax_plddt.plot(plddt_array)
-        query = self.df.iloc[model_widget.value-1]['query']
-        json_file = self.df.iloc[model_widget.value-1]['json']
+        plddt_array = self.get_plddt(rank_num - 1)
+        (plddt_plot,) = ax_plddt.plot(plddt_array)
+        query = self.df.iloc[model_widget.value - 1]["query"]
+        json_file = self.df.iloc[model_widget.value - 1]["json"]
         vline_plot = ax_plddt.vlines(
             np.cumsum(self.chain_length[query][:-1]),
             ymin=0,
@@ -701,8 +693,8 @@ class Data:
             xmax=res_max,
             colors="yellow",
         )
-        ax_pae.set_xlim(-0.5, res_max-0.5)
-        ax_pae.set_ylim(res_max-0.5, -0.5)
+        ax_pae.set_xlim(-0.5, res_max - 0.5)
+        ax_pae.set_ylim(res_max - 0.5, -0.5)
         chain_pos = []
         len_sum = 0
         for longueur in self.chain_length[query]:
@@ -714,30 +706,39 @@ class Data:
 
         def update_model(change):
             rank_num = model_widget.value
-            #print("Update")
-            plddt_array = self.get_plddt(rank_num-1)
+            # print("Update")
+            plddt_array = self.get_plddt(rank_num - 1)
             res_num = len(plddt_array)
             plddt_plot.set_data(range(res_num), plddt_array)
             ax_plddt.set_xlim(0, len(plddt_array))
 
-            query = self.df.iloc[rank_num-1]['query']
+            query = self.df.iloc[rank_num - 1]["query"]
             vline_plot.set_segments(
-                [np.array([[x, 0], [x, 100]]) for x in np.cumsum(self.chain_length[query][:-1])]
+                [
+                    np.array([[x, 0], [x, 100]])
+                    for x in np.cumsum(self.chain_length[query][:-1])
+                ]
             )
-            #ax_plddt.set_title(self.chain_length[query][:-1])
-            
-            json_file = self.df.iloc[rank_num-1]['json']
+            # ax_plddt.set_title(self.chain_length[query][:-1])
+
+            json_file = self.df.iloc[rank_num - 1]["json"]
             pae_array = get_pae(json_file)
-            pae_plot.set_extent((0, res_num,0, res_num))
+            pae_plot.set_extent((0, res_num, 0, res_num))
             pae_plot.set_data(pae_array)
             ax_pae.set_xlim(0, res_num)
             ax_pae.set_ylim(0, res_num)
 
             vline_pae.set_segments(
-                [np.array([[x, -0.5], [x, res_num]]) for x in np.cumsum(self.chain_length[query][:-1])]
+                [
+                    np.array([[x, -0.5], [x, res_num]])
+                    for x in np.cumsum(self.chain_length[query][:-1])
+                ]
             )
             hline_pae.set_segments(
-                [np.array([[-0.5, res_num-x], [res_num, res_num-x]]) for x in np.cumsum(self.chain_length[query][:-1])]
+                [
+                    np.array([[-0.5, res_num - x], [res_num, res_num - x]])
+                    for x in np.cumsum(self.chain_length[query][:-1])
+                ]
             )
             chain_pos = []
             len_sum = 0
@@ -747,13 +748,12 @@ class Data:
             ax_pae.set_yticks(chain_pos)
             ax_pae.set_yticklabels(self.chains[query])
             fig.canvas.draw()
-        
-        model_widget.observe(update_model, names='value')
 
+        model_widget.observe(update_model, names="value")
 
 
 def concat_data(data_list):
-    """ Concatenate data from a list of Data objects.
+    """Concatenate data from a list of Data objects.
 
     Parameters
     ----------
@@ -763,7 +763,7 @@ def concat_data(data_list):
     Returns
     -------
     Data
-        Concatenated Data object.   
+        Concatenated Data object.
     """
 
     concat = Data(directory=None, csv=None)
@@ -775,8 +775,9 @@ def concat_data(data_list):
     for i in range(1, len(data_list)):
         concat.chains.update(data_list[i].chains)
         concat.chain_length.update(data_list[i].chain_length)
-    
+
     return concat
+
 
 def read_multiple_alphapulldown(directory):
     """Read multiple directories containing AlphaPulldown data.
@@ -792,14 +793,17 @@ def read_multiple_alphapulldown(directory):
         Concatenated Data object.
     """
 
-    dir_list = [name for name in os.listdir(directory) if os.path.isdir(os.path.join(directory, name))]
+    dir_list = [
+        name
+        for name in os.listdir(directory)
+        if os.path.isdir(os.path.join(directory, name))
+    ]
     data_list = []
 
     for dir in dir_list:
-        if 'ranking_debug.json' in os.listdir(os.path.join(directory, dir)):
+        if "ranking_debug.json" in os.listdir(os.path.join(directory, dir)):
             data_list.append(Data(os.path.join(directory, dir)))
 
     if len(data_list) == 0:
         raise ValueError("No AlphaPulldown data found in the directory.")
     return concat_data(data_list)
-

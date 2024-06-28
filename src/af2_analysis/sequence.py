@@ -41,7 +41,6 @@ def convert_aa_msa(seqs):
 
 
 def parse_a3m(a3m_lines=None, a3m_file=None, filter_qid=0.15, filter_cov=0.5, N=100000):
-
     def seqid(a, b):
         return sum(c1 == c2 for c1, c2 in zip(a, b))
 
@@ -100,7 +99,6 @@ def parse_a3m(a3m_lines=None, a3m_file=None, filter_qid=0.15, filter_cov=0.5, N=
             seqs[-1] += line
 
     print(f"- Reading {n:6} sequences.")
-
 
     # filter last entry
     do_filter()

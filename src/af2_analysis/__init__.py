@@ -14,4 +14,3 @@ __email__ = "samuel.murail@u-paris.fr"
 __status__ = "Beta"
 
 from .data import Data
-

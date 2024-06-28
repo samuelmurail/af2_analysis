@@ -9,7 +9,7 @@ def plot_msa_v2(feature_dict, sort_lines=True, dpi=100):
     """
 
     seq = feature_dict["msa"][0]
-    #print("len(seq), seq", len(seq), seq)
+    # print("len(seq), seq", len(seq), seq)
 
     if "asym_id" in feature_dict:
         Ls = [0]
@@ -42,7 +42,6 @@ def plot_msa_v2(feature_dict, sort_lines=True, dpi=100):
     #    print(f"i: {i}  Ls[i]: {Ls[i]}  Ln[i+1]: {Ln[i+1]}")
     #    print(f"gap[:, Ln[i]: Ln[i+1]]: {gap[:, Ln[i]: Ln[i+1]]}")
     #    print(f"gap[:, Ln[i]: Ln[i+1]].max(-1): {gap[:, Ln[i]: Ln[i+1]].max(-1)}")
-
 
     gapid = np.stack([gap[:, Ln[i] : Ln[i + 1]].max(-1) for i in range(len(Ls))], -1)
     lines = []
