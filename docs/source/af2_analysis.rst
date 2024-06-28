@@ -29,6 +29,14 @@ af2\_analysis.sequence module
    :undoc-members:
    :show-inheritance:
 
+af2\_analysis.docking module
+-----------------------------
+
+.. automodule:: af2_analysis.docking
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 af2\_analysis.format module
 -----------------------------
 

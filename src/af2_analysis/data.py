@@ -16,7 +16,7 @@ import ipywidgets as widgets
 
 from .format import colabfold_1_5, af3_webserver, afpulldown, default
 from . import sequence, plot
-from .analysis import compute_LIS_matrix
+from .analysis import compute_LIS_matrix, get_pae
 
 class Data:
     """Data class
@@ -60,18 +60,10 @@ class Data:
         Plot the pLDDT.
     show_3d(index)
         Show the 3D structure.
-    compute_pdockq()
-        Compute pdockq from the pdb file.
-    compute_mpdockq()
-        Compute mpdockq from the pdb file.
-    compute_pdockq2()
-        Compute pdockq2 from the pdb file.
     plot_msa(filter_qid=0.15, filter_cov=0.4)
         Plot the msa from the a3m file.
     show_plot_info()
         Show the plot info.
-    extract_inter_chain_pae(fun=np.mean)
-        Read the PAE matrix and extract the average inter chain PAE.
     
     """
 
@@ -389,7 +381,6 @@ class Data:
             plddt_array = model.models[0].beta[model.models[0].name == 'CA']
             return plddt_array
 
-
         if row["json"] is None:
             return (None, None)
 
@@ -441,217 +432,6 @@ class Data:
         # view[1].add_licorice(selection=":A", color='blue')
         # view[0].add_licorice(selection=":A")
         return view
-
-    def compute_pdockq(self, verbose=True):
-        """
-        Compute the pdockq from the pdb file.
-        """
-
-        from pdb_numpy.analysis import compute_pdockQ
-
-        pdockq_list = []
-
-        disable = False if verbose else True
-
-        for pdb in tqdm(self.df["pdb"], total=len(self.df["pdb"]), disable=disable):
-            if pdb:
-                model = pdb_numpy.Coor(pdb)
-                pdockq_list += compute_pdockQ(model)
-            else:
-                pdockq_list.append(None)
-
-        self.df["pdockq"] = pdockq_list
-
-
-    def compute_mpdockq(self, verbose=True):
-        """
-        Compute mpdockq from the pdb file.
-
-        """
-
-        from pdb_numpy.analysis import compute_pdockQ
-
-        pdockq_list = []
-        disable = False if verbose else True
-
-        for pdb in tqdm(self.df["pdb"], total=len(self.df["pdb"]), disable=disable):
-            if (pdb is not None and pdb is not np.nan):
-                model = pdb_numpy.Coor(pdb)
-                pdockq_list += compute_pdockQ(
-                    model,
-                    cutoff=8.0,
-                    L=0.728,
-                    x0=309.375,
-                    k=0.098,
-                    b=0.262)
-            else:
-                pdockq_list.append(None)
-
-        self.df.loc[:, "mpdockq"] = pdockq_list
-
-    def compute_pdockq2(self, verbose=True):
-        r"""
-        Compute pdockq2 from the pdb file [1]_.
-
-        .. math::
-            pDockQ_2 = \frac{L}{1 + exp [-k*(X_i-X_0)]} + b
-
-        with
-
-        .. math::
-            X_i = \langle \frac{1}{1+(\frac{PAE_{int}}{d_0})^2} \rangle - \langle pLDDT \rangle_{int}
-
-        References:
-        
-        .. [1] : https://academic.oup.com/bioinformatics/article/39/7/btad424/7219714
-        """
-
-        from pdb_numpy.analysis import compute_pdockQ2
-
-        pdockq_list = []
-
-        max_chain_num = 0
-        for query in self.chains:
-            chain_num = len(self.chains[query])
-            if chain_num > max_chain_num:
-                max_chain_num = chain_num
-
-        for i in range(max_chain_num):
-            pdockq_list.append([])
-
-        disable = False if verbose else True
-
-        for pdb, json_path in tqdm(
-            zip(self.df["pdb"], self.df["json"]), total=len(self.df["pdb"]), disable=disable
-        ):
-            if (pdb is not None and pdb is not np.nan and json_path is not None and json_path is not np.nan):
-                model = pdb_numpy.Coor(pdb)
-                # with open(json_path) as f:
-                #     local_json = json.load(f)
-                # pae_array = np.array(local_json["pae"]) 
-                pae_array = get_pae(json_path)
-
-                pdockq2 = compute_pdockQ2(model, pae_array)
-
-                for i in range(max_chain_num):
-                    if i < len(pdockq2):
-                        pdockq_list[i].append(pdockq2[i][0])
-                    else:
-                        pdockq_list[i].append(None)
-
-            else:
-                for i in range(max_chain_num):
-                    pdockq_list[i].append(None)
-
-        # print(pdockq_list)
-        for i in range(max_chain_num):
-            self.df.loc[:, f"pdockq2_{chr(65+i)}"] = pdockq_list[i]
-
-
-    def compute_LIS_matrix(self, pae_cutoff=12.0, verbose=True):
-        """
-        Compute the LIS score as define in [2]_.
-
-        Implementation was inspired from implementation in:
-
-        .. [2] https://github.com/flyark/AFM-LIS
-        """
-        LIS_matrix_list = []
-
-        max_chain_num = 0
-        for query in self.chains:
-            chain_num = len(self.chains[query])
-            if chain_num > max_chain_num:
-                max_chain_num = chain_num
-            
-        disable = False if verbose else True
-
-        for pdb, json_path in tqdm(
-            zip(self.df["pdb"], self.df["json"]), total=len(self.df["pdb"]), disable = disable
-        ):
-            if (pdb is not None and pdb is not np.nan and json_path is not None and json_path is not np.nan):
-                model = pdb_numpy.Coor(pdb)
-                pae_array = get_pae(json_path)
-                LIS_matrix = compute_LIS_matrix(model, pae_array, pae_cutoff)
-                LIS_matrix_list.append(LIS_matrix)
-            else:
-                LIS_matrix_list.append(None)
-
-        self.df.loc[:, "LIS"] = LIS_matrix_list
-
-    def compute_piTM(self, verbose=True):
-        r"""Compute the piTM score as define in [3]_.
-
-        .. math::
-            piTM = \max_{i \in \mathcal{I}} \frac{1}{I} \sum_{j \in \mathcal{I}}  \frac{1}{1 + [\langle e_{ij} \rangle / d_0 (I)]^2}
-
-        with:
-
-        .. math::
-            d_0(I) = \begin{cases} 1.25 \sqrt[3]{I -15} -1.8\text{,} & \text{if } I \geq 22 \\ 0.02 I \text{,} & \text{if } I < 22  \end{cases}
-        
-
-        Implementation was inspired from `predicted_tm_score_v1()` in https://github.com/FreshAirTonight/af2complex/blob/main/src/alphafold/common/confidence.py
-
-        References
-        ----------
-        .. [3] Mu Gao, Davi Nakajima An, Jerry M. Parks & Jeffrey Skolnick. 
-            AF2Complex predicts direct physical interactions in multimeric proteins with deep learning
-            *Nature Communications*. volume 13, Article number: 1744 (2022).
-            https://www.nature.com/articles/s41467-022-29394-2
-        
-        .. warning::
-            IT IS NOT WORKING !!
-        """
-
-        from pdb_numpy.analysis import compute_piTM
-
-        piTM_chain_list = []
-        piTM_list = []
-
-        max_chain_num = 0
-        for query in self.chains:
-            chain_num = len(self.chains[query])
-            if chain_num > max_chain_num:
-                max_chain_num = chain_num
-
-        for i in range(max_chain_num):
-            piTM_chain_list.append([])
-
-        disable = False if verbose else True
-
-        for pdb, json_path in tqdm(
-            zip(self.df["pdb"], self.df["json"]), total=len(self.df["pdb"]), disable = disable
-        ):
-            # print(pdb, json_path)
-            if (pdb is not None and pdb is not np.nan and json_path is not None and json_path is not np.nan):
-                model = pdb_numpy.Coor(pdb)
-                with open(json_path) as f:
-                    local_json = json.load(f)
-                pae_array = np.array(local_json["pae"])
-
-                piTM, piTM_chain = compute_piTM(model, pae_array)
-                # print(piTM, piTM_chain)
-
-                piTM_list.append(piTM[0])
-
-                for i in range(max_chain_num):
-                    # print(i, len(piTM_chain))
-                    if i < len(piTM_chain):
-                        piTM_chain_list[i].append(piTM_chain[i][0])
-                    else:
-                        piTM_chain_list[i].append(None)
-
-            else:
-                piTM_list.append(None)
-                for i in range(max_chain_num):
-                    piTM_chain_list[i].append(None)
-
-        # print(piTM_chain_list)
-        self.df.loc[:, "piTM"] = piTM_list
-        for i in range(max_chain_num):
-            self.df.loc[:, f"piTM_{chr(65+i)}"] = piTM_chain_list[i]
-
 
     def plot_msa(self, filter_qid=0.15, filter_cov=0.4):
         """
@@ -971,50 +751,6 @@ class Data:
         model_widget.observe(update_model, names='value')
 
 
-    def extract_inter_chain_pae(self, fun=np.mean, verbose=True):
-        """ Read the PAE matrix and extract the average inter chain PAE.
-        
-        Parameters
-        ----------
-        None
-        
-        Returns
-        -------
-        None
-        """
-        pae_list = []
-        
-        disable = False if verbose else True
-
-        for query, json_path in tqdm(
-                        zip(self.df["query"], self.df["json"]), total=len(self.df["json"]), disable = disable
-            ):
-            if (json_path is not None and json_path is not np.nan):
-                with open(json_path) as f:
-                    local_json = json.load(f)
-                pae_array = np.array(local_json["pae"])
-                
-                chain_lens = self.chain_length[query]
-                chain_len_sums = np.cumsum([0] + chain_lens)
-                pae_chain_array = np.empty((len(chain_lens), len(chain_lens)))
-                chain_ids = self.chains[query]
-                
-                pae_dict = {}
-                
-                for i in range(len(chain_lens)):
-                    for j in range(len(chain_lens)):
-                        pae_val = fun(pae_array[chain_len_sums[i]:chain_len_sums[i+1],chain_len_sums[j]:chain_len_sums[j+1]])
-                        pae_dict[f"PAE_{chain_ids[i]}_{chain_ids[j]}"] = pae_val
-                
-                pae_list.append(pae_dict)
-            else:
-                pae_list.append({})
-
-        pae_df = pd.DataFrame(pae_list)
-        
-        for col in pae_df.columns:
-            self.df.loc[:, col] = pae_df.loc[:, col].to_numpy()
-
 
 def concat_data(data_list):
     """ Concatenate data from a list of Data objects.
@@ -1042,7 +778,7 @@ def concat_data(data_list):
     
     return concat
 
-def read_multiple_alphapuldown(directory):
+def read_multiple_alphapulldown(directory):
     """Read multiple directories containing AlphaPulldown data.
 
     Parameters
@@ -1067,33 +803,3 @@ def read_multiple_alphapuldown(directory):
         raise ValueError("No AlphaPulldown data found in the directory.")
     return concat_data(data_list)
 
-
-def get_pae(json_file):
-    """Get the PAE matrix from a json file.
-
-    Parameters
-    ----------
-    json_file : str
-        Path to the json file.
-    
-    Returns
-    -------
-    np.array
-        PAE matrix.
-    """
-
-
-    if json_file is None:
-        return (None, None)
-
-    with open(json_file) as f:
-        local_json = json.load(f)
-
-    if 'pae' in local_json:
-        pae_array = np.array(local_json["pae"])
-    elif 'predicted_aligned_error' in local_json[0]:
-        pae_array = np.array(local_json[0]["predicted_aligned_error"])
-    else:
-        raise ValueError("No PAE found in the json file.")
-
-    return pae_array

@@ -4,6 +4,13 @@ import pdb_numpy
 from tqdm.auto import tqdm
 from . import data
 
+"""
+The module contains functions to extract and compute docking scores.
+
+..Warning:
+    The ligand chain is assumed to be the last chain in the list of chains.
+"""
+
 def extract_pae_pep(my_data, fun = np.mean, verbose=True):
     """Extract the PAE score for the peptide-peptide interface.
 

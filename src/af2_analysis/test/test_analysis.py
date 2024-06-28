@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 
 import af2_analysis
+from af2_analysis import analysis
 from .data_files import TEST_FILE_PATH
 
 def test_cf_1_5_5_relax():
@@ -13,7 +14,7 @@ def test_cf_1_5_5_relax():
     data_path = os.path.join(TEST_FILE_PATH, 'beta_amyloid_dimer_cf_1.5.5')
 
     my_data = af2_analysis.Data(data_path)
-    my_data.compute_pdockq()
+    analysis.pdockq(my_data)
 
     expected_pdockq = [
         0.03322, 0.02051, 0.03, 0.02971, 0.12094,
@@ -29,11 +30,12 @@ def test_cf_1_5_5_relax():
     precision = 0.001
     assert np.all([my_data.df.iloc[i]['pdockq'] == pytest.approx(expected_pdockq[i], precision) for i in range(len(my_data.df))])
 
-    my_data.compute_pdockq2()
+    analysis.pdockq2(my_data)
     print([round(i,5) for i in my_data.df['pdockq2_B']])
 
     expected_pdockq2 = [0.01199, 0.01062, 0.01429, 0.01636, 0.16844, 0.01661, 0.0115, 0.02388, 0.00895, 0.02964, 0.01174, 0.01256, 0.01341, 0.05058, 0.20396, 0.01398, 0.01116, 0.01292, 0.02662, 0.19487, 0.01218, 0.01122, 0.01373, 0.05064, 0.18241, 0.01205, 0.01135, 0.01352, 0.01025, 0.02231, 0.01376, 0.0106, 0.01412, 0.04422, 0.19023, 0.01247, 0.01078, 0.01258, 0.02291, 0.20544]
     assert np.all([my_data.df.iloc[i]['pdockq2_B'] == pytest.approx(expected_pdockq2[i], precision) for i in range(len(my_data.df))])
 
-    my_data.compute_LIS_matrix()
-            
+    analysis.LIS_matrix(my_data)
+    analysis.inter_chain_pae(my_data)  
+
