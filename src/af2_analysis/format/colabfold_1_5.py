@@ -99,7 +99,7 @@ def read_log(directory, keep_recycles=False):
     return log_pd
 
 
-def add_pdb(log_pd, directory):
+def add_pdb(log_pd, directory, verbose=True):
     """Find pdb files in the directory.
 
     Parameters
@@ -125,7 +125,9 @@ def add_pdb(log_pd, directory):
     pdb_list = []
     relaxed_pdb_list = []
 
-    for _, row in tqdm(log_pd.iterrows(), total=log_pd.shape[0]):
+    disable = False if verbose else True
+
+    for _, row in tqdm(log_pd.iterrows(), total=log_pd.shape[0], disable=disable):
         # reg = fr"{row['query']}_.*_{row['weight']}_model_{row['model']}_seed_{row['seed']:03d}\.r{row['recycle']}\.pdb"
         reg = rf"{row['query']}.*_{row['weight']}_model_{row['model']}_seed_{row['seed']:03d}\.pdb"
         r = re.compile(reg)
@@ -163,7 +165,7 @@ def add_pdb(log_pd, directory):
         log_pd.loc[:, "relaxed_pdb"] = relaxed_pdb_list
 
 
-def add_json(log_pd, directory):
+def add_json(log_pd, directory, verbose=True):
     """Find json files in the directory.
 
     Parameters
@@ -195,7 +197,9 @@ def add_json(log_pd, directory):
         == log_pd["recycle"]
     )
 
-    for i, last in tqdm(enumerate(last_recycle), total=len(last_recycle)):
+    disable = False if verbose else True
+
+    for i, last in tqdm(enumerate(last_recycle), total=len(last_recycle), disable=disable):
         row = log_pd.iloc[i]
         file_state = False
 

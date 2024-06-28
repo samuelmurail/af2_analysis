@@ -75,16 +75,16 @@ class Data:
     
     """
 
-    def __init__(self, directory=None, csv=None):
+    def __init__(self, directory=None, csv=None, verbose=True):
         """ """
 
         if directory is not None:
-            self.read_directory(directory)
+            self.read_directory(directory, verbose=verbose)
         elif csv is not None:
             self.format = 'csv'
             self.import_csv(csv)
 
-    def read_directory(self, directory, keep_recycles=False):
+    def read_directory(self, directory, keep_recycles=False, verbose=True):
         """Read a directory.
 
         If the directory contains a `log.txt` file, the format is set to `colabfold_1.5`.
@@ -93,6 +93,10 @@ class Data:
         ----------
         directory : str
             Path to the directory containing the `log.txt` file.
+        keep_recycles : bool
+            Keep only the last recycle for each query.
+        verbose : bool
+            Print information about the directory.
 
         Returns
         -------
@@ -103,8 +107,8 @@ class Data:
         if os.path.isfile(os.path.join(directory, "log.txt")):
             self.format = "colabfold_1.5"
             self.df = colabfold_1_5.read_log(directory, keep_recycles)
-            self.add_pdb()
-            self.add_json()
+            self.add_pdb(verbose=verbose)
+            self.add_json(verbose=verbose)
         elif os.path.isfile(os.path.join(directory, "terms_of_use.md")):
             self.format = "AF3_webserver"
             self.df = af3_webserver.read_dir(directory)
@@ -200,7 +204,7 @@ class Data:
                 for chain in self.chains[querie]
             ]
 
-    def add_json(self):
+    def add_json(self, verbose=True):
         """Add json files to the dataframe.
 
         Parameters
@@ -213,9 +217,9 @@ class Data:
         """
 
         if self.format == "colabfold_1.5":
-            colabfold_1_5.add_json(self.df, self.dir)
+            colabfold_1_5.add_json(self.df, self.dir, verbose=verbose)
         if self.format == "default":
-            default.add_json(self.df, self.dir)
+            default.add_json(self.df, self.dir, verbose=verbose)
 
     def extract_json(self):
         """Extract json files to the dataframe.
@@ -253,7 +257,7 @@ class Data:
             new_col = pd.Series(new_column[keys], index=index_list)
             self.df[keys].iloc[index_list] = new_col
 
-    def add_pdb(self):
+    def add_pdb(self, verbose=True):
         """Add pdb files to the dataframe.
 
         Parameters
@@ -266,7 +270,7 @@ class Data:
         """
 
         if self.format == "colabfold_1.5":
-            colabfold_1_5.add_pdb(self.df, self.dir)
+            colabfold_1_5.add_pdb(self.df, self.dir, verbose=verbose)
 
     def add_fasta(self, csv):
         """Add fasta sequence to the dataframe.
@@ -438,7 +442,7 @@ class Data:
         # view[0].add_licorice(selection=":A")
         return view
 
-    def compute_pdockq(self):
+    def compute_pdockq(self, verbose=True):
         """
         Compute the pdockq from the pdb file.
         """
@@ -447,7 +451,9 @@ class Data:
 
         pdockq_list = []
 
-        for pdb in tqdm(self.df["pdb"], total=len(self.df["pdb"])):
+        disable = False if verbose else True
+
+        for pdb in tqdm(self.df["pdb"], total=len(self.df["pdb"]), disable=disable):
             if pdb:
                 model = pdb_numpy.Coor(pdb)
                 pdockq_list += compute_pdockQ(model)
@@ -457,7 +463,7 @@ class Data:
         self.df["pdockq"] = pdockq_list
 
 
-    def compute_mpdockq(self):
+    def compute_mpdockq(self, verbose=True):
         """
         Compute mpdockq from the pdb file.
 
@@ -466,8 +472,9 @@ class Data:
         from pdb_numpy.analysis import compute_pdockQ
 
         pdockq_list = []
+        disable = False if verbose else True
 
-        for pdb in tqdm(self.df["pdb"], total=len(self.df["pdb"])):
+        for pdb in tqdm(self.df["pdb"], total=len(self.df["pdb"]), disable=disable):
             if (pdb is not None and pdb is not np.nan):
                 model = pdb_numpy.Coor(pdb)
                 pdockq_list += compute_pdockQ(
@@ -482,7 +489,7 @@ class Data:
 
         self.df.loc[:, "mpdockq"] = pdockq_list
 
-    def compute_pdockq2(self):
+    def compute_pdockq2(self, verbose=True):
         r"""
         Compute pdockq2 from the pdb file [1]_.
 
@@ -512,8 +519,10 @@ class Data:
         for i in range(max_chain_num):
             pdockq_list.append([])
 
+        disable = False if verbose else True
+
         for pdb, json_path in tqdm(
-            zip(self.df["pdb"], self.df["json"]), total=len(self.df["pdb"])
+            zip(self.df["pdb"], self.df["json"]), total=len(self.df["pdb"]), disable=disable
         ):
             if (pdb is not None and pdb is not np.nan and json_path is not None and json_path is not np.nan):
                 model = pdb_numpy.Coor(pdb)
@@ -539,7 +548,7 @@ class Data:
             self.df.loc[:, f"pdockq2_{chr(65+i)}"] = pdockq_list[i]
 
 
-    def compute_LIS_matrix(self, pae_cutoff=12.0):
+    def compute_LIS_matrix(self, pae_cutoff=12.0, verbose=True):
         """
         Compute the LIS score as define in [2]_.
 
@@ -554,9 +563,11 @@ class Data:
             chain_num = len(self.chains[query])
             if chain_num > max_chain_num:
                 max_chain_num = chain_num
+            
+        disable = False if verbose else True
 
         for pdb, json_path in tqdm(
-            zip(self.df["pdb"], self.df["json"]), total=len(self.df["pdb"])
+            zip(self.df["pdb"], self.df["json"]), total=len(self.df["pdb"]), disable = disable
         ):
             if (pdb is not None and pdb is not np.nan and json_path is not None and json_path is not np.nan):
                 model = pdb_numpy.Coor(pdb)
@@ -568,7 +579,7 @@ class Data:
 
         self.df.loc[:, "LIS"] = LIS_matrix_list
 
-    def compute_piTM(self):
+    def compute_piTM(self, verbose=True):
         r"""Compute the piTM score as define in [3]_.
 
         .. math::
@@ -607,8 +618,10 @@ class Data:
         for i in range(max_chain_num):
             piTM_chain_list.append([])
 
+        disable = False if verbose else True
+
         for pdb, json_path in tqdm(
-            zip(self.df["pdb"], self.df["json"]), total=len(self.df["pdb"])
+            zip(self.df["pdb"], self.df["json"]), total=len(self.df["pdb"]), disable = disable
         ):
             # print(pdb, json_path)
             if (pdb is not None and pdb is not np.nan and json_path is not None and json_path is not np.nan):
@@ -958,7 +971,7 @@ class Data:
         model_widget.observe(update_model, names='value')
 
 
-    def extract_inter_chain_pae(self, fun=np.mean):
+    def extract_inter_chain_pae(self, fun=np.mean, verbose=True):
         """ Read the PAE matrix and extract the average inter chain PAE.
         
         Parameters
@@ -971,8 +984,10 @@ class Data:
         """
         pae_list = []
         
+        disable = False if verbose else True
+
         for query, json_path in tqdm(
-                        zip(self.df["query"], self.df["json"]), total=len(self.df["json"])
+                        zip(self.df["query"], self.df["json"]), total=len(self.df["json"]), disable = disable
             ):
             if (json_path is not None and json_path is not np.nan):
                 with open(json_path) as f:
@@ -1054,6 +1069,18 @@ def read_multiple_alphapuldown(directory):
 
 
 def get_pae(json_file):
+    """Get the PAE matrix from a json file.
+
+    Parameters
+    ----------
+    json_file : str
+        Path to the json file.
+    
+    Returns
+    -------
+    np.array
+        PAE matrix.
+    """
 
 
     if json_file is None:
