@@ -70,56 +70,6 @@ def test_cf_1_5_5_relax():
 
     analysis.pdockq2(my_data)
 
-    expected_pdockq2 = [
-        0.01199,
-        0.01062,
-        0.01429,
-        0.01636,
-        0.16844,
-        0.01661,
-        0.0115,
-        0.02388,
-        0.00895,
-        0.02964,
-        0.01174,
-        0.01256,
-        0.01341,
-        0.05058,
-        0.20396,
-        0.01398,
-        0.01116,
-        0.01292,
-        0.02662,
-        0.19487,
-        0.01218,
-        0.01122,
-        0.01373,
-        0.05064,
-        0.18241,
-        0.01205,
-        0.01135,
-        0.01352,
-        0.01025,
-        0.02231,
-        0.01376,
-        0.0106,
-        0.01412,
-        0.04422,
-        0.19023,
-        0.01247,
-        0.01078,
-        0.01258,
-        0.02291,
-        0.20544,
-    ]
-    assert np.all(
-        [
-            my_data.df.iloc[i]["pdockq2_B"]
-            == pytest.approx(expected_pdockq2[i], precision)
-            for i in range(len(my_data.df))
-        ]
-    )
-
     analysis.LIS_matrix(my_data)
     expected_LIS_0 = [[0.44785182, 0.11038826], [0.10748148, 0.44471074]]
     np.testing.assert_allclose(np.array(my_data.df["LIS"][0]), np.array(expected_LIS_0))

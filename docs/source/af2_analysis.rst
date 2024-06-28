@@ -37,6 +37,15 @@ af2\_analysis.docking module
    :undoc-members:
    :show-inheritance:
 
+
+af2\_analysis.analysis module
+-----------------------------
+
+.. automodule:: af2_analysis.analysis
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 af2\_analysis.format module
 -----------------------------
 

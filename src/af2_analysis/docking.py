@@ -2,18 +2,18 @@ import numpy as np
 import pdb_numpy
 
 from tqdm.auto import tqdm
-from . import data
+from . import data, analysis
 
 """
 The module contains functions to extract and compute docking scores.
 
-..Warning:
+.. warning:
     The ligand chain is assumed to be the last chain in the list of chains.
 """
 
 
-def extract_pae_pep(my_data, fun=np.mean, verbose=True):
-    """Extract the PAE score for the peptide-peptide interface.
+def pae_pep(my_data, fun=np.mean, verbose=True):
+    """Extract the PAE score for the receptor(s)-peptide interface.
 
     Parameters
     ----------
@@ -28,7 +28,7 @@ def extract_pae_pep(my_data, fun=np.mean, verbose=True):
         The `log_pd` dataframe is modified in place.
     """
 
-    my_data.extract_inter_chain_pae(verbose=verbose)
+    analysis.inter_chain_pae(my_data, verbose=verbose)
 
     pep_rec_pae_list = []
     rec_pep_pae_list = []
@@ -60,7 +60,7 @@ def extract_pae_pep(my_data, fun=np.mean, verbose=True):
     my_data.df.loc[:, "PAE_rec_pep"] = rec_pep_pae_list
 
 
-def extract_plddt_pep(my_data, fun=np.mean, verbose=True):
+def plddt_pep(my_data, fun=np.mean, verbose=True):
     """Extract the pLDDT score for the peptide-peptide interface.
 
     Parameters
@@ -93,7 +93,7 @@ def extract_plddt_pep(my_data, fun=np.mean, verbose=True):
     my_data.df.loc[:, "plddt_pep"] = pep_plddt_list
 
 
-def extract_plddt_contact_pep(my_data, fun=np.mean, cutoff=8.0, verbose=True):
+def plddt_contact_pep(my_data, fun=np.mean, cutoff=8.0, verbose=True):
     """Extract the pLDDT score for the peptide-peptide interface.
 
     Parameters
@@ -145,7 +145,7 @@ def extract_plddt_contact_pep(my_data, fun=np.mean, cutoff=8.0, verbose=True):
     my_data.df.loc[:, "plddt_contact_rec"] = rec_plddt_list
 
 
-def compute_LIS_pep(my_data, pae_cutoff=12.0, fun=np.max, verbose=True):
+def LIS_pep(my_data, pae_cutoff=12.0, fun=np.max, verbose=True):
     """Compute the LIS score for the peptide-peptide interface.
 
     Parameters
@@ -164,7 +164,7 @@ def compute_LIS_pep(my_data, pae_cutoff=12.0, fun=np.max, verbose=True):
 
     """
 
-    my_data.compute_LIS_matrix(pae_cutoff=pae_cutoff, verbose=verbose)
+    analysis.LIS_matrix(my_data, pae_cutoff=pae_cutoff, verbose=verbose)
 
     pep_LIS_list = []
     pep_LIS2_list = []
@@ -179,7 +179,7 @@ def compute_LIS_pep(my_data, pae_cutoff=12.0, fun=np.max, verbose=True):
     my_data.df.loc[:, "LIS_pep_rec"] = pep_LIS_list
 
 
-def compute_pdockq2_lig(my_data, verbose=True):
+def pdockq2_lig(my_data, verbose=True):
     """Compute the LIS score for the peptide-peptide interface.
 
     Parameters
@@ -198,7 +198,7 @@ def compute_pdockq2_lig(my_data, verbose=True):
 
     """
 
-    my_data.compute_pdockq2(verbose=verbose)
+    analysis.pdockq2(my_data, verbose=verbose)
 
     old_query = ""
     pdockq2_list = []
