@@ -1,5 +1,3 @@
-
-
 [![Documentation Status](https://readthedocs.org/projects/af2-analysis/badge/?version=latest)](https://af2-analysis.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/samuelmurail/af2_analysis/graph/badge.svg?token=WOJYQKKOP7)](https://codecov.io/gh/samuelmurail/af2_analysis)
 [![Build Status](https://dev.azure.com/samuelmurailRPBS/af2_analysis/_apis/build/status%2Fsamuelmurail.af2_analysis?branchName=main)](https://dev.azure.com/samuelmurailRPBS/af2_analysis/_build/latest?definitionId=2&branchName=main)
@@ -10,7 +8,8 @@
 
 <img src="https://raw.githubusercontent.com/samuelmurail/af2_analysis/master/docs/source/logo.jpeg" alt="AF2 Analysis Logo" width="200" style="display: block; margin: auto;"/>
 
-`af2_analysis` is a python package allowing a simplified analysis of alphafold and colabfold results.
+`af2_analysis` is a python package allowing a simplified analysis of [Alphafold][1] and [Colabfold][2] results.
+
 
 ## Installation
 
@@ -22,6 +21,9 @@ python setup.py install
 
 
 ## Usage
+
+
+## Importing data
 
 Create the `Data` object, giving the path of the directory containing the results of the alphafold2/colabfold run. 
 
@@ -36,12 +38,17 @@ Extracted data are available in the `df` attribute of the `Data` object.
 my_data.df
 ```
 
-- Compute pdockQ and pdockQ2:
+## Analysis
+
+- The analysis package contains several function to add metrics like [pdockQ][3] and [pdockQ2][4]:
 
 ```python
-my_data.compute_pdockq()
-my_data.compute_pdockq2()
+from af2_analysis import analysis
+analysis.pdockq(my_data)
+analysis.pdockq(my_data)
 ```
+
+## Plots
 
 - plot msa
 
@@ -66,3 +73,17 @@ my_data.plot_pae(my_data.df['ranking_confidence'].idxmax())
 ```python
 my_data.show_3d(my_data.df['ranking_confidence'].idxmax())
 ```
+
+# References
+
+- Jumper et al. Nature Methods (2021) doi: [10.1038/s41586-021-03819-2][1]
+- Mirdita et al. Nature (2022) doi: [10.1038/s41592-022-01488-1][2]
+- Bryant et al. Nat. Commun. (2022) doi: [10.1038/s41467-022-29480-5][3]
+- Zhu et al. Bioinformatics (2023) doi: [10.1093/bioinformatics/btad424][4]
+
+
+[1]: https://www.nature.com/articles/s41586-021-03819-2 "Jumper et al. Nature Methods (2021) doi: 10.1038/s41586-021-03819-2"
+[2]: https://www.nature.com/articles/s41592-022-01488-1 "Mirdita et al. Nature (2022) doi: 10.1038/s41592-022-01488-1"
+[3]: https://www.nature.com/articles/s41467-022-29480-5#citeas "Bryant et al. Nat. Commun. (2022) doi: 10.1038/s41467-022-29480-5"
+[4]: https://academic.oup.com/bioinformatics/article/39/7/btad424/7219714 "Zhu et al. Bioinformatics (2023) doi: 10.1093/bioinformatics/btad424"
+
