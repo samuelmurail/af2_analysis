@@ -35,5 +35,5 @@ $ cd af2_analysis
 Once you have a copy of the source and have created a conda environment, you can install it with:
 
 ```bash
-$ python setup.py install
+$ pip install .
 ```

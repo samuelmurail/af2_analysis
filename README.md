@@ -13,11 +13,30 @@
 
 ## Installation
 
+- You can install last version from the github repo:
+
+```bash
+pip install git+https://github.com/samuelmurail/af2_analysis.git@main
+```
+
+- AF2-Analysis can be installed easily through github:
+
 ```bash
 git clone https://github.com/samuelmurail/af2_analysis
 cd af2_analysis
-python setup.py install
+pip install .
 ```
+
+- Or directly from Pypi:
+
+```bash
+pip install af2_analysis
+```
+
+
+## Documentation
+
+The full documentation is available at [ReadTheDocs](https://af2-analysis.readthedocs.io/en/latest/).
 
 
 ## Usage
