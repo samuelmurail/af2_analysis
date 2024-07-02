@@ -6,4 +6,4 @@ pdb_numpy>=0.0.10
 cmcrameri>=1.7
 nglview>=3.0
 ipywidgets>=7.6
-mdanalysis>=2.0
+mdanalysis>=2.5
