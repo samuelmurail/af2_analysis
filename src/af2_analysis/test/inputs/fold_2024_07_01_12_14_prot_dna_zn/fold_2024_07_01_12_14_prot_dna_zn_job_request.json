@@ -1,0 +1,33 @@
+[{
+ "name": "2024-07-01_12:14_Prot_DNA_ZN",
+ "modelSeeds": [
+  "1"
+ ],
+ "sequences": [
+  {
+   "proteinChain": {
+    "sequence": "MERPYACPVESCDRRFSRSDELTRHIRIHTGQKPFQCRICMRNFSRSDHLTTHIRTHTGEKPFACDICGRKFARSDERKRHTKIHLRQKD",
+    "count": 1
+   }
+  },
+  {
+   "proteinChain": {
+    "sequence": "AGCGTGGGCGT",
+    "count": 1
+   }
+  },
+  {
+   "proteinChain": {
+    "sequence": "TACGCCCACGC",
+    "count": 1
+   }
+  },
+  {
+   "ion": {
+    "ion": "ZN",
+    "count": 3
+   }
+  }
+ ]
+}
+]

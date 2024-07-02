@@ -224,8 +224,8 @@ def inter_chain_pae(data, fun=np.mean, verbose=True):
 
 
 def compute_LIS_matrix(
-    coor,
     pae_array,
+    chain_length,
     pae_cutoff=12.0,
 ):
     r"""Compute the LIS score as define in [1]_.
@@ -234,10 +234,10 @@ def compute_LIS_matrix(
 
     Parameters
     ----------
-    coor : Coor
-        object containing the coordinates of the model
     pae_array : np.array
         array of predicted PAE
+    chain_length : list
+        list of chain lengths
     pae_cutoff : float
         cutoff for native contacts, default is 8.0 A
 
@@ -255,23 +255,19 @@ def compute_LIS_matrix(
 
     """
 
-    chain_list = np.unique(coor.chain)
-    chain_lens = [
-        coor.select_atoms(f"name CA and chain {chain}").len for chain in chain_list
-    ]
-    chain_len_sums = np.cumsum([0] + chain_lens)
+    chain_len_sums = np.cumsum([0] + chain_length)
 
-    LIS_array = np.zeros((len(chain_lens), len(chain_lens)))
+    LIS_array = np.zeros((len(chain_length), len(chain_length)))
 
     trans_matrix = np.zeros_like(pae_array)
     mask = pae_array < pae_cutoff
     trans_matrix[mask] = 1 - pae_array[mask] / pae_cutoff
 
-    for i in range(len(chain_list)):
+    for i in range(len(chain_length)):
         i_start = chain_len_sums[i]
         i_end = chain_len_sums[i + 1]
 
-        for j in range(len(chain_list)):
+        for j in range(len(chain_length)):
             j_start = chain_len_sums[j]
             j_end = chain_len_sums[j + 1]
 
@@ -315,18 +311,16 @@ def LIS_matrix(data, pae_cutoff=12.0, verbose=True):
 
     disable = False if verbose else True
 
-    for pdb, json_path in tqdm(
-        zip(data.df["pdb"], data.df["json"]), total=len(data.df["pdb"]), disable=disable
+    for query, json_path in tqdm(
+        zip(data.df["query"], data.df["json"]), total=len(data.df["query"]), disable=disable
     ):
         if (
-            pdb is not None
-            and pdb is not np.nan
+            data.chain_length[query] is not None
             and json_path is not None
             and json_path is not np.nan
         ):
-            model = pdb_numpy.Coor(pdb)
             pae_array = get_pae(json_path)
-            LIS_matrix = compute_LIS_matrix(model, pae_array, pae_cutoff)
+            LIS_matrix = compute_LIS_matrix(pae_array, data.chain_length[query], pae_cutoff)
             LIS_matrix_list.append(LIS_matrix)
         else:
             LIS_matrix_list.append(None)
