@@ -161,4 +161,4 @@ def test_af3_webserver():
     print(my_data.df.iloc[:,:])
     assert list(my_data.df["num_recycles"]) == [10]*5
 
-    assert list(my_data.df["iptm"]) == [0.66, 0.76, 0.73, 0.77, 0.77]
+    assert list(my_data.df["iptm"]) == [0.77, 0.76, 0.77, 0.73, 0.66]

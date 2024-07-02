@@ -140,10 +140,10 @@ def test_af3_webserver():
     analysis.pdockq(my_data)
 
     expected_pdockq = [
-        0.1984, 0.2221, 0.2478, 0.3059, 0.2736
+        0.3059, 0.2221, 0.2736, 0.2478, 0.1984
     ]
     assert 2.2 == pytest.approx(2.3, 0.1)
-    print([round(i, 4) for i in my_data.df["pdockq"]])
+    # print([round(i, 4) for i in my_data.df["pdockq"]])
     precision = 0.001
     assert np.all(
         [
@@ -170,7 +170,8 @@ def test_af3_webserver():
 
     analysis.inter_chain_pae(my_data)
 
-    expected_PAE_A_B = [5.0452, 3.9899, 4.3717, 3.928, 3.5882]
+    expected_PAE_A_B = [3.928, 3.9899, 3.5882, 4.3717, 5.0452]
+    print([round(i, 4) for i in my_data.df["PAE_A_B"]])
     assert np.all(
         [
             my_data.df.iloc[i]["PAE_A_B"]
@@ -179,7 +180,7 @@ def test_af3_webserver():
         ]
     )
 
-    expected_PAE_A_E = [3.9401, 3.1581, 3.5433, 3.5354, 3.1004]
+    expected_PAE_A_E = [3.5354, 3.1581, 3.1004, 3.5433, 3.9401]
     print([round(i, 4) for i in my_data.df["PAE_A_E"]])
     assert np.all(
         [

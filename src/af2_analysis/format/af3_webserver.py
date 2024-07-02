@@ -52,4 +52,8 @@ def read_dir(directory):
             log_dict_list.append(info_dict)
 
     log_pd = pd.DataFrame(log_dict_list)
+
+    # To ensure that tests are consistent across different systems
+    # we sort the dataframe by pdb
+    log_pd = log_pd.sort_values(by=['pdb'])
     return log_pd
