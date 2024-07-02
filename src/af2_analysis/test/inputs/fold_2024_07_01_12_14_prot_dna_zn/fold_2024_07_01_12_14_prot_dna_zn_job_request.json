@@ -11,13 +11,13 @@
    }
   },
   {
-   "proteinChain": {
+   "dnaSequence": {
     "sequence": "AGCGTGGGCGT",
     "count": 1
    }
   },
   {
-   "proteinChain": {
+   "dnaSequence": {
     "sequence": "TACGCCCACGC",
     "count": 1
    }

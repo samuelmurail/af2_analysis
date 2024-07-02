@@ -152,7 +152,7 @@ def test_af3_webserver():
 
     query = my_data.df.iloc[0]["query"]
 
-    assert my_data.chain_length[query] == [90, 11, 11, 1, 1, 1]
+    assert my_data.chain_length[query] == [90, 1, 1, 1, 11, 11]
     assert my_data.chains[query] == ["A", "B", "C", "D", "E", "F"]
 
     # There should be 0 relaxed structures
@@ -161,4 +161,4 @@ def test_af3_webserver():
     print(my_data.df.iloc[:,:])
     assert list(my_data.df["num_recycles"]) == [10]*5
 
-    assert list(my_data.df["iptm"]) == [0.77, 0.76, 0.77, 0.73, 0.66]
+    assert list(my_data.df["iptm"]) == [0.93, 0.94, 0.93, 0.93, 0.93]

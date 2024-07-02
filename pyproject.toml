@@ -8,7 +8,7 @@ version = "0.0.2"
 dynamic = ["readme", "dependencies"]
 description = "`AF2 analysis` is a python library allowing analysis of Alphafold results."
 license = {text = "GNUv2.0"}
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 authors = [
     { name = "Samuel Murail", email = "samuel.murail@u-paris.fr" },
 ]
@@ -27,7 +27,6 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: Implementation :: CPython",
