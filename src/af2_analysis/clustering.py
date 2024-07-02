@@ -162,8 +162,8 @@ def hierarchical(
             select=f'chainID {chain_pep_value} and resnum {" ".join([str(res) for res in resid_contact_list])} and backbone',
         ).run(verbose=True)
 
-        print(f"Max RMSD is {np.max(matrix.dist_matrix):.2f} A")
-        dist = 1 - scale(matrix.dist_matrix)
+        print(f"Max RMSD is {np.max(matrix.results.dist_matrix):.2f} A")
+        dist = 1 - scale(matrix.results.dist_matrix)
         h, w = dist.shape
 
         print("Compute Linkage clustering")
@@ -508,7 +508,7 @@ def plot_pc(df, X="PC1", Y="PC2", show_legend=False, min_clust_num=5, **kwargs):
                 keep_clust.append(cluster)
 
         keep_clust_df = sub_df[sub_df["cluster"].isin(keep_clust)]
-        keep_clust_df["cluster"] = keep_clust_df["cluster"].astype("category")
+        keep_clust_df.loc[:, "cluster"] = keep_clust_df.loc[:, "cluster"].astype("category")
 
         # Plot seaborn scatterplot
         plt.figure(figsize=(10, 6))
