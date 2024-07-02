@@ -55,5 +55,5 @@ def read_dir(directory):
 
     # To ensure that tests are consistent across different systems
     # we sort the dataframe by pdb
-    log_pd = log_pd.sort_values(by=['pdb'])
+    log_pd = log_pd.sort_values(by=['pdb']).reset_index(drop=True)
     return log_pd
