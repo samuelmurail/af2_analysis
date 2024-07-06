@@ -16,7 +16,7 @@ import ipywidgets as widgets
 
 from .format import colabfold_1_5, af3_webserver, afpulldown, default
 from . import sequence, plot
-from .analysis import compute_LIS_matrix, get_pae
+from .analysis import compute_LIS_matrix, get_pae, extract_fields_json
 
 
 class Data:
@@ -250,6 +250,41 @@ class Data:
             new_col = pd.Series(new_column[keys], index=index_list)
             self.df[keys].iloc[index_list] = new_col
 
+
+    def extract_fields(self, fields, disable=False):
+        """Extract json files to the dataframe.
+
+        Parameters
+        ----------
+        fields : list
+            List of fields to extract.
+        disable : bool
+            Disable the progress bar.
+
+        Returns
+        -------
+        None
+        """
+
+        values_list = []
+        for field in fields:
+            values_list.append([])
+        for json_path in tqdm(self.df["json"], total=len(self.df["json"]), disable=disable):
+            if json_path is not None:
+                local_values = extract_fields_json(json_path, fields)
+
+                for i in range(len(fields)):
+                    values_list[i].append(local_values[i])
+                
+            else:
+                for i in range(len(fields)):
+                    values_list[i].append(None)
+
+        for i, field in enumerate(fields):
+            self.df[field] = None
+            new_col = pd.Series(values_list[i])
+            self.df[field].iloc[:] = new_col
+
     def add_pdb(self, verbose=True):
         """Add pdb files to the dataframe.
 
@@ -379,7 +414,7 @@ class Data:
             return plddt_array
 
         if row["json"] is None:
-            return (None, None)
+            return None
 
         with open(row["json"]) as f:
             local_json = json.load(f)
@@ -387,7 +422,7 @@ class Data:
         if "plddt" in local_json:
             plddt_array = np.array(local_json["plddt"])
         else:
-            return (None, None)
+            return None
 
         return plddt_array
 

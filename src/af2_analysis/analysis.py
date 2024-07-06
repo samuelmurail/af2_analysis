@@ -31,7 +31,7 @@ def get_pae(json_file):
     """
 
     if json_file is None:
-        return (None, None)
+        return None
 
     with open(json_file) as f:
         local_json = json.load(f)
@@ -44,6 +44,37 @@ def get_pae(json_file):
         raise ValueError("No PAE found in the json file.")
 
     return pae_array
+
+
+def extract_fields_json(json_file, fields):
+    """Get the PAE matrix from a json file.
+
+    Parameters
+    ----------
+    json_file : str
+        Path to the json file.
+    fields : list
+        List of fields to extract.
+
+    Returns
+    -------
+    value
+    """
+
+    if json_file is None:
+        return None
+
+    with open(json_file) as f:
+        local_json = json.load(f)
+
+    values = []
+    for field in fields:
+        if field in local_json:
+            values.append(local_json[field])
+        else:
+            raise ValueError(f"No field {field} found in the json file.")
+    
+    return values
 
 
 def pdockq(data, verbose=True):
@@ -255,9 +286,14 @@ def compute_LIS_matrix(
 
     """
 
+    if pae_array is None:
+        return None
+
     chain_len_sums = np.cumsum([0] + chain_length)
 
-    LIS_array = np.zeros((len(chain_length), len(chain_length)))
+    # Use list instead of array, because
+    # df[column].iloc[:] = LIS_list does not work with numpy array 
+    LIS_list = []
 
     trans_matrix = np.zeros_like(pae_array)
     mask = pae_array < pae_cutoff
@@ -266,7 +302,7 @@ def compute_LIS_matrix(
     for i in range(len(chain_length)):
         i_start = chain_len_sums[i]
         i_end = chain_len_sums[i + 1]
-
+        local_LIS_list = []
         for j in range(len(chain_length)):
             j_start = chain_len_sums[j]
             j_end = chain_len_sums[j + 1]
@@ -274,9 +310,12 @@ def compute_LIS_matrix(
             submatrix = trans_matrix[i_start:i_end, j_start:j_end]
 
             if np.any(submatrix > 0):
-                LIS_array[i, j] = submatrix[submatrix > 0].mean()
+                local_LIS_list.append(submatrix[submatrix > 0].mean())
+            else:
+                local_LIS_list.append(0)
+        LIS_list.append(local_LIS_list)
 
-    return LIS_array
+    return LIS_list
 
 
 def LIS_matrix(data, pae_cutoff=12.0, verbose=True):
@@ -314,17 +353,15 @@ def LIS_matrix(data, pae_cutoff=12.0, verbose=True):
     for query, json_path in tqdm(
         zip(data.df["query"], data.df["json"]), total=len(data.df["query"]), disable=disable
     ):
-        if (
-            data.chain_length[query] is not None
-            and json_path is not None
-            and json_path is not np.nan
-        ):
-            pae_array = get_pae(json_path)
-            LIS_matrix = compute_LIS_matrix(pae_array, data.chain_length[query], pae_cutoff)
-            LIS_matrix_list.append(LIS_matrix)
-        else:
+        if data.chain_length[query] is None:
             LIS_matrix_list.append(None)
+            continue
 
+        pae_array = get_pae(json_path)
+        LIS_matrix = compute_LIS_matrix(pae_array, data.chain_length[query], pae_cutoff)
+        LIS_matrix_list.append(LIS_matrix)
+
+    assert len(LIS_matrix_list) == len(data.df["query"])
     data.df.loc[:, "LIS"] = LIS_matrix_list
 
 

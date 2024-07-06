@@ -45,16 +45,24 @@ def pae_pep(my_data, fun=np.mean, verbose=True):
 
         pae = data.get_pae(json)
 
-        # print(f"{cum_sum_chain}  {cum_sum_chain[-2]}:{cum_sum_chain[-1]}")
+        #print(f"0:{cum_sum_chain[-2]} , {cum_sum_chain[-2]}:{cum_sum_chain[-1]}")
+        #print(pae.shape)
+
+        if pae is None:
+            pep_rec_pae_list.append(None)
+            rec_pep_pae_list.append(None)
+            continue
+
         rec_pep_pae = fun(
-            pae[0 : cum_sum_chain[-2], cum_sum_chain[-2] : cum_sum_chain[-1]]
+            pae[0:cum_sum_chain[-2], cum_sum_chain[-2]:cum_sum_chain[-1]]
         )
         pep_rec_pae = fun(
-            pae[cum_sum_chain[-2] : cum_sum_chain[-1], 0 : cum_sum_chain[-2]]
+            pae[cum_sum_chain[-2]:cum_sum_chain[-1], 0:cum_sum_chain[-2]]
         )
 
         pep_rec_pae_list.append(pep_rec_pae)
         rec_pep_pae_list.append(rec_pep_pae)
+
 
     my_data.df.loc[:, "PAE_pep_rec"] = pep_rec_pae_list
     my_data.df.loc[:, "PAE_rec_pep"] = rec_pep_pae_list
@@ -88,6 +96,9 @@ def plddt_pep(my_data, fun=np.mean, verbose=True):
         cum_sum_chain = np.cumsum([0] + chain_length)
 
         plddt = my_data.get_plddt(i)
+        if plddt is None:
+            pep_plddt_list.append(None)
+            continue
         pep_plddt_list.append(fun(plddt[cum_sum_chain[-2] : cum_sum_chain[-1]]))
 
     my_data.df.loc[:, "plddt_pep"] = pep_plddt_list
@@ -170,10 +181,16 @@ def LIS_pep(my_data, pae_cutoff=12.0, fun=np.max, verbose=True):
     pep_LIS2_list = []
 
     for query, LIS in zip(my_data.df["query"], my_data.df["LIS"]):
-        chain_num = len(my_data.chains[query])
 
-        pep_LIS_list.append(fun(LIS[0 : chain_num - 1, chain_num - 1]))
-        pep_LIS2_list.append(fun(LIS[chain_num - 1, 0 : chain_num - 1]))
+        if LIS is None:
+            pep_LIS_list.append(None)
+            pep_LIS2_list.append(None)
+            continue
+
+        chain_num = len(my_data.chains[query])
+        LIS_array = np.array(LIS)
+        pep_LIS_list.append(fun(LIS_array[0 : chain_num - 1, chain_num - 1]))
+        pep_LIS2_list.append(fun(LIS_array[chain_num - 1, 0 : chain_num - 1]))
 
     my_data.df.loc[:, "LIS_rec_pep"] = pep_LIS2_list
     my_data.df.loc[:, "LIS_pep_rec"] = pep_LIS_list
