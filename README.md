@@ -64,7 +64,7 @@ my_data.df
 ```python
 from af2_analysis import analysis
 analysis.pdockq(my_data)
-analysis.pdockq(my_data)
+analysis.pdockq2(my_data)
 ```
 
 ## Plots

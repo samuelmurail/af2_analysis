@@ -101,11 +101,14 @@ def pdockq(data, verbose=True):
     disable = False if verbose else True
 
     for pdb in tqdm(data.df["pdb"], total=len(data.df["pdb"]), disable=disable):
-        if pdb:
-            model = pdb_numpy.Coor(pdb)
-            pdockq_list += compute_pdockQ(model)
-        else:
+        
+        if pdb is None or pdb is np.nan:
             pdockq_list.append(None)
+            continue
+        
+        model = pdb_numpy.Coor(pdb)
+        pdockq_list += compute_pdockQ(model)
+
 
     data.df["pdockq"] = pdockq_list
 
@@ -122,13 +125,15 @@ def mpdockq(data, verbose=True):
     disable = False if verbose else True
 
     for pdb in tqdm(data.df["pdb"], total=len(data.df["pdb"]), disable=disable):
-        if pdb is not None and pdb is not np.nan:
-            model = pdb_numpy.Coor(pdb)
-            pdockq_list += compute_pdockQ(
-                model, cutoff=8.0, L=0.728, x0=309.375, k=0.098, b=0.262
-            )
-        else:
+        
+        if pdb is None or pdb is np.nan:
             pdockq_list.append(None)
+            continue
+        
+        model = pdb_numpy.Coor(pdb)
+        pdockq_list += compute_pdockQ(
+                model, cutoff=8.0, L=0.728, x0=309.375, k=0.098, b=0.262
+        )
 
     data.df.loc[:, "mpdockq"] = pdockq_list
 
@@ -364,81 +369,3 @@ def LIS_matrix(data, pae_cutoff=12.0, verbose=True):
     assert len(LIS_matrix_list) == len(data.df["query"])
     data.df.loc[:, "LIS"] = LIS_matrix_list
 
-
-def piTM(data, verbose=True):
-    r"""Compute the piTM score as define in [3]_.
-
-    .. math::
-        piTM = \max_{i \in \mathcal{I}} \frac{1}{I} \sum_{j \in \mathcal{I}}  \frac{1}{1 + [\langle e_{ij} \rangle / d_0 (I)]^2}
-
-    with:
-
-    .. math::
-        d_0(I) = \begin{cases} 1.25 \sqrt[3]{I -15} -1.8\text{,} & \text{if } I \geq 22 \\ 0.02 I \text{,} & \text{if } I < 22  \end{cases}
-
-
-    Implementation was inspired from `predicted_tm_score_v1()` in https://github.com/FreshAirTonight/af2complex/blob/main/src/alphafold/common/confidence.py
-
-    References
-    ----------
-    .. [3] Mu Gao, Davi Nakajima An, Jerry M. Parks & Jeffrey Skolnick.
-        AF2Complex predicts direct physical interactions in multimeric proteins with deep learning
-        *Nature Communications*. volume 13, Article number: 1744 (2022).
-        https://www.nature.com/articles/s41467-022-29394-2
-
-    .. warning::
-        IT IS NOT WORKING !!
-    """
-
-    from pdb_numpy.analysis import compute_piTM
-
-    piTM_chain_list = []
-    piTM_list = []
-
-    max_chain_num = 0
-    for query in data.chains:
-        chain_num = len(data.chains[query])
-        if chain_num > max_chain_num:
-            max_chain_num = chain_num
-
-    for i in range(max_chain_num):
-        piTM_chain_list.append([])
-
-    disable = False if verbose else True
-
-    for pdb, json_path in tqdm(
-        zip(data.df["pdb"], data.df["json"]), total=len(data.df["pdb"]), disable=disable
-    ):
-        # print(pdb, json_path)
-        if (
-            pdb is not None
-            and pdb is not np.nan
-            and json_path is not None
-            and json_path is not np.nan
-        ):
-            model = pdb_numpy.Coor(pdb)
-            with open(json_path) as f:
-                local_json = json.load(f)
-            pae_array = np.array(local_json["pae"])
-
-            piTM, piTM_chain = compute_piTM(model, pae_array)
-            # print(piTM, piTM_chain)
-
-            piTM_list.append(piTM[0])
-
-            for i in range(max_chain_num):
-                # print(i, len(piTM_chain))
-                if i < len(piTM_chain):
-                    piTM_chain_list[i].append(piTM_chain[i][0])
-                else:
-                    piTM_chain_list[i].append(None)
-
-        else:
-            piTM_list.append(None)
-            for i in range(max_chain_num):
-                piTM_chain_list[i].append(None)
-
-    # print(piTM_chain_list)
-    data.df.loc[:, "piTM"] = piTM_list
-    for i in range(max_chain_num):
-        data.df.loc[:, f"piTM_{chr(65+i)}"] = piTM_chain_list[i]

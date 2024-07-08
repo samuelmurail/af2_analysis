@@ -283,7 +283,7 @@ class Data:
         for i, field in enumerate(fields):
             self.df[field] = None
             new_col = pd.Series(values_list[i])
-            self.df[field].iloc[:] = new_col
+            self.df.loc[:, field] = new_col
 
     def add_pdb(self, verbose=True):
         """Add pdb files to the dataframe.

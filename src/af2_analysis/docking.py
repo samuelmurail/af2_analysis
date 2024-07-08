@@ -28,8 +28,6 @@ def pae_pep(my_data, fun=np.mean, verbose=True):
         The `log_pd` dataframe is modified in place.
     """
 
-    analysis.inter_chain_pae(my_data, verbose=verbose)
-
     pep_rec_pae_list = []
     rec_pep_pae_list = []
 
@@ -67,6 +65,76 @@ def pae_pep(my_data, fun=np.mean, verbose=True):
     my_data.df.loc[:, "PAE_pep_rec"] = pep_rec_pae_list
     my_data.df.loc[:, "PAE_rec_pep"] = rec_pep_pae_list
 
+
+def pae_contact_pep(my_data, fun=np.mean, cutoff=8.0, verbose=True, max_pae = 30.98):
+    """Extract the PAE score for the receptor(s)-peptide interface.
+
+    Parameters
+    ----------
+    my_data : AF2Data
+        object containing the data
+    fun : function
+        function to apply to the PAE scores
+
+    Returns
+    -------
+    None
+        The `log_pd` dataframe is modified in place.
+    """
+
+    pep_rec_pae_list = []
+    rec_pep_pae_list = []
+
+    disable = False if verbose else True
+
+    for i, (query, json, pdb) in tqdm(
+        enumerate(zip(my_data.df["query"], my_data.df["json"], my_data.df["pdb"])),
+        total=len(my_data.df),
+        disable=disable,
+    ):
+        chains = my_data.chains[query]
+
+        if pdb is None or json is None:
+            pep_rec_pae_list.append(None)
+            rec_pep_pae_list.append(None)
+            continue
+
+        pae = data.get_pae(json)
+
+        model = pdb_numpy.Coor(pdb)
+        model_CA = model.select_atoms("name CA")
+        contact_lig = model_CA.select_atoms(
+            f"chain {chains[-1]} and within {cutoff} of chain {' '.join(chains[:-1])}"
+        )
+        contact_rec = model_CA.select_atoms(
+            f"chain {' '.join(chains[:-1])} and within {cutoff} of chain {chains[-1]}"
+        )
+
+        if contact_lig.len == 0 or contact_rec.len == 0:
+            pep_rec_pae_list.append(max_pae)
+            rec_pep_pae_list.append(max_pae)
+            continue
+
+        rec_mask = np.zeros(pae.shape)
+        lig_mask = np.zeros(pae.shape) 
+
+        rec_mask[contact_rec.residue, :] = 1
+        lig_mask[:, contact_lig.residue] =  1
+        pair_mask = np.logical_and(rec_mask, lig_mask)
+
+        rec_pep_pae = fun(
+            pae[pair_mask]
+        )
+        pep_rec_pae = fun(
+            pae[pair_mask.T]
+        )
+
+        pep_rec_pae_list.append(pep_rec_pae)
+        rec_pep_pae_list.append(rec_pep_pae)
+
+
+    my_data.df.loc[:, "PAE_contact_pep_rec"] = pep_rec_pae_list
+    my_data.df.loc[:, "PAE_contact_rec_pep"] = rec_pep_pae_list
 
 def plddt_pep(my_data, fun=np.mean, verbose=True):
     """Extract the pLDDT score for the peptide-peptide interface.
@@ -132,6 +200,11 @@ def plddt_contact_pep(my_data, fun=np.mean, cutoff=8.0, verbose=True):
         chain_length = my_data.chain_length[query]
         chains = my_data.chains[query]
         cum_sum_chain = np.cumsum([0] + chain_length)
+
+        if pdb is None:
+            lig_plddt_list.append(None)
+            rec_plddt_list.append(None)
+            continue
 
         model = pdb_numpy.Coor(pdb)
         model_CA = model.select_atoms("name CA")
