@@ -1,0 +1,51 @@
+
+@article{jumper_highly_2021,
+	title = {Highly accurate protein structure prediction with {AlphaFold}},
+	volume = {596},
+	copyright = {2021 The Author(s)},
+	issn = {1476-4687},
+	url = {https://www.nature.com/articles/s41586-021-03819-2},
+	doi = {10.1038/s41586-021-03819-2},
+	abstract = {Proteins are essential to life, and understanding their structure can facilitate a mechanistic understanding of their function. Through an enormous experimental effort1–4, the structures of around 100,000 unique proteins have been determined5, but this represents a small fraction of the billions of known protein sequences6,7. Structural coverage is bottlenecked by the months to years of painstaking effort required to determine a single protein structure. Accurate computational approaches are needed to address this gap and to enable large-scale structural bioinformatics. Predicting the three-dimensional structure that a protein will adopt based solely on its amino acid sequence—the structure prediction component of the ‘protein folding problem’8—has been an important open research problem for more than 50 years9. Despite recent progress10–14, existing methods fall far short of atomic accuracy, especially when no homologous structure is available. Here we provide the first computational method that can regularly predict protein structures with atomic accuracy even in cases in which no similar structure is known. We validated an entirely redesigned version of our neural network-based model, AlphaFold, in the challenging 14th Critical Assessment of protein Structure Prediction (CASP14)15, demonstrating accuracy competitive with experimental structures in a majority of cases and greatly outperforming other methods. Underpinning the latest version of AlphaFold is a novel machine learning approach that incorporates physical and biological knowledge about protein structure, leveraging multi-sequence alignments, into the design of the deep learning algorithm.},
+	language = {en},
+	number = {7873},
+	urldate = {2022-12-03},
+	journal = {Nature},
+	author = {Jumper, John and Evans, Richard and Pritzel, Alexander and Green, Tim and Figurnov, Michael and Ronneberger, Olaf and Tunyasuvunakool, Kathryn and Bates, Russ and Žídek, Augustin and Potapenko, Anna and Bridgland, Alex and Meyer, Clemens and Kohl, Simon A. A. and Ballard, Andrew J. and Cowie, Andrew and Romera-Paredes, Bernardino and Nikolov, Stanislav and Jain, Rishub and Adler, Jonas and Back, Trevor and Petersen, Stig and Reiman, David and Clancy, Ellen and Zielinski, Michal and Steinegger, Martin and Pacholska, Michalina and Berghammer, Tamas and Bodenstein, Sebastian and Silver, David and Vinyals, Oriol and Senior, Andrew W. and Kavukcuoglu, Koray and Kohli, Pushmeet and Hassabis, Demis},
+	month = aug,
+	year = {2021},
+	keywords = {Computational biophysics, Machine learning, Protein structure predictions, Structural biology},
+	pages = {583--589},
+}
+
+@article {Evans2021.10.04.463034,
+	author = {Evans, Richard and O{\textquoteright}Neill, Michael and Pritzel, Alexander and Antropova, Natasha and Senior, Andrew and Green, Tim and {\v Z}{\'\i}dek, Augustin and Bates, Russ and Blackwell, Sam and Yim, Jason and Ronneberger, Olaf and Bodenstein, Sebastian and Zielinski, Michal and Bridgland, Alex and Potapenko, Anna and Cowie, Andrew and Tunyasuvunakool, Kathryn and Jain, Rishub and Clancy, Ellen and Kohli, Pushmeet and Jumper, John and Hassabis, Demis},
+	title = {Protein complex prediction with AlphaFold-Multimer},
+	elocation-id = {2021.10.04.463034},
+	year = {2022},
+	doi = {10.1101/2021.10.04.463034},
+	publisher = {Cold Spring Harbor Laboratory},
+	abstract = {While the vast majority of well-structured single protein chains can now be predicted to high accuracy due to the recent AlphaFold [1] model, the prediction of multi-chain protein complexes remains a challenge in many cases. In this work, we demonstrate that an AlphaFold model trained specifically for multimeric inputs of known stoichiometry, which we call AlphaFold-Multimer, significantly increases accuracy of predicted multimeric interfaces over input-adapted single-chain AlphaFold while maintaining high intra-chain accuracy. On a benchmark dataset of 17 heterodimer proteins without templates (introduced in [2]) we achieve at least medium accuracy (DockQ [3] >= 0.49) on 13 targets and high accuracy (DockQ >= 0.8) on 7 targets, compared to 9 targets of at least medium accuracy and 4 of high accuracy for the previous state of the art system (an AlphaFold-based system from [2]). We also predict structures for a large dataset of 4,446 recent protein complexes, from which we score all non-redundant interfaces with low template identity. For heteromeric interfaces we successfully predict the interface (DockQ >= 0.23) in 70\% of cases, and produce high accuracy predictions (DockQ >= 0.8) in 26\% of cases, an improvement of +27 and +14 percentage points over the flexible linker modification of AlphaFold [4] respectively. For homomeric inter-faces we successfully predict the interface in 72\% of cases, and produce high accuracy predictions in 36\% of cases, an improvement of +8 and +7 percentage points respectively.Competing Interest StatementThe authors have declared no competing interest.},
+	URL = {https://www.biorxiv.org/content/early/2022/03/10/2021.10.04.463034},
+	eprint = {https://www.biorxiv.org/content/early/2022/03/10/2021.10.04.463034.full.pdf},
+	journal = {bioRxiv}
+}
+
+@article{10.1093/bioinformatics/btad573,
+    author = {Wallner, Björn},
+    title = "{AFsample: improving multimer prediction with AlphaFold using massive sampling}",
+    journal = {Bioinformatics},
+    volume = {39},
+    number = {9},
+    pages = {btad573},
+    year = {2023},
+    month = {09},
+    abstract = "{The AlphaFold2 neural network model has revolutionized structural biology with unprecedented performance. We demonstrate that by stochastically perturbing the neural network by enabling dropout at inference combined with massive sampling, it is possible to improve the quality of the generated models. We generated ∼6000 models per target compared with 25 default for AlphaFold-Multimer, with v1 and v2 multimer network models, with and without templates, and increased the number of recycles within the network. The method was benchmarked in CASP15, and compared with AlphaFold-Multimer v2 it improved the average DockQ from 0.41 to 0.55 using identical input and was ranked at the very top in the protein assembly category when compared with all other groups participating in CASP15. The simplicity of the method should facilitate the adaptation by the field, and the method should be useful for anyone interested in modeling multimeric structures, alternate conformations, or flexible structures.AFsample is available online at http://wallnerlab.org/AFsample.}",
+    issn = {1367-4811},
+    doi = {10.1093/bioinformatics/btad573},
+    url = {https://doi.org/10.1093/bioinformatics/btad573},
+    eprint = {https://academic.oup.com/bioinformatics/article-pdf/39/9/btad573/51784596/btad573.pdf},
+}
+
+
+
