@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE article PUBLIC "-//NLM//DTD JATS (Z39.96) Journal Publishing DTD v1.2 20190208//EN"
+                  "JATS-publishing1.dtd">
+<article xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" dtd-version="1.2" article-type="other">
+<front>
+<journal-meta>
+<journal-id></journal-id>
+<journal-title-group>
+<journal-title>Journal of Open Source Software</journal-title>
+<abbrev-journal-title>JOSS</abbrev-journal-title>
+</journal-title-group>
+<issn publication-format="electronic">2475-9066</issn>
+<publisher>
+<publisher-name>Open Journals</publisher-name>
+</publisher>
+</journal-meta>
+<article-meta>
+<article-id pub-id-type="publisher-id">0</article-id>
+<article-id pub-id-type="doi">N/A</article-id>
+<title-group>
+<article-title>Af2-analysis: a Python package for alphafold 2
+analysis</article-title>
+</title-group>
+<contrib-group>
+<contrib contrib-type="author">
+<name>
+<surname>Reguei</surname>
+<given-names>Alaa</given-names>
+</name>
+<xref ref-type="aff" rid="aff-1"/>
+</contrib>
+<contrib contrib-type="author">
+<contrib-id contrib-id-type="orcid">https://orcid.org/0000-0002-3842-5333</contrib-id>
+<name>
+<surname>Murail</surname>
+<given-names>Samuel</given-names>
+</name>
+<xref ref-type="aff" rid="aff-1"/>
+</contrib>
+<aff id="aff-1">
+<institution-wrap>
+<institution>Université Paris Cité, Inserm U1133, CNRS UMR 8251, Paris,
+France</institution>
+</institution-wrap>
+</aff>
+</contrib-group>
+<pub-date date-type="pub" publication-format="electronic" iso-8601-date="2024-07-11">
+<day>11</day>
+<month>7</month>
+<year>2024</year>
+</pub-date>
+<volume>¿VOL?</volume>
+<issue>¿ISSUE?</issue>
+<fpage>¿PAGE?</fpage>
+<permissions>
+<copyright-statement>Authors of papers retain copyright and release the
+work under a Creative Commons Attribution 4.0 International License (CC
+BY 4.0)</copyright-statement>
+<copyright-year>2022</copyright-year>
+<copyright-holder>The article authors</copyright-holder>
+<license license-type="open-access" xlink:href="https://creativecommons.org/licenses/by/4.0/">
+<license-p>Authors of papers retain copyright and release the work under
+a Creative Commons Attribution 4.0 International License (CC BY
+4.0)</license-p>
+</license>
+</permissions>
+<kwd-group kwd-group-type="author">
+<kwd>Python</kwd>
+<kwd>Alphafold</kwd>
+<kwd>Protein Structure</kwd>
+<kwd>Structural bioinformatics</kwd>
+</kwd-group>
+</article-meta>
+</front>
+<body>
+<sec id="summary">
+  <title>Summary</title>
+  <p>Since the publication of Alphafold 2 software in 2021
+  (<xref alt="Jjumper_highly_2021?" rid="ref-Jjumper_highly_2021" ref-type="bibr"><bold>Jjumper_highly_2021?</bold></xref>),
+  the scientific community can access a prediction accuracy of protein
+  structures that was previously unattainable. The Alphafold 2 software
+  has been widely adopted by the scientific community. The derivative
+  Alphafold Multimer
+  (<xref alt="Evans et al., 2022" rid="ref-Evans2021.10.04.463034" ref-type="bibr">Evans
+  et al., 2022</xref>) has been developed to predict the structure of
+  protein complexes, once again defining a new standard for
+  protein-protein and protein-peptide docking. However as shown by Björn
+  Wallner, it is sometime necessary to generate thousands of model to
+  get a good model
+  (<xref alt="Wallner, 2023" rid="ref-10.1093U002FbioinformaticsU002Fbtad573" ref-type="bibr">Wallner,
+  2023</xref>). The analysis of the results can then be a challenge for
+  many researchers. Here, we present Af2-analysis, a Python package that
+  provides tools for the analysis of Alphafold 2 results. Af2-analysis
+  is designed to facilitate the analysis of protein structures predicted
+  by Alphafold 2, providing functions for the comparison of predicted
+  structures with experimental structures, the visualization of
+  predicted structures, and the calculation of structural quality
+  metrics. Af2-analysis is open-source and freely available on
+  GitHub.</p>
+</sec>
+<sec id="statement-of-need">
+  <title>Statement of need</title>
+  <p><monospace>Af2-analysis</monospace> is a Python package that
+  provides tools for the analysis of protein structures predicted by
+  Alphafold 2. The package is designed to facilitate the analysis of
+  protein structures predicted by Alphafold 2, providing functions for
+  the comparison of predicted structures with experimental structures,
+  the visualization of predicted structures, and the calculation of
+  structural quality metrics. The package is open-source and freely
+  available on GitHub.</p>
+</sec>
+<sec id="mathematics">
+  <title>Mathematics</title>
+  <p>Single dollars ($) are required for inline mathematics
+  e.g. <inline-formula><alternatives>
+  <tex-math><![CDATA[f(x) = e^{\pi/x}]]></tex-math>
+  <mml:math display="inline" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mi>f</mml:mi><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:mo>=</mml:mo><mml:msup><mml:mi>e</mml:mi><mml:mrow><mml:mi>π</mml:mi><mml:mi>/</mml:mi><mml:mi>x</mml:mi></mml:mrow></mml:msup></mml:mrow></mml:math></alternatives></inline-formula></p>
+  <p>Double dollars make self-standing equations:</p>
+  <p><disp-formula><tex-math><![CDATA[\Theta(x) = \left\{\begin{array}{l}
+  0\textrm{ if } x < 0\cr
+  1\textrm{ else}
+  \end{array}\right.]]></tex-math></disp-formula></p>
+  <p>You can also use plain LaTeXfor equations
+  <named-content id="eqU003Afourier" content-type="equation"><disp-formula><alternatives>
+  <tex-math><![CDATA[
+  \hat f(\omega) = \int_{-\infty}^{\infty} f(x) e^{i\omega x} dx]]></tex-math>
+  <mml:math display="block" xmlns:mml="http://www.w3.org/1998/Math/MathML"><mml:mrow><mml:mover><mml:mi>f</mml:mi><mml:mo accent="true">̂</mml:mo></mml:mover><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>ω</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:mo>=</mml:mo><mml:msubsup><mml:mo>∫</mml:mo><mml:mrow><mml:mi>−</mml:mi><mml:mi>∞</mml:mi></mml:mrow><mml:mi>∞</mml:mi></mml:msubsup><mml:mi>f</mml:mi><mml:mrow><mml:mo stretchy="true" form="prefix">(</mml:mo><mml:mi>x</mml:mi><mml:mo stretchy="true" form="postfix">)</mml:mo></mml:mrow><mml:msup><mml:mi>e</mml:mi><mml:mrow><mml:mi>i</mml:mi><mml:mi>ω</mml:mi><mml:mi>x</mml:mi></mml:mrow></mml:msup><mml:mi>d</mml:mi><mml:mi>x</mml:mi></mml:mrow></mml:math></alternatives></disp-formula></named-content>
+  and refer to
+  <xref alt="Equation 1" rid="eqU003Afourier">Equation 1</xref> from
+  text.</p>
+</sec>
+<sec id="citations">
+  <title>Citations</title>
+  <p>Citations to entries in paper.bib should be in
+  <ext-link ext-link-type="uri" xlink:href="http://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html">rMarkdown</ext-link>
+  format.</p>
+  <p>If you want to cite a software repository URL (e.g. something on
+  GitHub without a preferred citation) then you can do it with the
+  example BibTeX entry below for
+  (<xref alt="fidgit?" rid="ref-fidgit" ref-type="bibr"><bold>fidgit?</bold></xref>).</p>
+  <p>For a quick reference, the following citation commands can be used:
+  - <monospace>@author:2001</monospace> -&gt; “Author et al. (2001)” -
+  <monospace>[@author:2001]</monospace> -&gt; “(Author et al., 2001)” -
+  <monospace>[@author1:2001; @author2:2001]</monospace> -&gt; “(Author1
+  et al., 2001; Author2 et al., 2002)”</p>
+</sec>
+<sec id="figures">
+  <title>Figures</title>
+  <p>Figures can be included like this:
+  <named-content content-type="image">Caption for example
+  figure.<styled-content id="figU003Aexample"></styled-content></named-content>
+  and referenced from text using
+  <xref alt="[fig:example]" rid="figU003Aexample">[fig:example]</xref>.</p>
+  <p>Figure sizes can be customized by adding an optional second
+  parameter: <named-content content-type="image">Caption for example
+  figure.</named-content></p>
+</sec>
+<sec id="acknowledgements">
+  <title>Acknowledgements</title>
+  <p>We acknowledge contributions from Brigitta Sipocz, Syrtis Major,
+  and Semyeong Oh, and support from Kathryn Johnston during the genesis
+  of this project.</p>
+</sec>
+</body>
+<back>
+<ref-list>
+  <title></title>
+  <ref id="ref-Evans2021.10.04.463034">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Evans</surname><given-names>Richard</given-names></name>
+        <name><surname>O’Neill</surname><given-names>Michael</given-names></name>
+        <name><surname>Pritzel</surname><given-names>Alexander</given-names></name>
+        <name><surname>Antropova</surname><given-names>Natasha</given-names></name>
+        <name><surname>Senior</surname><given-names>Andrew</given-names></name>
+        <name><surname>Green</surname><given-names>Tim</given-names></name>
+        <name><surname>Žı́dek</surname><given-names>Augustin</given-names></name>
+        <name><surname>Bates</surname><given-names>Russ</given-names></name>
+        <name><surname>Blackwell</surname><given-names>Sam</given-names></name>
+        <name><surname>Yim</surname><given-names>Jason</given-names></name>
+        <name><surname>Ronneberger</surname><given-names>Olaf</given-names></name>
+        <name><surname>Bodenstein</surname><given-names>Sebastian</given-names></name>
+        <name><surname>Zielinski</surname><given-names>Michal</given-names></name>
+        <name><surname>Bridgland</surname><given-names>Alex</given-names></name>
+        <name><surname>Potapenko</surname><given-names>Anna</given-names></name>
+        <name><surname>Cowie</surname><given-names>Andrew</given-names></name>
+        <name><surname>Tunyasuvunakool</surname><given-names>Kathryn</given-names></name>
+        <name><surname>Jain</surname><given-names>Rishub</given-names></name>
+        <name><surname>Clancy</surname><given-names>Ellen</given-names></name>
+        <name><surname>Kohli</surname><given-names>Pushmeet</given-names></name>
+        <name><surname>Jumper</surname><given-names>John</given-names></name>
+        <name><surname>Hassabis</surname><given-names>Demis</given-names></name>
+      </person-group>
+      <article-title>Protein complex prediction with AlphaFold-multimer</article-title>
+      <source>bioRxiv</source>
+      <publisher-name>Cold Spring Harbor Laboratory</publisher-name>
+      <year iso-8601-date="2022">2022</year>
+      <uri>https://www.biorxiv.org/content/early/2022/03/10/2021.10.04.463034</uri>
+      <pub-id pub-id-type="doi">10.1101/2021.10.04.463034</pub-id>
+    </element-citation>
+  </ref>
+  <ref id="ref-10.1093U002FbioinformaticsU002Fbtad573">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Wallner</surname><given-names>Björn</given-names></name>
+      </person-group>
+      <article-title>AFsample: improving multimer prediction with AlphaFold using massive sampling</article-title>
+      <source>Bioinformatics</source>
+      <year iso-8601-date="2023-09">2023</year><month>09</month>
+      <volume>39</volume>
+      <issue>9</issue>
+      <issn>1367-4811</issn>
+      <uri>https://doi.org/10.1093/bioinformatics/btad573</uri>
+      <pub-id pub-id-type="doi">10.1093/bioinformatics/btad573</pub-id>
+      <fpage>btad573</fpage>
+      <lpage></lpage>
+    </element-citation>
+  </ref>
+</ref-list>
+</back>
+</article>

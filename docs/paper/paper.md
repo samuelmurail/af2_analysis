@@ -7,14 +7,13 @@ tags:
   - Structural bioinformatics
 authors:
   - name: Alaa Reguei
-    equal-contrib: false
-    affiliation: "1" # (Multiple affiliations must be quoted)
-- name: Samuel Murail
-    orcid: 0000-0002-3842-5333
-    affiliation: "1" # (Multiple affiliations must be quoted)
+    affiliation: "1"
+  - name: Samuel Murail
+    orcid: "0000-0002-3842-5333"
+    affiliation: "1"
 
 affiliations:
- - name: Université Paris Cité, Inserm U1133, CNRS UMR 8251, Paris, France
+ - name: "Université Paris Cité, Inserm U1133, CNRS UMR 8251, Paris, France"
    index: 1
 
 date: 11 July 2024
