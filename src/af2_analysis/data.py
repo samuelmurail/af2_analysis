@@ -18,6 +18,7 @@ from .format import colabfold_1_5, af3_webserver, afpulldown, default
 from . import sequence, plot
 from .analysis import compute_LIS_matrix, get_pae, extract_fields_json
 
+plddt_main_atom_list = ["CA", "P", "ZN", "MG", "CL", "CA", "NA", "MN", "K", "FE", "CU", "CO"]
 
 class Data:
     """Data class
@@ -410,7 +411,7 @@ class Data:
 
         if self.format in ["AF3_webserver", "csv", "AlphaPulldown"]:
             model = pdb_numpy.Coor(row["pdb"])
-            plddt_array = model.models[0].beta[model.models[0].name == "CA"]
+            plddt_array = model.models[0].beta[np.isin(model.models[0].name, plddt_main_atom_list)]
             return plddt_array
 
         if row["json"] is None:

@@ -18,74 +18,14 @@ affiliations:
 
 date: 11 July 2024
 bibliography: paper.bib
-
 ---
 
 # Summary
 
-Since the publication of Alphafold 2 software in 2021 [@Jjumper_highly_2021], the scientific community can
-access a prediction accuracy of protein structures that was previously unattainable. The Alphafold 2
-software has been widely adopted by the scientific community. The derivative Alphafold Multimer [@Evans2021.10.04.463034]
-has been developed to predict the structure of protein complexes, once again defining a new standard for
-protein-protein and protein-peptide docking. However as shown by Björn Wallner, it is sometime necessary
-to generate thousands of model to get a good model [@10.1093/bioinformatics/btad573]. The analysis of the results
-can then be a challenge for many researchers. Here, we present Af2-analysis, a Python package that provides
-tools for the analysis of Alphafold 2 results. Af2-analysis is designed to facilitate the analysis of
-protein structures predicted by Alphafold 2, providing functions for the comparison of predicted
-structures with experimental structures, the visualization of predicted structures, and the
-calculation of structural quality metrics. Af2-analysis is open-source and freely available on GitHub.
+The publication of AlphaFold 2[@jumper_highly_2021] has significantly advanced the field of protein structure prediction. Predicting protein structures has long been a central challenge in structural bioinformatics, with the ultimate aim of elucidating the relationship between protein structure and function. Accurate protein structure prediction is crucial for various applications, including drug discovery, protein engineering, and the investigation of protein-protein interactions. AlphaFold 2, a deep learning-based approach, has demonstrated unprecedented accuracy in protein structure prediction, surpassing other contemporary methods. Here, we present `af2-analysis`, a Python package that provides tools for the analysis of Alphafold 2 results. `af2-analysis` is designed to facilitate the analysis of protein structures predicted by Alphafold 2, providing functions for the comparison of predicted structures with experimental structures, the visualization of predicted structures, and the calculation of structural quality metrics.
 
 # Statement of need
 
-`Af2-analysis` is a Python package that provides tools for the analysis of protein structures predicted by Alphafold 2.
-The package is designed to facilitate the analysis of protein structures predicted by Alphafold 2, providing functions
-for the comparison of predicted structures with experimental structures, the visualization of predicted structures, and the
-calculation of structural quality metrics. The package is open-source and freely available on GitHub.
-
-
-# Mathematics
-
-Single dollars ($) are required for inline mathematics e.g. $f(x) = e^{\pi/x}$
-
-Double dollars make self-standing equations:
-
-$$\Theta(x) = \left\{\begin{array}{l}
-0\textrm{ if } x < 0\cr
-1\textrm{ else}
-\end{array}\right.$$
-
-You can also use plain \LaTeX for equations
-\begin{equation}\label{eq:fourier}
-\hat f(\omega) = \int_{-\infty}^{\infty} f(x) e^{i\omega x} dx
-\end{equation}
-and refer to \autoref{eq:fourier} from text.
-
-# Citations
-
-Citations to entries in paper.bib should be in
-[rMarkdown](http://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html)
-format.
-
-If you want to cite a software repository URL (e.g. something on GitHub without a preferred
-citation) then you can do it with the example BibTeX entry below for @fidgit.
-
-For a quick reference, the following citation commands can be used:
-- `@author:2001`  ->  "Author et al. (2001)"
-- `[@author:2001]` -> "(Author et al., 2001)"
-- `[@author1:2001; @author2:2001]` -> "(Author1 et al., 2001; Author2 et al., 2002)"
-
-# Figures
-
-Figures can be included like this:
-![Caption for example figure.\label{fig:example}](figure.png)
-and referenced from text using \autoref{fig:example}.
-
-Figure sizes can be customized by adding an optional second parameter:
-![Caption for example figure.](figure.png){ width=20% }
-
-# Acknowledgements
-
-We acknowledge contributions from Brigitta Sipocz, Syrtis Major, and Semyeong
-Oh, and support from Kathryn Johnston during the genesis of this project.
+Since the publication of Alphafold 2[@jumper_highly_2021] in 2021, the scientific community can access a prediction accuracy of protein structures that was previously unattainable. The derivatives Colabfold[@mirdita2022colabfold] and Alphafold Multimer[@Evans2021.10.04.463034] have been developed to predict the structure of protein complexes, once again defining a new standard for protein-protein and protein-peptide docking. However as shown by Björn Wallner, it is sometime necessary to generate thousands of model to get few good models[@10.1093/bioinformatics/btad573]. The analysis of the results can then be a fastidious, moreover if alphafold quality metrics are good, supplementary metrics have been developed to evaluate the quality of the models as pdockq[@bryant2022improved], pdockq2[@10.1093/bioinformatics/btad424], and LIS score[@Kim2024.02.19.580970]. All this metrics have to be calculated from different scripts. Another point to access is the diversity of the models, and as shown in AFsample[@10.1093/bioinformatics/btad573] it is sometime necessary to compute up to ten thousand models, and then to cluster them to select the best models. `Af2-analysis` is designed to facilitate the analysis of set of model structures and metrics. The library is build upon `pandas` library and will import an alphafold or colabfold prediction directory as a `pandas` dataframe. The library will provide functions to add additional metric to the dataframe, to compare the models with experimental structures, to visualize the models, to cluster the models, and to select the best models.
 
 # References

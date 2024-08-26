@@ -18,6 +18,17 @@
 	pages = {583--589},
 }
 
+@article{mirdita2022colabfold,
+  title={ColabFold: making protein folding accessible to all},
+  author={Mirdita, Milot and Sch{\"u}tze, Konstantin and Moriwaki, Yoshitaka and Heo, Lim and Ovchinnikov, Sergey and Steinegger, Martin},
+  journal={Nature methods},
+  volume={19},
+  number={6},
+  pages={679--682},
+  year={2022},
+  publisher={Nature Publishing Group US New York}
+}
+
 @article {Evans2021.10.04.463034,
 	author = {Evans, Richard and O{\textquoteright}Neill, Michael and Pritzel, Alexander and Antropova, Natasha and Senior, Andrew and Green, Tim and {\v Z}{\'\i}dek, Augustin and Bates, Russ and Blackwell, Sam and Yim, Jason and Ronneberger, Olaf and Bodenstein, Sebastian and Zielinski, Michal and Bridgland, Alex and Potapenko, Anna and Cowie, Andrew and Tunyasuvunakool, Kathryn and Jain, Rishub and Clancy, Ellen and Kohli, Pushmeet and Jumper, John and Hassabis, Demis},
 	title = {Protein complex prediction with AlphaFold-Multimer},
@@ -47,5 +58,66 @@
     eprint = {https://academic.oup.com/bioinformatics/article-pdf/39/9/btad573/51784596/btad573.pdf},
 }
 
+@article{10.1093/bioinformatics/btad424,
+    author = {Zhu, Wensi and Shenoy, Aditi and Kundrotas, Petras and Elofsson, Arne},
+    title = "{Evaluation of AlphaFold-Multimer prediction on multi-chain protein complexes}",
+    journal = {Bioinformatics},
+    volume = {39},
+    number = {7},
+    pages = {btad424},
+    year = {2023},
+    month = {07},
+    abstract = "{Despite near-experimental accuracy on single-chain predictions, there is still scope for improvement among multimeric predictions. Methods like AlphaFold-Multimer and FoldDock can accurately model dimers. However, how well these methods fare on larger complexes is still unclear. Further, evaluation methods of the quality of multimeric complexes are not well established.We analysed the performance of AlphaFold-Multimer on a homology-reduced dataset of homo- and heteromeric protein complexes. We highlight the differences between the pairwise and multi-interface evaluation of chains within a multimer. We describe why certain complexes perform well on one metric (e.g. TM-score) but poorly on another (e.g. DockQ). We propose a new score, Predicted DockQ version 2 (pDockQ2), to estimate the quality of each interface in a multimer. Finally, we modelled protein complexes (from CORUM) and identified two highly confident structures that do not have sequence homology to any existing structures.All scripts, models, and data used to perform the analysis in this study are freely available at https://gitlab.com/ElofssonLab/afm-benchmark.}",
+    issn = {1367-4811},
+    doi = {10.1093/bioinformatics/btad424},
+    url = {https://doi.org/10.1093/bioinformatics/btad424},
+    eprint = {https://academic.oup.com/bioinformatics/article-pdf/39/7/btad424/50886203/btad424.pdf},
+}
 
+@article {Kim2024.02.19.580970,
+	author = {Kim, Ah-Ram and Hu, Yanhui and Comjean, Aram and Rodiger, Jonathan and Mohr, Stephanie E. and Perrimon, Norbert},
+	title = {Enhanced Protein-Protein Interaction Discovery via AlphaFold-Multimer},
+	elocation-id = {2024.02.19.580970},
+	year = {2024},
+	doi = {10.1101/2024.02.19.580970},
+	publisher = {Cold Spring Harbor Laboratory},
+	abstract = {Accurately mapping protein-protein interactions (PPIs) is critical for elucidating cellular functions and has significant implications for health and disease. Conventional experimental approaches, while foundational, often fall short in capturing direct, dynamic interactions, especially those with transient or small interfaces. Our study leverages AlphaFold-Multimer (AFM) to re-evaluate high-confidence PPI datasets from Drosophila and human. Our analysis uncovers a significant limitation of the AFM-derived interface pTM (ipTM) metric, which, while reflective of structural integrity, can miss physiologically relevant interactions at small interfaces or within flexible regions. To bridge this gap, we introduce the Local Interaction Score (LIS), derived from AFM{\textquoteright}s Predicted Aligned Error (PAE), focusing on areas with low PAE values, indicative of the high confidence in interaction predictions. The LIS method demonstrates enhanced sensitivity in detecting PPIs, particularly among those that involve flexible and small interfaces. By applying LIS to large-scale Drosophila datasets, we enhance the detection of direct interactions. Moreover, we present FlyPredictome, an online platform that integrates our AFM-based predictions with additional information such as gene expression correlations and subcellular localization predictions. This study not only improves upon AFM{\textquoteright}s utility in PPI prediction but also highlights the potential of computational methods to complement and enhance experimental approaches in the identification of PPI networks.Competing Interest StatementThe authors have declared no competing interest.},
+	URL = {https://www.biorxiv.org/content/early/2024/02/21/2024.02.19.580970},
+	eprint = {https://www.biorxiv.org/content/early/2024/02/21/2024.02.19.580970.full.pdf},
+	journal = {bioRxiv}
+}
 
+@article{basu2016dockq,
+  title={DockQ: a quality measure for protein-protein docking models},
+  author={Basu, Sankar and Wallner, Bj{\"o}rn},
+  journal={PloS one},
+  volume={11},
+  number={8},
+  pages={e0161879},
+  year={2016},
+  publisher={Public Library of Science San Francisco, CA USA}
+}
+
+@article {Kim2024.02.19.580970,
+	author = {Kim, Ah-Ram and Hu, Yanhui and Comjean, Aram and Rodiger, Jonathan and Mohr, Stephanie E. and Perrimon, Norbert},
+	title = {Enhanced Protein-Protein Interaction Discovery via AlphaFold-Multimer},
+	elocation-id = {2024.02.19.580970},
+	year = {2024},
+	doi = {10.1101/2024.02.19.580970},
+	publisher = {Cold Spring Harbor Laboratory},
+	abstract = {Accurately mapping protein-protein interactions (PPIs) is critical for elucidating cellular functions and has significant implications for health and disease. Conventional experimental approaches, while foundational, often fall short in capturing direct, dynamic interactions, especially those with transient or small interfaces. Our study leverages AlphaFold-Multimer (AFM) to re-evaluate high-confidence PPI datasets from Drosophila and human. Our analysis uncovers a significant limitation of the AFM-derived interface pTM (ipTM) metric, which, while reflective of structural integrity, can miss physiologically relevant interactions at small interfaces or within flexible regions. To bridge this gap, we introduce the Local Interaction Score (LIS), derived from AFM{\textquoteright}s Predicted Aligned Error (PAE), focusing on areas with low PAE values, indicative of the high confidence in interaction predictions. The LIS method demonstrates enhanced sensitivity in detecting PPIs, particularly among those that involve flexible and small interfaces. By applying LIS to large-scale Drosophila datasets, we enhance the detection of direct interactions. Moreover, we present FlyPredictome, an online platform that integrates our AFM-based predictions with additional information such as gene expression correlations and subcellular localization predictions. This study not only improves upon AFM{\textquoteright}s utility in PPI prediction but also highlights the potential of computational methods to complement and enhance experimental approaches in the identification of PPI networks.Competing Interest StatementThe authors have declared no competing interest.},
+	URL = {https://www.biorxiv.org/content/early/2024/02/21/2024.02.19.580970},
+	eprint = {https://www.biorxiv.org/content/early/2024/02/21/2024.02.19.580970.full.pdf},
+	journal = {bioRxiv}
+}
+
+@article{bryant2022improved,
+  title={Improved prediction of protein-protein interactions using AlphaFold2},
+  author={Bryant, Patrick and Pozzati, Gabriele and Elofsson, Arne},
+  journal={Nature communications},
+  volume={13},
+  number={1},
+  pages={1265},
+  year={2022},
+  publisher={Nature Publishing Group UK London}
+}

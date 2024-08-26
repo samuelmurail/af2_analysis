@@ -7,9 +7,10 @@ import numpy as np
 import af2_analysis
 from af2_analysis import clustering
 from .data_files import TEST_FILE_PATH
+from unittest.mock import patch 
 
-
-def test_cf_1_5_5_relax():
+@patch("matplotlib.pyplot.show")
+def test_cf_1_5_5_relax(mock_show):
     data_path = os.path.join(TEST_FILE_PATH, "beta_amyloid_dimer_cf_1.5.5")
 
     my_data = af2_analysis.Data(data_path)
