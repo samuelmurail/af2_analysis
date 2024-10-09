@@ -78,8 +78,22 @@ def extract_fields_json(json_file, fields):
 
 
 def pdockq(data, verbose=True):
-    """
-    Compute the pdockq from the pdb file.
+    r"""Compute the pDockq [1]_ from the pdb file.
+
+    .. math::
+        pDockQ = \frac{L}{1 + e^{-k (x-x_{0})}} + b
+
+    where:
+
+    .. math::
+        x = \overline{plDDT_{interface}} \cdot log(number \: of \: interface \: contacts)
+
+    :math:`L = 0.724` is the maximum value of the sigmoid,
+    :math:`k = 0.052` is the slope of the sigmoid, :math:`x_{0} = 152.611`
+    is the midpoint of the sigmoid, and :math:`b = 0.018` is the y-intercept
+    of the sigmoid.
+
+    Implementation was inspired from https://gitlab.com/ElofssonLab/FoldDock/-/blob/main/src/pdockq.py
 
     Parameters
     ----------
@@ -92,6 +106,16 @@ def pdockq(data, verbose=True):
     -------
     None
         The `log_pd` dataframe is modified in place.
+
+    
+    References
+    ----------
+
+    .. [1] Bryant P, Pozzati G and Elofsson A. Improved prediction of protein-protein
+        interactions using AlphaFold2. *Nature Communications*. vol. 13, 1265 (2022)
+        https://www.nature.com/articles/s41467-022-28865-w
+
+
     """
 
     from pdb_numpy.analysis import compute_pdockQ
@@ -114,9 +138,40 @@ def pdockq(data, verbose=True):
 
 
 def mpdockq(data, verbose=True):
-    """
-    Compute mpdockq from the pdb file.
+    r"""Compute the mpDockq [2]_ from the pdb file.
 
+    .. math::
+        pDockQ = \frac{L}{1 + e^{-k (x-x_{0})}} + b
+
+    where:
+
+    .. math::
+        x = \overline{plDDT_{interface}} \cdot log(number \: of \: interface \: contacts)
+
+    :math:`L = 0.728`, :math:`x0 = 309.375`, :math:`k = 0.098` and :math:`b = 0.262`.
+
+    Implementation was inspired from https://gitlab.com/ElofssonLab/FoldDock/-/blob/main/src/pdockq.py
+
+    Parameters
+    ----------
+    data : AF2Data
+        object containing the data
+    verbose : bool
+        print progress bar
+
+    Returns
+    -------
+    None
+        The `log_pd` dataframe is modified in place.
+
+    
+    References
+    ----------
+
+    .. [2] Bryant P, Pozzati G, Zhu W, Shenoy A, Kundrotas P & Elofsson A.
+        Predicting the structure of large protein complexes using AlphaFold and Monte
+        Carlo tree search. *Nature Communications*. vol. 13, 6028 (2022)
+        https://www.nature.com/articles/s41467-022-33729-4
     """
 
     from pdb_numpy.analysis import compute_pdockQ
@@ -140,7 +195,7 @@ def mpdockq(data, verbose=True):
 
 def pdockq2(data, verbose=True):
     r"""
-    Compute pdockq2 from the pdb file [1]_.
+    Compute pdockq2 from the pdb file [3]_.
 
     .. math::
         pDockQ_2 = \frac{L}{1 + exp [-k*(X_i-X_0)]} + b
@@ -148,11 +203,12 @@ def pdockq2(data, verbose=True):
     with
 
     .. math::
-        X_i = \langle \frac{1}{1+(\frac{PAE_{int}}{d_0})^2} \rangle - \langle pLDDT \rangle_{int}
+        X_i = \langle \frac{1}{1+(\frac{PAE_{int}}{d_0})^2} \rangle * \langle pLDDT \rangle_{int}
 
     References:
 
-    .. [1] : https://academic.oup.com/bioinformatics/article/39/7/btad424/7219714
+    .. [3] : https://academic.oup.com/bioinformatics/article/39/7/btad424/7219714
+
     """
 
     from pdb_numpy.analysis import compute_pdockQ2

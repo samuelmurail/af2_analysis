@@ -14,14 +14,16 @@ Welcome to AF2 Analysis's documentation!
 
 ``af2_analysis`` is a python library designed to facilitate analysis of AlphaFold results.
 
+:math:`pDockQ = \frac{L}{1 + e^{-k (x-x_{0})}} + b`
+
 .. toctree::
    :maxdepth: 2
    :caption: Table of Contents:
 
    readme
    installation
+   analysis
    notebooks/basic_example.ipynb
-   Github project <https://github.com/samuelmurail/af2_analysis>
    modules
 
 Indices and tables

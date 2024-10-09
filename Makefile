@@ -52,16 +52,18 @@ coverage: ## check code coverage quickly with the default Python
 	coverage html
 	$(BROWSER) htmlcov/index.html
 
-docs: ## generate Sphinx HTML documentation, including API docs
+simple-docs: ## generate Sphinx HTML documentation, including API docs
 	rm -f docs/source/af2_analysis.data.rst
 	rm -f docs/source/af2_analysis.tests.rst
 	rm -f docs/source/modules.rst
 	sphinx-apidoc -o docs/source src/af2_analysis/
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
+
+docs: simple-docs ## generate Sphinx HTML documentation, including API docs
 	$(BROWSER) docs/build/html/index.html
 
-servedocs: docs ## compile the docs watching for changes
+ervedocs: docs ## compile the docs watching for changes
 	watchmedo shell-command -p '*.rst' -c '$(MAKE) -C docs html' -R -D .
 
 release: dist ## package and upload a release

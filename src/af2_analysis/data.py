@@ -427,7 +427,11 @@ class Data:
 
         return plddt_array
 
-    def plot_plddt(self, index_list):
+    def plot_plddt(self, index_list=None):
+
+        if index_list is None:
+            index_list = range(len(self.df))
+
         fig, ax = plt.subplots()
 
         for index in index_list:
@@ -511,6 +515,7 @@ class Data:
 
             fig = plot.plot_msa_v2(feature_dict)
             plt.show()
+        
 
     def count_msa_seq(self):
         """
