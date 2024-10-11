@@ -7,3 +7,4 @@ cmcrameri>=1.7
 nglview>=3.0
 ipywidgets>=7.6
 mdanalysis>=2.4
+scikit-learn
