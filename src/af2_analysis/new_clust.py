@@ -175,18 +175,24 @@ def hierarchical(
     MDS_coors=True,
     rmsd_scale=False,
 ):
-    """Clustering of AlphaFold Protein-Peptide Complex results.
+    """Clustering of AlphaFold models.
 
     After checking for the absence of missing values, the function starts by aligning the protein
-    chains of different predicted models of each PDB before characterizing the different
-    protein-peptide contact residues. The search for contact residues is done within 4 angstroms
-    by default. These residues will be used to compute the distance matrix of the different
-    peptide chains, where the output array will be scaled using the `scale` function before
-    calculating the new matrix of 1-scaled matrix. This new matrix will be used to perform
-    hierarchical ascending classification and characterize clusters by defining a cutoff threshold.
+    models using the `align_selection` variable or using `"backbone`" selection if not defined.
+    
+    Then, the function computes the distance matrix using the `distance_selection` variable or using
+    the `align_selection` variable if not defined.
+
+    The distance matrix can be scaled using the `scale` function if `rmsd_scale` is set to `True`.
+
+    The function then computes the hierarchical clustering using the average linkage method and the
+    distance matrix. The threshold value is used to cut the dendrogram and define the clusters.
 
     Optionally, this function can also plot the dendrogram of each PDB and the clusters distribution
     plot using the `clusters_distribution`.
+
+    Multidimensional scaling coordinates can be computed from the distance matrix if `MDS_coors` is set
+    to `True`.
 
     Parameters
     ----------

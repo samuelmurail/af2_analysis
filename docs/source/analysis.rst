@@ -243,16 +243,33 @@ based on their structural similarity. The user can choose:
 
 with RMS: RMSD matrix, di: scaling factor of 8.5 Å. 
 
-From the distance matrix (scaled or not), we performed an ascending hierarchical
-classification to determine the clusters based on the distance threshold.
+From the distance matrix (scaled or not), an ascending hierarchical
+classification is computed to determine the clusters based on the distance threshold.
+
 
 .. code-block:: python
 
     from af2_analysis import clustering
 
     clustering.hierarchical(my_data.df, threshold=0.3)
-    clustering.compute_pc(my_data.df)
-    clustering.plot_pc(my_data.df)
+
+.. image:: _static/cluster_PDIA3.png
+  :width: 400
+  :alt: Cluster plot
+
+A multidimensional scaling (MDS) coordinates can be computed from the distance matrix
+to visualize a 2D projection of the clusters, this coordinates are added in the dataframe
+in column ``MDS 1`` and ``MDS 2``.
+
+.. code-block:: python
+
+    sns.scatterplot(data=my_data.df, x='MDS 1', y='MDS 2', hue='cluster')
+
+.. image:: _static/PDIA3_clusters_MDS.png
+  :width: 400
+  :alt: Cluster plot
+
+
 
 References
 ==========
@@ -266,3 +283,4 @@ References
 .. [#pdockq2] `Zhu et al. Bioinformatics (2023) doi: 10.1093/bioinformatics/btad424 <https://academic.oup.com/bioinformatics/article/39/7/btad424/7219714>`_
 .. [#LIS] `Kim et al. bioRxiv (2024) doi: 10.1101/2024.02.19.580970 <https://www.biorxiv.org/content/10.1101/2024.02.19.580970v1>`_
 .. [#AF2M] `Evans et al. bioRxiv (2021) doi: 10.1101/2021.10.04.463034 <https://www.biorxiv.org/content/10.1101/2021.10.04.463034v2>`_
+.. [#RMS] `Basu et al. PLOS ONE. 2016 Aug 25;11(8). <https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0161879>`_
