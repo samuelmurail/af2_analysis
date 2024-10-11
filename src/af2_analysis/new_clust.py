@@ -2,16 +2,15 @@ import seaborn as sns
 import numpy as np
 import matplotlib.pyplot as plt
 import MDAnalysis as mda
-from scipy.cluster.hierarchy import linkage, dendrogram, fcluster
+import scipy.cluster.hierarchy # import linkage, dendrogram, fcluster
 import sklearn.manifold
 import sklearn.decomposition
 from MDAnalysis.analysis import align, diffusionmap, pca
 from MDAnalysis.coordinates.memory import MemoryReader
 import pandas as pd
 import pdb_numpy
-import os
-import shutil
 import logging
+from collections import Counter
 
 
 # Autorship information
@@ -169,10 +168,11 @@ def compute_distance_matrix(
     
 def hierarchical(
     df,
-    threshold=0.2,
+    threshold=2.0,
     align_selection=None,
     distance_selection=None,
     show_dendrogram=True,
+    MDS_coors=True,
     rmsd_scale=False,
 ):
     """Clustering of AlphaFold Protein-Peptide Complex results.
@@ -200,6 +200,8 @@ def hierarchical(
         The selection string to compute the distance matrix (default is None).
     show_dendrogram : bool, optional
         Whether to plot the different dendrograms of each PDB (default is `True`).
+    MDS_coors : bool, optional
+        Whether to compute Multidimensional scaling coordinates from the distance matrix (default is `True`).
     rmsd_scale : bool, optional
         Whether to scale the RMS values using the `scale` function (default is `False`).
 
@@ -246,14 +248,17 @@ def hierarchical(
 
         logger.info("Compute Linkage clustering")
         h, _ = dist_matrix.shape
-        Z = linkage(dist_matrix[np.triu_indices(h, 1)], method="average")
-        cluster_list += fcluster(Z, float(threshold), criterion="distance").tolist()
+        Z = scipy.cluster.hierarchy.linkage(dist_matrix[np.triu_indices(h, 1)], method="average")
+        cluster_list += scipy.cluster.hierarchy.fcluster(Z, float(threshold), criterion="distance").tolist()
 
         logger.info(f"{len(np.unique(cluster_list))} clusters founded for {pdb}")
 
         # Add Multidimensional scaling coordinates from the distance matrix
-        mds = sklearn.manifold.MDS(dissimilarity='precomputed', n_components=2)
-        coordinates = mds.fit_transform(dist_matrix)
+        if MDS_coors:
+            mds = sklearn.manifold.MDS(dissimilarity='precomputed', n_components=2)
+            coordinates = mds.fit_transform(dist_matrix)
+            MDS_1 += coordinates.T[0].tolist()
+            MDS_2 += coordinates.T[1].tolist()
 
         # PCA analysis don't add any information:
         #pca = sklearn.decomposition.PCA(n_components=2)  # n_components defines how many principal components you want
@@ -264,71 +269,50 @@ def hierarchical(
         if show_dendrogram:
             # plot the dendrogram with the threshold line
             plt.figure()
-            dendrogram(Z, color_threshold=float(threshold))
+            scipy.cluster.hierarchy.dendrogram(Z, color_threshold=float(threshold))
             plt.axhline(float(threshold), color="k", ls="--")
             plt.title("Hierarchical Cluster Dendrogram -{}".format(pdb))
             plt.xlabel("Data Point Indexes")
             plt.ylabel("Distance")
             plt.show()
 
-    df["cluster"] = cluster_list + null_number * [None]
+    df["cluster"] = reorder_by_size(cluster_list) + null_number * [None]
     df["cluster"] = df["cluster"].astype('category')
-    df["MDS 1"] = list(coordinates.T[0]) + null_number * [None]
-    df["MDS 2"] = list(coordinates.T[1]) + null_number * [None]
+    if MDS_coors:
+        df["MDS 1"] = MDS_1 + null_number * [None]
+        df["MDS 2"] = MDS_2 + null_number * [None]
 
+    return
 
-def compute_pc(df, n_components=2):
-    """Compute Principal Components for Alphafold Protein-Peptide Complex.
-
-    This function computes the Principal Components (PCs) for a protein-peptide complex predicted by
-    Alphafold. After checking for the absence of missing values, the function aligns the protein
-    chains before calculating the PCs using the PCA module from the MDAnalysis package. The results
-    are then updated in the input DataFrame. By default, this function computes the first two
-    principal components.
-
+def reorder_by_size(clust_list):
+    """Reorder clusters by size.
+    
+    This function reorders the clusters by size, with the largest cluster first.
+    
     Parameters
     ----------
-    df : pandas.DataFrame
-        DataFrame containing Alphafold data for the protein-peptide complex.
-    n_components : int, optional
-        Number of principal components to compute (default is 2).
-
+    clust_list : list
+        List of clusters.
+    
     Returns
     -------
-    None
-        The function modifies the input DataFrame by appending the PC columns, but does not return a value.
+    list
+        The reordered list of clusters.
     """
 
-    pc_list = []
-    for i in range(n_components):
-        pc_list.append([])
+    # Step 1: Count the occurrences of each cluster
+    cluster_counts = Counter(clust_list)
 
-    query_list = df["query"].unique().tolist()
+    # Step 2: Sort clusters by frequency (most frequent first)
+    sorted_clusters_by_frequency = [cluster for cluster, count in cluster_counts.most_common()]
 
-    for pdb in query_list:
-        files = [file for file in df[df["query"] == pdb]["pdb"] if not pd.isnull(file)]
-        # Check that only the last df row are missing
-        null_number = sum(pd.isnull(df[df["query"] == pdb]["pdb"]))
-        assert null_number == sum(
-            pd.isnull(df[df["query"] == pdb]["pdb"][-null_number:])
-        ), f"Missing pdb data in the middle of the query {pdb}"
-        u = read_numerous_pdb(files)
-        chain_pep_value = chain_pep(files[0])
+    # Step 3: Create a mapping from old cluster labels to new ones
+    cluster_mapping = {old: new for new, old in enumerate(sorted_clusters_by_frequency, start=1)}
+    # Treat None as a special case: it should be mapped to None
+    if None in cluster_mapping:
+        cluster_mapping[None] = None
 
-        align.AlignTraj(
-            u, u, select=f"backbone and not chainID {chain_pep_value}", in_memory=True
-        ).run()
-        pc = pca.PCA(
-            u,
-            select=(f"backbone and chainID {chain_pep_value}"),
-            align=True,
-            mean=None,
-            n_components=n_components,
-        ).run()
-        backbone = u.select_atoms(f"backbone and chainID {chain_pep_value}")
-        transformed = pc.transform(backbone, n_components)
-        for i in range(n_components):
-            pc_list[i].extend(transformed[:, i].tolist())
+    # Step 4: Relabel the clusters using the mapping
+    reordered_clusters = [cluster_mapping[cluster] for cluster in clust_list]
 
-    for i in range(n_components):
-        df[f"PC{i+1}"] = pc_list[i] + null_number * [np.nan]
+    return reordered_clusters
