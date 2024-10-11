@@ -1,5 +1,9 @@
 from string import ascii_lowercase
 import numpy as np
+import logging
+
+# Logging
+logger = logging.getLogger(__name__)
 
 
 def convert_aa_msa(seqs):
@@ -98,13 +102,13 @@ def parse_a3m(a3m_lines=None, a3m_file=None, filter_qid=0.15, filter_cov=0.5, N=
         else:
             seqs[-1] += line
 
-    print(f"- Reading {n:6} sequences.")
+    logger.info(f"- Reading {n:6} sequences.")
 
     # filter last entry
     do_filter()
 
     if len(seqs) > N + 1:
-        print(
+        logger.info(
             f"found too many sequences ({len(seqs)}), taking the top{N} (sorted by qid)"
         )
         sid = np.argsort([seqid(seq, ref_seq) for seq in seqs])[::-1][: N + 1]

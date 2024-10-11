@@ -14,3 +14,19 @@ __email__ = "samuel.murail@u-paris.fr"
 __status__ = "Beta"
 
 from .data import Data
+import logging
+import sys
+
+# Logging
+logger = logging.getLogger(__name__)
+
+
+def show_log():
+    logger.setLevel(logging.INFO)
+    if not logger.hasHandlers():
+        handler = logging.StreamHandler(sys.stdout)
+        handler.setLevel(logging.INFO)
+        formatter = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+

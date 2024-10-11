@@ -11,12 +11,27 @@ import matplotlib.pyplot as plt
 from cmcrameri import cm
 from tqdm.auto import tqdm
 import json
-
+import logging
 import ipywidgets as widgets
 
 from .format import colabfold_1_5, af3_webserver, afpulldown, default
 from . import sequence, plot
-from .analysis import compute_LIS_matrix, get_pae, extract_fields_json
+from .analysis import get_pae, extract_fields_json
+
+
+# Autorship information
+__author__ = "Alaa Reguei, Samuel Murail"
+__copyright__ = "Copyright 2023, RPBS"
+__credits__ = ["Samuel Murail", "Alaa Reguei"]
+__license__ = "GNU General Public License v2.0"
+__version__ = "0.0.2"
+__maintainer__ = "Samuel Murail"
+__email__ = "samuel.murail@u-paris.fr"
+__status__ = "Beta"
+
+# Logging
+logger = logging.getLogger(__name__)
+
 
 plddt_main_atom_list = ["CA", "P", "ZN", "MG", "CL", "CA", "NA", "MN", "K", "FE", "CU", "CO"]
 
@@ -364,6 +379,9 @@ class Data:
 
     def plot_pae(self, index, cmap=cm.vik):
         row = self.df.iloc[index]
+
+        if row["json"] is None:
+            return None
         pae_array = get_pae(row["json"])
 
         fig, ax = plt.subplots()
@@ -495,14 +513,14 @@ class Data:
                 file_list.append(file)
 
         for a3m_file in file_list:
-            print(f"Reading MSA file:{a3m_file}")
+            logger.info(f"Reading MSA file:{a3m_file}")
             querie = a3m_file.split("/")[-1].split(".")[0]
 
             a3m_lines = open(os.path.join(self.dir, a3m_file), "r").readlines()[1:]
             seqs, mtx, nams = sequence.parse_a3m(
                 a3m_lines=a3m_lines, filter_qid=filter_qid, filter_cov=filter_cov
             )
-            print(f"- Keeping {len(seqs):6} sequences for plotting.")
+            logger.info(f"- Keeping {len(seqs):6} sequences for plotting.")
             feature_dict = {}
             feature_dict["msa"] = sequence.convert_aa_msa(seqs)
             feature_dict["num_alignments"] = len(seqs)
@@ -541,7 +559,7 @@ class Data:
         alignement_len = {}
 
         for a3m_file in file_list:
-            print(f"Reading MSA file:{a3m_file}")
+            logger.info(f"Reading MSA file:{a3m_file}")
             querie = a3m_file.split("/")[-1].split(".")[0]
 
             a3m_lines = open(os.path.join(self.dir, a3m_file), "r").readlines()[1:]
@@ -695,7 +713,6 @@ class Data:
         )
         display(model_widget)
 
-        print("YO")
         rank_num = 1
 
         fig, (ax_plddt, ax_pae) = plt.subplots(1, 2, figsize=(10, 4))

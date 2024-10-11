@@ -4,6 +4,17 @@ import pdb_numpy
 from tqdm.auto import tqdm
 from . import data, analysis
 
+
+# Autorship information
+__author__ = "Alaa Reguei, Samuel Murail"
+__copyright__ = "Copyright 2023, RPBS"
+__credits__ = ["Samuel Murail", "Alaa Reguei"]
+__license__ = "GNU General Public License v2.0"
+__version__ = "0.0.2"
+__maintainer__ = "Samuel Murail"
+__email__ = "samuel.murail@u-paris.fr"
+__status__ = "Beta"
+
 """
 The module contains functions to extract and compute docking scores.
 

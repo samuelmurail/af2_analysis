@@ -9,10 +9,11 @@ import pandas as pd
 import pdb_numpy
 import os
 import shutil
+import logging
 
 
 # Autorship information
-__author__ = "Alaa Reguei"
+__author__ = "Alaa Reguei, Samuel Murail"
 __copyright__ = "Copyright 2023, RPBS"
 __credits__ = ["Samuel Murail", "Alaa Reguei"]
 __license__ = "GNU General Public License v2.0"
@@ -20,6 +21,14 @@ __version__ = "0.0.2"
 __maintainer__ = "Samuel Murail"
 __email__ = "samuel.murail@u-paris.fr"
 __status__ = "Beta"
+
+
+"""
+The module contains functions to cluster AlphaFold models.
+"""
+
+# Logging
+logger = logging.getLogger(__name__)
 
 
 def chain_pep(pdb_file):
@@ -79,7 +88,56 @@ def scale(rms, d0=8.5):
     rms_scale = 1 / (1 + (rms / d0) ** 2)
     return rms_scale
 
+def compute_distance_matrix(
+    pdb_files,
+    align_selection=None,
+    distance_selection=None,
+):
+    """Compute distance matrix.
+    
+    This function computes the distance matrix of the different peptide chains.
+    
+    Parameters
+    ----------
+    pdb_files : list of str
+        List of file paths to the PDB files to be read.
+    align_selection : str, optional
+        The selection string to align the protein chains (default is None or "backbone").
+    distance_selection : str, optional
+        The selection string to compute the distance matrix (default is None or "backbone").
+    
+    Returns
+    -------
+    None
+        The function modifies the input DataFrame by appending the DistanceMatrix column, but does not return a value.
+    """
 
+    if align_selection is None and distance_selection is None:
+        distance_selection = "backbone"
+        align_selection = "backbone"
+    elif align_selection is None:
+        align_selection = distance_selection
+    elif distance_selection is None:
+        distance_selection = align_selection
+    
+    u = read_numerous_pdb(pdb_files)
+    assert u.trajectory.n_frames == len(
+        pdb_files
+    ), f"Number of frames {u.trajectory.n_frames} different from number of files {len(files)}"
+
+    logger.info("align structures")
+    align.AlignTraj(
+        u, u, select=align_selection, in_memory=True
+    ).run(verbose=True)
+
+    logger.info("Compute distance Matrix")
+    matrix = diffusionmap.DistanceMatrix(
+        u,
+        select=distance_selection,
+    ).run(verbose=True)
+
+    return matrix.results.dist_matrix
+    
 def hierarchical(
     df,
     threshold=0.2,
@@ -129,20 +187,20 @@ def hierarchical(
             pd.isnull(df[df["query"] == pdb]["pdb"][-null_number:])
         ), f"Missing pdb data in the middle of the query {pdb}"
 
-        print("Read all structures")
+        logger.info("Read all structures")
         u = read_numerous_pdb(files)
         assert u.trajectory.n_frames == len(
             files
         ), f"Number of frames {u.trajectory.n_frames} different from number of files {len(files)}"
         chain_pep_value = chain_pep(files[0])
-        print(f"Peptide chain is :{chain_pep_value}")
+        logger.info(f"Peptide chain is :{chain_pep_value}")
 
-        print("align structures")
+        logger.info("align structures")
         align.AlignTraj(
             u, u, select=f"backbone and not chainID {chain_pep_value}", in_memory=True
         ).run(verbose=True)
 
-        print("Extract contact residues")
+        logger.info("Extract contact residues")
         cutoff = contact_cutoff
         peptide_contact = u.select_atoms(
             f"chainID {chain_pep_value} and around {cutoff} not chainID {chain_pep_value}"
@@ -153,26 +211,26 @@ def hierarchical(
                 resid_contact_list.append(residue.resnum)
 
         resid_contact_list = set(resid_contact_list)
-        print(f"Contact residues : {resid_contact_list}")
+        logger.info(f"Contact residues : {resid_contact_list}")
 
-        print("Compute distance Matrix")
+        logger.info("Compute distance Matrix")
         # matrix = diffusionmap.DistanceMatrix(u, select=f"backbone and chainID {chain_pep_value}").run(verbose=True)
         matrix = diffusionmap.DistanceMatrix(
             u,
             select=f'chainID {chain_pep_value} and resnum {" ".join([str(res) for res in resid_contact_list])} and backbone',
         ).run(verbose=True)
 
-        print(f"Max RMSD is {np.max(matrix.results.dist_matrix):.2f} A")
+        logger.info(f"Max RMSD is {np.max(matrix.results.dist_matrix):.2f} A")
         dist = 1 - scale(matrix.results.dist_matrix)
         h, w = dist.shape
 
-        print("Compute Linkage clustering")
+        logger.info("Compute Linkage clustering")
         Z = linkage(dist[np.triu_indices(h, 1)], method="average")
         clust_threshold.extend(
             fcluster(Z, float(threshold), criterion="distance").tolist()
         )
 
-        print(f"{len(np.unique(clust_threshold))} clusters founded for {pdb}")
+        logger.info(f"{len(np.unique(clust_threshold))} clusters founded for {pdb}")
 
         if show_dendrogram:
             # plot the dendrogram with the threshold line
@@ -386,7 +444,7 @@ def get_pdb(df, metric, ascending=False):
                 .iloc[0:5]["pdb"]
                 .tolist()
             )
-            print(
+            logger.info(
                 f"This structure presents {pdb} {len(nclusters)} clusters according to the chosen threshold "
             )
             # print(f"Top 5 structures for {pdb}: {top_structures}")
@@ -395,7 +453,7 @@ def get_pdb(df, metric, ascending=False):
 
         # If nclusters is greater than 2, take the top 3 structure from each cluster
         else:
-            print(
+            logger.info(
                 f"This structure presents {pdb} {len(nclusters)} clusters according to the chosen threshold "
             )
             grouped_df = sub_df.groupby("cluster")
