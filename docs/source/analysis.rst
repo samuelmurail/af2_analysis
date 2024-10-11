@@ -241,7 +241,7 @@ based on their structural similarity. The user can choose:
 .. math::
     RMS_{scaled} (RMS, di) = \frac{1}{1 + (\frac{RMS}{di})^2}
 
-with RMS: RMSD matrix, di: scaling factor of 8.5 Å. 
+with :math:`RMS` the RMSD matrix and :math:`di` a scaling factor of 8.5 Å. 
 
 From the distance matrix (scaled or not), an ascending hierarchical
 classification is computed to determine the clusters based on the distance threshold.
