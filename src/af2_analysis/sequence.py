@@ -45,6 +45,29 @@ def convert_aa_msa(seqs):
 
 
 def parse_a3m(a3m_lines=None, a3m_file=None, filter_qid=0.15, filter_cov=0.5, N=100000):
+    """
+    Parses an A3M file or list of A3M lines and filters sequences based on sequence identity and coverage.
+
+    Parameters
+    ----------
+    a3m_lines: list of str, optional
+        List of lines from an A3M file. Default is None.
+    a3m_file: str, optional
+        Path to an A3M file. Default is None.
+    filter_qid: float, optional
+        Minimum sequence identity threshold for filtering. Default is 0.15.
+    filter_cov:  float, optional
+        Minimum coverage threshold for filtering. Default is 0.5.
+    N: int, optional
+        Maximum number of sequences to return. Default is 100000.
+
+    Returns
+    -------
+        tuple: A tuple containing:
+            - seqs (list of str): List of filtered sequences.
+            - mtx (list of list of int): List of deletion matrices corresponding to the sequences.
+            - nams (list of str): List of sequence names.
+    """
     def seqid(a, b):
         return sum(c1 == c2 for c1, c2 in zip(a, b))
 
@@ -57,6 +80,9 @@ def parse_a3m(a3m_lines=None, a3m_file=None, filter_qid=0.15, filter_cov=0.5, N=
         return not (L > filter_cov * rL and seqid(seq, ref_seq) > filter_qid * L)
 
     rm_lower = str.maketrans("", "", ascii_lowercase)
+
+    if a3m_file is None and a3m_lines is None:
+        raise ValueError("Either a3m_file or a3m_lines must be provided.")
 
     # prep inputs
     if a3m_lines is None:

@@ -1,3 +1,6 @@
+User Guide
+**********
+
 Importing Alphafold Data
 ========================
 
@@ -151,6 +154,42 @@ Figure from ``github.com/flyark/AFM-LIS``. Implementation was inspired from `htt
 
 Example of LIS heatmap among subunits on a protein-DNA-Zn complex computed with AlphaFold 3.
 
+Protein-Protein and Protein-Peptide Docking
+===========================================
+
+The ``af2_analysis`` package provides a simple interface to score protein-protein and protein-peptide docking using the ``docking`` package.
+
+.. note::
+
+    The ``docking`` package infer that the peptide chain or the protein ligand chain is the last one in the model.
+
+The ``docking`` package allow to compute:
+
+* ``pae_pep()``: average interface of Predicted Aligned Error (PAE) between the receptor chain(s) and the ligand/peptide chain (last one). Add the columns ``PAE_pep_red`` and ``PAE_rec_pep`` in the dataframe.
+
+.. image:: _static/PAE_ligand.png
+  :width: 400
+  :alt: pLDDT selection plot
+
+* ``plddt_pep()``: compute the average pLDDT of the ligand chain. Add the column ``plddt_pep`` in the dataframe.
+* ``pdockq2_lig()``: compute the pDockQ2 scores of each chain. Add the columns ``pdockq2_A``, ``pdockq2_B``, ... and ``pdockq2_lig`` (the last chain pdockq2) in the dataframe.
+* ``LIS_pep()``: compute the Local Interaction Score (LIS) between the receptor chain(s) and the ligand/peptide chain (last one). Add the columns ``LIS_rec_pep`` and ``LIS_pep_rec`` in the dataframe.
+
+**Example**:
+
+.. code-block:: python
+
+    from af2_analysis import docking
+
+    #extract_pae_pep
+    docking.pae_pep(my_data, verbose=False)
+    #compute_pdockq2_lig
+    docking.pdockq2_lig(my_data, verbose=False)
+    #compute_LIS_pep
+    docking.LIS_pep(my_data, verbose=False)
+    #extract_plddt_pep
+    docking.plddt_pep(my_data, verbose=False)
+
 Plots
 =====
 
@@ -251,7 +290,7 @@ classification is computed to determine the clusters based on the distance thres
 
     from af2_analysis import clustering
 
-    clustering.hierarchical(my_data.df, threshold=0.3)
+    clustering.hierarchical(my_data.df, threshold=2.5)
 
 .. image:: _static/cluster_PDIA3.png
   :width: 400

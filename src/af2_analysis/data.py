@@ -454,8 +454,7 @@ class Data:
 
         for index in index_list:
             plddt_array = self.get_plddt(index)
-
-            plt.plot(plddt_array)
+            plt.plot(np.arange(1, len(plddt_array)+1), plddt_array)
 
         plt.vlines(
             np.cumsum(self.chain_length[self.df.iloc[index_list[0]]["query"]][:-1]),
