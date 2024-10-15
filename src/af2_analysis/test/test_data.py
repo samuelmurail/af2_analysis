@@ -184,3 +184,16 @@ def test_get_plddt_dna_ions():
     ]
     precision = 0.001
     assert plddt_array == pytest.approx(expected_plddt, precision)
+
+def test_concat():
+
+    data_path = os.path.join(TEST_FILE_PATH, "beta_amyloid_dimer_cf_1.5.5")
+    my_data = af2_analysis.Data(data_path)
+
+    data_path_2 = os.path.join(TEST_FILE_PATH, "fold_2024_07_01_12_14_prot_dna_zn")
+    my_data_2 = af2_analysis.Data(data_path_2)
+
+    my_data_all = af2_analysis.data.concat_data([my_data, my_data_2])
+    assert len(my_data_all.df) == 45
+    assert len(my_data_all.chain_length) == 2
+    assert len(my_data_all.chains) == 2
