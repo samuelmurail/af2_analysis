@@ -3,6 +3,7 @@
 
 import os
 import numpy as np
+import pandas as pd
 import pytest
 
 import af2_analysis
@@ -197,3 +198,22 @@ def test_concat():
     assert len(my_data_all.df) == 45
     assert len(my_data_all.chain_length) == 2
     assert len(my_data_all.chains) == 2
+
+def test_extract_json():
+
+    data_path = os.path.join(TEST_FILE_PATH, "beta_amyloid_dimer_cf_1.5.5")
+    my_data = af2_analysis.Data(data_path)
+    print(my_data.df.columns)
+    new_column = ['plddt', 'max_pae', 'pae', 'ptm', 'iptm']
+    assert np.all([not (col in my_data.df.columns) for col in new_column])
+    my_data.extract_json()
+    print(my_data.df.columns)
+    assert np.all([col in my_data.df.columns for col in new_column])
+
+    old_column = ['pLDDT', 'pTM', 'ipTM']
+
+    rtol=1e-02
+    assert np.all(np.abs(my_data.df['pTM'] - my_data.df['ptm']) < rtol)
+    assert np.all(np.abs(my_data.df['ipTM'] - my_data.df['iptm']) < rtol)
+    rtol=1e-01
+    assert np.all( np.abs(np.array([np.mean(plddts) for plddts in my_data.df['plddt']]) - my_data.df['pLDDT']) < rtol)

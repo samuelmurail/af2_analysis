@@ -133,6 +133,20 @@ def test_cf_1_5_5_relax():
         0.598,
     ]
 
+    analysis.pdockq(my_data)
+    print([round(i, 4) for i in my_data.df["pdockq"]])
+    expected_pdockq = [0.0332, 0.0205, 0.03, 0.0297, 0.1209, 0.0285, 0.0225, 0.0485, 0.0198, 0.0715, 0.0332, 0.0238, 0.0276, 0.0558, 0.1383, 0.0242, 0.0211, 0.0252, 0.0419, 0.1415, 0.0295, 0.0212, 0.0285, 0.0524, 0.137, 0.0291, 0.0204, 0.0284, 0.0207, 0.0823, 0.0231, 0.0203, 0.0282, 0.0509, 0.1392, 0.0294, 0.0206, 0.0254, 0.0362, 0.1426]
+
+    precision = 0.01
+    assert np.all(
+        [
+            my_data.df.iloc[i]["pdockq"] == pytest.approx(expected_pdockq[i], precision)
+            for i in range(len(my_data.df))
+        ]
+    )
+
+
+
 def test_af3_webserver():
     data_path = os.path.join(TEST_FILE_PATH, "fold_2024_07_01_12_14_prot_dna_zn")
 
@@ -145,12 +159,23 @@ def test_af3_webserver():
 
     expected_pdockq = [0.2756, 0.2621, 0.2755, 0.2754, 0.2758]
 
-    assert 2.2 == pytest.approx(2.3, 0.1)
     #print([round(i, 4) for i in my_data.df["pdockq"]])
     precision = 0.001
     assert np.all(
         [
             my_data.df.iloc[i]["pdockq"] == pytest.approx(expected_pdockq[i], precision)
+            for i in range(len(my_data.df))
+        ]
+    )
+
+    analysis.mpdockq(my_data)
+    expected_mpdockq = [0.262, 0.262, 0.262, 0.262, 0.262]
+
+    #print([round(i, 6) for i in my_data.df["mpdockq"]])
+    precision = 0.001
+    assert np.all(
+        [
+            my_data.df.iloc[i]["mpdockq"] == pytest.approx(expected_mpdockq[i], precision)
             for i in range(len(my_data.df))
         ]
     )
