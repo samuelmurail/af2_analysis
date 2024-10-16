@@ -193,6 +193,15 @@ The ``docking`` package allow to compute:
 Plots
 =====
 
+Interactive Visualization
+-------------------------
+
+At first approach the user can visualize the pLDDT, PAE matrix and the model scores. The ``show_info()`` function displays the scores of the models, as well as the pLDDT plot and PAE matrix in a interactive way.
+
+.. image:: _static/show_info.gif
+  :width: 600
+  :alt: show_info
+
 MSA Plot
 --------
 

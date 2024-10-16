@@ -101,6 +101,12 @@ docking.LIS_pep(my_data)
 
 ### Plots
 
+
+- At first approach the user can visualize the pLDDT, PAE matrix and the model scores. The ``show_info()`` function displays the scores of the models, as well as the pLDDT plot and PAE matrix in a interactive way.
+
+<img src="https://raw.githubusercontent.com/samuelmurail/af2_analysis/master/docs/source/_static/show_info.gif" alt="Interactive Visualization" width="200" style="display: block; margin: auto;"/>
+
+
 - plot msa, plddt and PAE:
 
 ```python
