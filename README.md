@@ -34,6 +34,7 @@ Existing tools often require separate scripts for calculating various quality me
 * Visualize predicted protein models.
 * Cluster generated models to identify diverse conformations.
 * Select the best models based on defined criteria.
+* Add your custom metrics to the DataFrame for further analysis.
 
 ## Installation
 
