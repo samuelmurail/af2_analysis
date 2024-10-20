@@ -149,8 +149,7 @@ to contribute code, please fork the repository and submit a pull request.
 ## Authors
 
 * Alaa Regei, Graduate Student - [Université Paris Cité](https://u-paris.fr).
-* [Samuel Murail](https://samuelmurail.github.io/PersonalPage/>), Associate Professor - [Université Paris Cité](https://u-paris.fr),
-[CMPLI](http://bfa.univ-paris-diderot.fr/equipe-8/>).
+* [Samuel Murail](https://samuelmurail.github.io/PersonalPage/>), Associate Professor - [Université Paris Cité](https://u-paris.fr), [CMPLI](http://bfa.univ-paris-diderot.fr/equipe-8/>).
 
 See also the list of [contributors](https://github.com/samuelmurail/af2_analysis/contributors) who participated in this project.
 
