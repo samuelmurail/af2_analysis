@@ -9,7 +9,7 @@ import pdb_numpy
 __author__ = "Alaa Reguei"
 __copyright__ = "Copyright 2023, RPBS"
 __credits__ = ["Samuel Murail", "Alaa Reguei"]
-__license__ = "GNU General Public License v2.0"
+__license__ = "GNU General Public License version 2"
 __version__ = "0.1.0"
 __maintainer__ = "Samuel Murail"
 __email__ = "samuel.murail@u-paris.fr"

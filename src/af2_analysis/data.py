@@ -23,7 +23,7 @@ from .analysis import get_pae, extract_fields_json
 __author__ = "Alaa Reguei, Samuel Murail"
 __copyright__ = "Copyright 2023, RPBS"
 __credits__ = ["Samuel Murail", "Alaa Reguei"]
-__license__ = "GNU General Public License v2.0"
+__license__ = "GNU General Public License version 2"
 __version__ = "0.1.0"
 __maintainer__ = "Samuel Murail"
 __email__ = "samuel.murail@u-paris.fr"

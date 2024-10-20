@@ -155,7 +155,7 @@ See also the list of [contributors](https://github.com/samuelmurail/af2_analysis
 
 ## License
 
-This project is licensed under the GNU General Public License v2.0 - see the `LICENSE` file for details.
+This project is licensed under the GNU General Public License version 2 - see the `LICENSE` file for details.
 
 
 # References
