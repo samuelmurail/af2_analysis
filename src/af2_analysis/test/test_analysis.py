@@ -9,6 +9,7 @@ import af2_analysis
 from af2_analysis import analysis
 from .data_files import TEST_FILE_PATH
 
+
 def test_cf_1_5_5_relax():
     data_path = os.path.join(TEST_FILE_PATH, "beta_amyloid_dimer_cf_1.5.5")
 
@@ -135,7 +136,48 @@ def test_cf_1_5_5_relax():
 
     analysis.pdockq(my_data)
     print([round(i, 4) for i in my_data.df["pdockq"]])
-    expected_pdockq = [0.0332, 0.0205, 0.03, 0.0297, 0.1209, 0.0285, 0.0225, 0.0485, 0.0198, 0.0715, 0.0332, 0.0238, 0.0276, 0.0558, 0.1383, 0.0242, 0.0211, 0.0252, 0.0419, 0.1415, 0.0295, 0.0212, 0.0285, 0.0524, 0.137, 0.0291, 0.0204, 0.0284, 0.0207, 0.0823, 0.0231, 0.0203, 0.0282, 0.0509, 0.1392, 0.0294, 0.0206, 0.0254, 0.0362, 0.1426]
+    expected_pdockq = [
+        0.0332,
+        0.0205,
+        0.03,
+        0.0297,
+        0.1209,
+        0.0285,
+        0.0225,
+        0.0485,
+        0.0198,
+        0.0715,
+        0.0332,
+        0.0238,
+        0.0276,
+        0.0558,
+        0.1383,
+        0.0242,
+        0.0211,
+        0.0252,
+        0.0419,
+        0.1415,
+        0.0295,
+        0.0212,
+        0.0285,
+        0.0524,
+        0.137,
+        0.0291,
+        0.0204,
+        0.0284,
+        0.0207,
+        0.0823,
+        0.0231,
+        0.0203,
+        0.0282,
+        0.0509,
+        0.1392,
+        0.0294,
+        0.0206,
+        0.0254,
+        0.0362,
+        0.1426,
+    ]
 
     precision = 0.01
     assert np.all(
@@ -146,7 +188,6 @@ def test_cf_1_5_5_relax():
     )
 
 
-
 def test_af3_webserver():
     data_path = os.path.join(TEST_FILE_PATH, "fold_2024_07_01_12_14_prot_dna_zn")
 
@@ -154,12 +195,11 @@ def test_af3_webserver():
 
     assert my_data.format == "AF3_webserver"
 
-
     analysis.pdockq(my_data)
 
     expected_pdockq = [0.2756, 0.2621, 0.2755, 0.2754, 0.2758]
 
-    #print([round(i, 4) for i in my_data.df["pdockq"]])
+    # print([round(i, 4) for i in my_data.df["pdockq"]])
     precision = 0.001
     assert np.all(
         [
@@ -171,11 +211,12 @@ def test_af3_webserver():
     analysis.mpdockq(my_data)
     expected_mpdockq = [0.262, 0.262, 0.262, 0.262, 0.262]
 
-    #print([round(i, 6) for i in my_data.df["mpdockq"]])
+    # print([round(i, 6) for i in my_data.df["mpdockq"]])
     precision = 0.001
     assert np.all(
         [
-            my_data.df.iloc[i]["mpdockq"] == pytest.approx(expected_mpdockq[i], precision)
+            my_data.df.iloc[i]["mpdockq"]
+            == pytest.approx(expected_mpdockq[i], precision)
             for i in range(len(my_data.df))
         ]
     )
@@ -185,7 +226,8 @@ def test_af3_webserver():
     expected_pdockq2 = [0.9148, 0.9187, 0.9151, 0.913, 0.9154]
     assert np.all(
         [
-            my_data.df.iloc[i]["pdockq2_A"] == pytest.approx(expected_pdockq2[i], precision)
+            my_data.df.iloc[i]["pdockq2_A"]
+            == pytest.approx(expected_pdockq2[i], precision)
             for i in range(len(my_data.df))
         ]
     )
@@ -193,23 +235,25 @@ def test_af3_webserver():
     expected_pdockq2 = [0.8972, 0.8925, 0.8884, 0.889, 0.8785]
     assert np.all(
         [
-            my_data.df.iloc[i]["pdockq2_D"] == pytest.approx(expected_pdockq2[i], precision)
+            my_data.df.iloc[i]["pdockq2_D"]
+            == pytest.approx(expected_pdockq2[i], precision)
             for i in range(len(my_data.df))
         ]
     )
 
     analysis.LIS_matrix(my_data)
-    expected_LIS_0 = [[0.83139, 0.8075 , 0.85381, 0.85251, 0.85559, 0.85551],
-                      [0.82717, 0.93666, 0.7975 , 0.83166, 0.84568, 0.83962],
-                      [0.80911, 0.745  , 0.93666, 0.82333, 0.83409, 0.83060],
-                      [0.84268, 0.84166, 0.84   , 0.93666, 0.865  , 0.85886],
-                      [0.83427, 0.84507, 0.83712, 0.84522, 0.87633, 0.87050],
-                      [0.81519, 0.79833, 0.83053, 0.82   , 0.85831, 0.86331],]
+    expected_LIS_0 = [
+        [0.83139, 0.8075, 0.85381, 0.85251, 0.85559, 0.85551],
+        [0.82717, 0.93666, 0.7975, 0.83166, 0.84568, 0.83962],
+        [0.80911, 0.745, 0.93666, 0.82333, 0.83409, 0.83060],
+        [0.84268, 0.84166, 0.84, 0.93666, 0.865, 0.85886],
+        [0.83427, 0.84507, 0.83712, 0.84522, 0.87633, 0.87050],
+        [0.81519, 0.79833, 0.83053, 0.82, 0.85831, 0.86331],
+    ]
 
     np.testing.assert_allclose(
-        np.array(my_data.df["LIS"][0]),
-        np.array(expected_LIS_0),
-        atol=precision)
+        np.array(my_data.df["LIS"][0]), np.array(expected_LIS_0), atol=precision
+    )
 
     analysis.inter_chain_pae(my_data)
 
@@ -232,4 +276,3 @@ def test_af3_webserver():
             for i in range(len(my_data.df))
         ]
     )
-

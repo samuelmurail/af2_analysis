@@ -73,7 +73,7 @@ def extract_fields_json(json_file, fields):
             values.append(local_json[field])
         else:
             raise ValueError(f"No field {field} found in the json file.")
-    
+
     return values
 
 
@@ -107,7 +107,7 @@ def pdockq(data, verbose=True):
     None
         The `log_pd` dataframe is modified in place.
 
-    
+
     References
     ----------
 
@@ -125,14 +125,12 @@ def pdockq(data, verbose=True):
     disable = False if verbose else True
 
     for pdb in tqdm(data.df["pdb"], total=len(data.df["pdb"]), disable=disable):
-        
         if pdb is None or pdb is np.nan:
             pdockq_list.append(None)
             continue
-        
+
         model = pdb_numpy.Coor(pdb)
         pdockq_list += compute_pdockQ(model)
-
 
     data.df["pdockq"] = pdockq_list
 
@@ -164,7 +162,7 @@ def mpdockq(data, verbose=True):
     None
         The `log_pd` dataframe is modified in place.
 
-    
+
     References
     ----------
 
@@ -180,14 +178,13 @@ def mpdockq(data, verbose=True):
     disable = False if verbose else True
 
     for pdb in tqdm(data.df["pdb"], total=len(data.df["pdb"]), disable=disable):
-        
         if pdb is None or pdb is np.nan:
             pdockq_list.append(None)
             continue
-        
+
         model = pdb_numpy.Coor(pdb)
         pdockq_list += compute_pdockQ(
-                model, cutoff=8.0, L=0.728, x0=309.375, k=0.098, b=0.262
+            model, cutoff=8.0, L=0.728, x0=309.375, k=0.098, b=0.262
         )
 
     data.df.loc[:, "mpdockq"] = pdockq_list
@@ -353,7 +350,7 @@ def compute_LIS_matrix(
     chain_len_sums = np.cumsum([0] + chain_length)
 
     # Use list instead of array, because
-    # df[column].iloc[:] = LIS_list does not work with numpy array 
+    # df[column].iloc[:] = LIS_list does not work with numpy array
     LIS_list = []
 
     trans_matrix = np.zeros_like(pae_array)
@@ -412,7 +409,9 @@ def LIS_matrix(data, pae_cutoff=12.0, verbose=True):
     disable = False if verbose else True
 
     for query, json_path in tqdm(
-        zip(data.df["query"], data.df["json"]), total=len(data.df["query"]), disable=disable
+        zip(data.df["query"], data.df["json"]),
+        total=len(data.df["query"]),
+        disable=disable,
     ):
         if data.chain_length[query] is None:
             LIS_matrix_list.append(None)
@@ -424,4 +423,3 @@ def LIS_matrix(data, pae_cutoff=12.0, verbose=True):
 
     assert len(LIS_matrix_list) == len(data.df["query"])
     data.df.loc[:, "LIS"] = LIS_matrix_list
-

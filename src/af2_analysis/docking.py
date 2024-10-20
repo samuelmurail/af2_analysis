@@ -54,8 +54,8 @@ def pae_pep(my_data, fun=np.mean, verbose=True):
 
         pae = data.get_pae(json)
 
-        #print(f"0:{cum_sum_chain[-2]} , {cum_sum_chain[-2]}:{cum_sum_chain[-1]}")
-        #print(pae.shape)
+        # print(f"0:{cum_sum_chain[-2]} , {cum_sum_chain[-2]}:{cum_sum_chain[-1]}")
+        # print(pae.shape)
 
         if pae is None:
             pep_rec_pae_list.append(None)
@@ -63,21 +63,20 @@ def pae_pep(my_data, fun=np.mean, verbose=True):
             continue
 
         rec_pep_pae = fun(
-            pae[0:cum_sum_chain[-2], cum_sum_chain[-2]:cum_sum_chain[-1]]
+            pae[0 : cum_sum_chain[-2], cum_sum_chain[-2] : cum_sum_chain[-1]]
         )
         pep_rec_pae = fun(
-            pae[cum_sum_chain[-2]:cum_sum_chain[-1], 0:cum_sum_chain[-2]]
+            pae[cum_sum_chain[-2] : cum_sum_chain[-1], 0 : cum_sum_chain[-2]]
         )
 
         pep_rec_pae_list.append(pep_rec_pae)
         rec_pep_pae_list.append(rec_pep_pae)
 
-
     my_data.df.loc[:, "PAE_pep_rec"] = pep_rec_pae_list
     my_data.df.loc[:, "PAE_rec_pep"] = rec_pep_pae_list
 
 
-def pae_contact_pep(my_data, fun=np.mean, cutoff=8.0, verbose=True, max_pae = 30.98):
+def pae_contact_pep(my_data, fun=np.mean, cutoff=8.0, verbose=True, max_pae=30.98):
     """Extract the PAE score for the receptor(s)-peptide interface.
 
     Parameters
@@ -127,25 +126,21 @@ def pae_contact_pep(my_data, fun=np.mean, cutoff=8.0, verbose=True, max_pae = 30
             continue
 
         rec_mask = np.zeros(pae.shape)
-        lig_mask = np.zeros(pae.shape) 
+        lig_mask = np.zeros(pae.shape)
 
         rec_mask[contact_rec.residue, :] = 1
-        lig_mask[:, contact_lig.residue] =  1
+        lig_mask[:, contact_lig.residue] = 1
         pair_mask = np.logical_and(rec_mask, lig_mask)
 
-        rec_pep_pae = fun(
-            pae[pair_mask]
-        )
-        pep_rec_pae = fun(
-            pae[pair_mask.T]
-        )
+        rec_pep_pae = fun(pae[pair_mask])
+        pep_rec_pae = fun(pae[pair_mask.T])
 
         pep_rec_pae_list.append(pep_rec_pae)
         rec_pep_pae_list.append(rec_pep_pae)
 
-
     my_data.df.loc[:, "PAE_contact_pep_rec"] = pep_rec_pae_list
     my_data.df.loc[:, "PAE_contact_rec_pep"] = rec_pep_pae_list
+
 
 def plddt_pep(my_data, fun=np.mean, verbose=True):
     """Extract the pLDDT score for the peptide-peptide interface.
@@ -265,7 +260,6 @@ def LIS_pep(my_data, pae_cutoff=12.0, fun=np.max, verbose=True):
     pep_LIS2_list = []
 
     for query, LIS in zip(my_data.df["query"], my_data.df["LIS"]):
-
         if LIS is None:
             pep_LIS_list.append(None)
             pep_LIS2_list.append(None)

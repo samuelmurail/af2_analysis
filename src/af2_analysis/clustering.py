@@ -2,7 +2,7 @@ import seaborn as sns
 import numpy as np
 import matplotlib.pyplot as plt
 import MDAnalysis as mda
-import scipy.cluster.hierarchy # import linkage, dendrogram, fcluster
+import scipy.cluster.hierarchy  # import linkage, dendrogram, fcluster
 import sklearn.manifold
 import sklearn.decomposition
 from MDAnalysis.analysis import align, diffusionmap, pca
@@ -90,6 +90,7 @@ def read_numerous_pdb(pdb_files, batch_size=1000):
     # print(frames_array.shape)
     return mda.Universe(pdb_files[0], frames_array, format=MemoryReader, order="fac")
 
+
 def scale(rms, d0=8.5):
     """Scaling RMS values.
     To avoid the problem of arbitrarily large RMS values that are essentially equally bad,
@@ -115,15 +116,16 @@ def scale(rms, d0=8.5):
     rms_scale = 1 / (1 + (rms / d0) ** 2)
     return rms_scale
 
+
 def compute_distance_matrix(
     pdb_files,
     align_selection=None,
     distance_selection=None,
 ):
     """Compute distance matrix.
-    
+
     This function computes the distance matrix of the different peptide chains.
-    
+
     Parameters
     ----------
     pdb_files : list of str
@@ -132,7 +134,7 @@ def compute_distance_matrix(
         The selection string to align the protein chains (default is None or "backbone").
     distance_selection : str, optional
         The selection string to compute the distance matrix (default is None or "backbone").
-    
+
     Returns
     -------
     None
@@ -146,16 +148,14 @@ def compute_distance_matrix(
         align_selection = distance_selection
     elif distance_selection is None:
         distance_selection = align_selection
-    
+
     u = read_numerous_pdb(pdb_files)
     assert u.trajectory.n_frames == len(
         pdb_files
     ), f"Number of frames {u.trajectory.n_frames} different from number of files {len(files)}"
 
     logger.info("align structures")
-    align.AlignTraj(
-        u, u, select=align_selection, in_memory=True
-    ).run(verbose=True)
+    align.AlignTraj(u, u, select=align_selection, in_memory=True).run(verbose=True)
 
     logger.info("Compute distance Matrix")
     matrix = diffusionmap.DistanceMatrix(
@@ -165,7 +165,7 @@ def compute_distance_matrix(
 
     return matrix.results.dist_matrix
 
-    
+
 def hierarchical(
     df,
     threshold=2.0,
@@ -179,7 +179,7 @@ def hierarchical(
 
     After checking for the absence of missing values, the function starts by aligning the protein
     models using the `align_selection` variable or using `"backbone`" selection if not defined.
-    
+
     Then, the function computes the distance matrix using the `distance_selection` variable or using
     the `align_selection` variable if not defined.
 
@@ -246,7 +246,8 @@ def hierarchical(
         dist_matrix = compute_distance_matrix(
             files,
             align_selection=align_selection[pdb],
-            distance_selection=distance_selection[pdb],)
+            distance_selection=distance_selection[pdb],
+        )
 
         logger.info(f"Max RMSD is {np.max(dist_matrix):.2f} A")
         if rmsd_scale:
@@ -254,23 +255,27 @@ def hierarchical(
 
         logger.info("Compute Linkage clustering")
         h, _ = dist_matrix.shape
-        Z = scipy.cluster.hierarchy.linkage(dist_matrix[np.triu_indices(h, 1)], method="average")
-        cluster_list += scipy.cluster.hierarchy.fcluster(Z, float(threshold), criterion="distance").tolist()
+        Z = scipy.cluster.hierarchy.linkage(
+            dist_matrix[np.triu_indices(h, 1)], method="average"
+        )
+        cluster_list += scipy.cluster.hierarchy.fcluster(
+            Z, float(threshold), criterion="distance"
+        ).tolist()
 
         logger.info(f"{len(np.unique(cluster_list))} clusters founded for {pdb}")
 
         # Add Multidimensional scaling coordinates from the distance matrix
         if MDS_coors:
-            mds = sklearn.manifold.MDS(dissimilarity='precomputed', n_components=2)
+            mds = sklearn.manifold.MDS(dissimilarity="precomputed", n_components=2)
             coordinates = mds.fit_transform(dist_matrix)
             MDS_1 += coordinates.T[0].tolist()
             MDS_2 += coordinates.T[1].tolist()
 
         # PCA analysis don't add any information:
-        #pca = sklearn.decomposition.PCA(n_components=2)  # n_components defines how many principal components you want
-        #pca_result = pca.fit_transform(coordinates)
-        #coordinates = pca_result
-        #print(pca_result)
+        # pca = sklearn.decomposition.PCA(n_components=2)  # n_components defines how many principal components you want
+        # pca_result = pca.fit_transform(coordinates)
+        # coordinates = pca_result
+        # print(pca_result)
 
         if show_dendrogram:
             # plot the dendrogram with the threshold line
@@ -283,23 +288,24 @@ def hierarchical(
             plt.show()
 
     df["cluster"] = reorder_by_size(cluster_list) + null_number * [None]
-    df["cluster"] = df["cluster"].astype('category')
+    df["cluster"] = df["cluster"].astype("category")
     if MDS_coors:
         df["MDS 1"] = MDS_1 + null_number * [None]
         df["MDS 2"] = MDS_2 + null_number * [None]
 
     return
 
+
 def reorder_by_size(clust_list):
     """Reorder clusters by size.
-    
+
     This function reorders the clusters by size, with the largest cluster first.
-    
+
     Parameters
     ----------
     clust_list : list
         List of clusters.
-    
+
     Returns
     -------
     list
@@ -310,10 +316,14 @@ def reorder_by_size(clust_list):
     cluster_counts = Counter(clust_list)
 
     # Step 2: Sort clusters by frequency (most frequent first)
-    sorted_clusters_by_frequency = [cluster for cluster, count in cluster_counts.most_common()]
+    sorted_clusters_by_frequency = [
+        cluster for cluster, count in cluster_counts.most_common()
+    ]
 
     # Step 3: Create a mapping from old cluster labels to new ones
-    cluster_mapping = {old: new for new, old in enumerate(sorted_clusters_by_frequency, start=1)}
+    cluster_mapping = {
+        old: new for new, old in enumerate(sorted_clusters_by_frequency, start=1)
+    }
     # Treat None as a special case: it should be mapped to None
     if None in cluster_mapping:
         cluster_mapping[None] = None

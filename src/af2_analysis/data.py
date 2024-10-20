@@ -33,7 +33,21 @@ __status__ = "Beta"
 logger = logging.getLogger(__name__)
 
 
-plddt_main_atom_list = ["CA", "P", "ZN", "MG", "CL", "CA", "NA", "MN", "K", "FE", "CU", "CO"]
+plddt_main_atom_list = [
+    "CA",
+    "P",
+    "ZN",
+    "MG",
+    "CL",
+    "CA",
+    "NA",
+    "MN",
+    "K",
+    "FE",
+    "CU",
+    "CO",
+]
+
 
 class Data:
     """Data class
@@ -266,7 +280,6 @@ class Data:
             new_col = pd.Series(new_column[keys], index=index_list)
             self.df[keys].iloc[index_list] = new_col
 
-
     def extract_fields(self, fields, disable=False):
         """Extract json files to the dataframe.
 
@@ -285,13 +298,15 @@ class Data:
         values_list = []
         for field in fields:
             values_list.append([])
-        for json_path in tqdm(self.df["json"], total=len(self.df["json"]), disable=disable):
+        for json_path in tqdm(
+            self.df["json"], total=len(self.df["json"]), disable=disable
+        ):
             if json_path is not None:
                 local_values = extract_fields_json(json_path, fields)
 
                 for i in range(len(fields)):
                     values_list[i].append(local_values[i])
-                
+
             else:
                 for i in range(len(fields)):
                     values_list[i].append(None)
@@ -429,7 +444,9 @@ class Data:
 
         if self.format in ["AF3_webserver", "csv", "AlphaPulldown"]:
             model = pdb_numpy.Coor(row["pdb"])
-            plddt_array = model.models[0].beta[np.isin(model.models[0].name, plddt_main_atom_list)]
+            plddt_array = model.models[0].beta[
+                np.isin(model.models[0].name, plddt_main_atom_list)
+            ]
             return plddt_array
 
         if row["json"] is None:
@@ -446,7 +463,6 @@ class Data:
         return plddt_array
 
     def plot_plddt(self, index_list=None):
-
         if index_list is None:
             index_list = range(len(self.df))
 
@@ -454,7 +470,7 @@ class Data:
 
         for index in index_list:
             plddt_array = self.get_plddt(index)
-            plt.plot(np.arange(1, len(plddt_array)+1), plddt_array)
+            plt.plot(np.arange(1, len(plddt_array) + 1), plddt_array)
 
         plt.vlines(
             np.cumsum(self.chain_length[self.df.iloc[index_list[0]]["query"]][:-1]),
@@ -532,7 +548,6 @@ class Data:
 
             fig = plot.plot_msa_v2(feature_dict)
             plt.show()
-        
 
     def count_msa_seq(self):
         """

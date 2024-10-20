@@ -68,6 +68,7 @@ def parse_a3m(a3m_lines=None, a3m_file=None, filter_qid=0.15, filter_cov=0.5, N=
             - mtx (list of list of int): List of deletion matrices corresponding to the sequences.
             - nams (list of str): List of sequence names.
     """
+
     def seqid(a, b):
         return sum(c1 == c2 for c1, c2 in zip(a, b))
 

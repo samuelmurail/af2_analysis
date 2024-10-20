@@ -132,6 +132,7 @@ def test_cf_1_5_5_relax():
         0.598,
     ]
 
+
 def test_af3_webserver():
     data_path = os.path.join(TEST_FILE_PATH, "fold_2024_07_01_12_14_prot_dna_zn")
 
@@ -143,9 +144,21 @@ def test_af3_webserver():
     assert (
         my_data.df.columns
         == np.array(
-            ['pdb', 'query', 'model', 'json', 'chain_iptm', 'chain_pair_iptm',
-       'chain_pair_pae_min', 'chain_ptm', 'fraction_disordered', 'has_clash',
-       'iptm', 'num_recycles', 'ptm', 'ranking_score'
+            [
+                "pdb",
+                "query",
+                "model",
+                "json",
+                "chain_iptm",
+                "chain_pair_iptm",
+                "chain_pair_pae_min",
+                "chain_ptm",
+                "fraction_disordered",
+                "has_clash",
+                "iptm",
+                "num_recycles",
+                "ptm",
+                "ranking_score",
             ]
         )
     ).all()
@@ -158,7 +171,7 @@ def test_af3_webserver():
     # There should be 0 relaxed structures
 
     assert "relaxed_pdb" not in my_data.df.columns
-    print(my_data.df.iloc[:,:])
-    assert list(my_data.df["num_recycles"]) == [10]*5
+    print(my_data.df.iloc[:, :])
+    assert list(my_data.df["num_recycles"]) == [10] * 5
 
     assert list(my_data.df["iptm"]) == [0.93, 0.94, 0.93, 0.93, 0.93]

@@ -5,6 +5,7 @@ from cmcrameri import cm
 
 from .analysis import get_pae
 
+
 def plot_msa_v2(feature_dict, sort_lines=True, dpi=100):
     """
     Taken from:
@@ -93,8 +94,9 @@ def plot_msa_v2(feature_dict, sort_lines=True, dpi=100):
     return fig
 
 
-
-def show_info(data_af2, cmap=cm.vik, score_list=["pLDDT", "pTM", "ipTM", "ranking_confidence"]):
+def show_info(
+    data_af2, cmap=cm.vik, score_list=["pLDDT", "pTM", "ipTM", "ranking_confidence"]
+):
     """
     Use with
     ```
@@ -161,7 +163,7 @@ def show_info(data_af2, cmap=cm.vik, score_list=["pLDDT", "pTM", "ipTM", "rankin
     ax_pae.set_yticklabels(data_af2.chains[query])
     plt.show(fig)
 
-    #out_score = widgets.Output(layout={'border': '1px solid black'})
+    # out_score = widgets.Output(layout={'border': '1px solid black'})
     out_score = widgets.HTML()
     display(out_score)
 
@@ -169,10 +171,11 @@ def show_info(data_af2, cmap=cm.vik, score_list=["pLDDT", "pTM", "ipTM", "rankin
 
     for score in score_list:
         if score in data_af2.df.columns:
-            out_score.value += pattern.format(score_name=score, score_value=data_af2.df.iloc[model_widget.value - 1][score])
-            #(f"<div> <strong>{score:15} : </strong> {data_af2.df.iloc[model_widget.value - 1][score]:7.2f} </div>")
-
-
+            out_score.value += pattern.format(
+                score_name=score,
+                score_value=data_af2.df.iloc[model_widget.value - 1][score],
+            )
+            # (f"<div> <strong>{score:15} : </strong> {data_af2.df.iloc[model_widget.value - 1][score]:7.2f} </div>")
 
     def update_model(change):
         rank_num = model_widget.value
@@ -222,17 +225,18 @@ def show_info(data_af2, cmap=cm.vik, score_list=["pLDDT", "pTM", "ipTM", "rankin
         new_out_score = ""
         for score in score_list:
             if score in data_af2.df.columns:
-                #new_out_score += (f"<div> <strong>{score:15} : </strong> {data_af2.df.iloc[model_widget.value - 1][score]:7.2f} </div>")
-                new_out_score += pattern.format(score_name=score, score_value=data_af2.df.iloc[model_widget.value - 1][score])
+                # new_out_score += (f"<div> <strong>{score:15} : </strong> {data_af2.df.iloc[model_widget.value - 1][score]:7.2f} </div>")
+                new_out_score += pattern.format(
+                    score_name=score,
+                    score_value=data_af2.df.iloc[model_widget.value - 1][score],
+                )
 
         out_score.value = new_out_score
 
-
-        #out_score.clear_output()
-        #with out_score:
+        # out_score.clear_output()
+        # with out_score:
         #    for score in score_list:
         #        if score in data_af2.df.columns:
         #            print(f"{score:15} : {data_af2.df.iloc[model_widget.value - 1][score]:7.2f}")
-
 
     model_widget.observe(update_model, names="value")

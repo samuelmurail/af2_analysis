@@ -10,6 +10,7 @@ import af2_analysis
 from af2_analysis import analysis
 from .data_files import TEST_FILE_PATH
 
+
 def test_cf_1_5_5_write_read_csv(tmp_path):
     data_path = os.path.join(TEST_FILE_PATH, "beta_amyloid_dimer_cf_1.5.5")
     my_data = af2_analysis.Data(data_path)
@@ -138,7 +139,6 @@ def test_cf_1_5_5_write_read_csv(tmp_path):
 
 
 def test_get_plddt():
-    
     data_path = os.path.join(TEST_FILE_PATH, "beta_amyloid_dimer_cf_1.5.5")
     my_data = af2_analysis.Data(data_path)
 
@@ -149,19 +149,96 @@ def test_get_plddt():
     assert len(plddt_array) == 84
 
     expected_plddt = [
-        36.12, 39.41, 41.03, 42.34, 41.69, 43.5 , 42.78, 44.25, 38.16, 39.84, 37.75, 36.56,
-        36.06, 39.  , 38.66, 38.44, 39.34, 39.06, 41.03, 37.22, 39.31, 38.75, 40.72, 43.12,
-        39.62, 41.19, 39.22, 39.41, 39.31, 37.56, 39.06, 41.12, 40.12, 37.81, 36.56, 36.75,
-        37.97, 38.56, 34.19, 32.66, 33.19, 33.59, 36.28, 38.75, 40.5 , 42.44, 41.28, 42.72,
-        42.72, 43.91, 37.81, 40.03, 37.84, 36.28, 35.72, 38.91, 38.38, 38.62, 39.19, 39.03,
-        40.72, 37.31, 39.41, 38.56, 40.31, 42.84, 39.75, 41.06, 39.25, 39.16, 39.34, 37.66,
-        38.91, 40.66, 40.47, 37.78, 36.41, 36.5 , 37.69, 38.25, 34.09, 32.03, 33.06, 33.16,
+        36.12,
+        39.41,
+        41.03,
+        42.34,
+        41.69,
+        43.5,
+        42.78,
+        44.25,
+        38.16,
+        39.84,
+        37.75,
+        36.56,
+        36.06,
+        39.0,
+        38.66,
+        38.44,
+        39.34,
+        39.06,
+        41.03,
+        37.22,
+        39.31,
+        38.75,
+        40.72,
+        43.12,
+        39.62,
+        41.19,
+        39.22,
+        39.41,
+        39.31,
+        37.56,
+        39.06,
+        41.12,
+        40.12,
+        37.81,
+        36.56,
+        36.75,
+        37.97,
+        38.56,
+        34.19,
+        32.66,
+        33.19,
+        33.59,
+        36.28,
+        38.75,
+        40.5,
+        42.44,
+        41.28,
+        42.72,
+        42.72,
+        43.91,
+        37.81,
+        40.03,
+        37.84,
+        36.28,
+        35.72,
+        38.91,
+        38.38,
+        38.62,
+        39.19,
+        39.03,
+        40.72,
+        37.31,
+        39.41,
+        38.56,
+        40.31,
+        42.84,
+        39.75,
+        41.06,
+        39.25,
+        39.16,
+        39.34,
+        37.66,
+        38.91,
+        40.66,
+        40.47,
+        37.78,
+        36.41,
+        36.5,
+        37.69,
+        38.25,
+        34.09,
+        32.03,
+        33.06,
+        33.16,
     ]
     precision = 0.001
     assert plddt_array == pytest.approx(expected_plddt, precision)
 
+
 def test_get_plddt_dna_ions():
-    
     data_path = os.path.join(TEST_FILE_PATH, "fold_2024_07_01_12_14_prot_dna_zn")
     my_data = af2_analysis.Data(data_path)
 
@@ -172,22 +249,127 @@ def test_get_plddt_dna_ions():
     assert len(plddt_array) == 115
 
     expected_plddt = [
-        83.82, 89.41, 97.62, 98.41, 98.81, 98.88, 98.9 , 98.82, 98.7 , 97.65, 98.17, 98.85,
-        98.46, 98.89, 98.86, 98.94, 98.85, 98.84, 98.84, 98.9 , 98.91, 98.92, 98.85, 98.96,
-        98.98, 98.99, 98.88, 98.71, 98.8 , 98.8 , 98.98, 98.94, 98.99, 98.83, 98.98, 98.99,
-        98.91, 98.97, 98.9 , 98.95, 98.99, 98.91, 98.98, 98.92, 98.99, 98.93, 98.94, 98.94,
-        98.95, 98.92, 98.9 , 98.98, 98.92, 98.97, 98.92, 98.98, 98.98, 98.91, 98.96, 98.93,
-        98.96, 98.93, 98.94, 98.93, 98.94, 98.82, 98.78, 98.97, 98.98, 98.92, 98.99, 98.94,
-        98.9 , 98.96, 98.92, 98.9 , 98.98, 98.95, 98.9 , 98.94, 98.84, 98.78, 98.41, 98.15,
-        98.4 , 96.75, 86.69, 82.44, 81.47, 78.44, 98.9 , 98.94, 98.98, 93.57, 98.57, 98.89,
-        98.94, 98.91, 98.87, 98.86, 98.83, 98.75, 98.71, 98.02, 81.79, 94.31, 98.18, 98.67,
-        98.84, 98.81, 98.73, 98.57, 98.55, 98.43, 98.27,    
+        83.82,
+        89.41,
+        97.62,
+        98.41,
+        98.81,
+        98.88,
+        98.9,
+        98.82,
+        98.7,
+        97.65,
+        98.17,
+        98.85,
+        98.46,
+        98.89,
+        98.86,
+        98.94,
+        98.85,
+        98.84,
+        98.84,
+        98.9,
+        98.91,
+        98.92,
+        98.85,
+        98.96,
+        98.98,
+        98.99,
+        98.88,
+        98.71,
+        98.8,
+        98.8,
+        98.98,
+        98.94,
+        98.99,
+        98.83,
+        98.98,
+        98.99,
+        98.91,
+        98.97,
+        98.9,
+        98.95,
+        98.99,
+        98.91,
+        98.98,
+        98.92,
+        98.99,
+        98.93,
+        98.94,
+        98.94,
+        98.95,
+        98.92,
+        98.9,
+        98.98,
+        98.92,
+        98.97,
+        98.92,
+        98.98,
+        98.98,
+        98.91,
+        98.96,
+        98.93,
+        98.96,
+        98.93,
+        98.94,
+        98.93,
+        98.94,
+        98.82,
+        98.78,
+        98.97,
+        98.98,
+        98.92,
+        98.99,
+        98.94,
+        98.9,
+        98.96,
+        98.92,
+        98.9,
+        98.98,
+        98.95,
+        98.9,
+        98.94,
+        98.84,
+        98.78,
+        98.41,
+        98.15,
+        98.4,
+        96.75,
+        86.69,
+        82.44,
+        81.47,
+        78.44,
+        98.9,
+        98.94,
+        98.98,
+        93.57,
+        98.57,
+        98.89,
+        98.94,
+        98.91,
+        98.87,
+        98.86,
+        98.83,
+        98.75,
+        98.71,
+        98.02,
+        81.79,
+        94.31,
+        98.18,
+        98.67,
+        98.84,
+        98.81,
+        98.73,
+        98.57,
+        98.55,
+        98.43,
+        98.27,
     ]
     precision = 0.001
     assert plddt_array == pytest.approx(expected_plddt, precision)
 
-def test_concat():
 
+def test_concat():
     data_path = os.path.join(TEST_FILE_PATH, "beta_amyloid_dimer_cf_1.5.5")
     my_data = af2_analysis.Data(data_path)
 
@@ -199,21 +381,27 @@ def test_concat():
     assert len(my_data_all.chain_length) == 2
     assert len(my_data_all.chains) == 2
 
-def test_extract_json():
 
+def test_extract_json():
     data_path = os.path.join(TEST_FILE_PATH, "beta_amyloid_dimer_cf_1.5.5")
     my_data = af2_analysis.Data(data_path)
     print(my_data.df.columns)
-    new_column = ['plddt', 'max_pae', 'pae', 'ptm', 'iptm']
+    new_column = ["plddt", "max_pae", "pae", "ptm", "iptm"]
     assert np.all([not (col in my_data.df.columns) for col in new_column])
     my_data.extract_json()
     print(my_data.df.columns)
     assert np.all([col in my_data.df.columns for col in new_column])
 
-    old_column = ['pLDDT', 'pTM', 'ipTM']
+    old_column = ["pLDDT", "pTM", "ipTM"]
 
-    rtol=1e-02
-    assert np.all(np.abs(my_data.df['pTM'] - my_data.df['ptm']) < rtol)
-    assert np.all(np.abs(my_data.df['ipTM'] - my_data.df['iptm']) < rtol)
-    rtol=1e-01
-    assert np.all( np.abs(np.array([np.mean(plddts) for plddts in my_data.df['plddt']]) - my_data.df['pLDDT']) < rtol)
+    rtol = 1e-02
+    assert np.all(np.abs(my_data.df["pTM"] - my_data.df["ptm"]) < rtol)
+    assert np.all(np.abs(my_data.df["ipTM"] - my_data.df["iptm"]) < rtol)
+    rtol = 1e-01
+    assert np.all(
+        np.abs(
+            np.array([np.mean(plddts) for plddts in my_data.df["plddt"]])
+            - my_data.df["pLDDT"]
+        )
+        < rtol
+    )
