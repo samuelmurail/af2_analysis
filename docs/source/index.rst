@@ -21,6 +21,7 @@ Welcome to AF2 Analysis's documentation!
 
    readme
    installation
+   contributing
    analysis
    notebooks/basic_example.ipynb
    modules
