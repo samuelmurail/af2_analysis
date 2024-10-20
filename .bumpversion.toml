@@ -17,10 +17,22 @@ message = "Bump version: {current_version} → {new_version}"
 commit_args = ""
 
 [[tool.bumpversion.files]]
-filename = "src/af2_analysis/__init__.py"
-
-[[tool.bumpversion.files]]
 filename = "docs/source/conf.py"
 
 [[tool.bumpversion.files]]
 filename = "pyproject.toml"
+
+[[tool.bumpversion.files]]
+filename = "src/af2_analysis/__init__.py"
+
+[[tool.bumpversion.files]]
+filename = "src/af2_analysis/analysis.py"
+
+[[tool.bumpversion.files]]
+filename = "src/af2_analysis/clustering.py"
+
+[[tool.bumpversion.files]]
+filename = "src/af2_analysis/data.py"
+
+[[tool.bumpversion.files]]
+filename = "src/af2_analysis/docking.py"
